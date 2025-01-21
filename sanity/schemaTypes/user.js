@@ -17,7 +17,21 @@ export const user = defineType({
       name: "email",
       title: "Email",
       type: "string",
-      validation: (Rule) => Rule.required().email(),
+      validation: (Rule) =>
+        Rule.required()
+          .email()
+          .custom(async (email, context) => {
+            const { document } = context;
+            const existingUsers = await context.getClient().fetch(
+              `*[_type == "user" && email == $email && _id != $id][0]`,
+              { email, id: document._id }
+            );
+
+            if (existingUsers) {
+              return "This email is already in use.";
+            }
+            return true;
+          }),
     }),
     defineField({
       name: "password",
