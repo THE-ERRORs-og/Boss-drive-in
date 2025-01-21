@@ -1,3 +1,5 @@
+import { user } from "./user";
+
 export const schema = {
-  types: [],
+  types: [user],
 }
