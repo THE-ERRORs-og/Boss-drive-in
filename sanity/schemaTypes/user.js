@@ -1,5 +1,6 @@
 import { UserIcon } from "lucide-react";
-import { defineField, defineType } from "sanity"
+import { defineField, defineType } from "sanity";
+import { client } from "../lib/client";
 
 export const user = defineType({
   name: "user",
@@ -22,7 +23,7 @@ export const user = defineType({
           .email()
           .custom(async (email, context) => {
             const { document } = context;
-            const existingUsers = await context.getClient().fetch(
+            const existingUsers = await client.fetch(
               `*[_type == "user" && email == $email && _id != $id][0]`,
               { email, id: document._id }
             );
@@ -37,7 +38,7 @@ export const user = defineType({
       name: "password",
       title: "Password",
       type: "string",
-      hidden: true, // To ensure passwords are not visible in the Sanity dashboard
+      hidden: true, // Hide the password field in the UI
     }),
     defineField({
       name: "role",
