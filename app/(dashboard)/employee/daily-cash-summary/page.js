@@ -2,6 +2,8 @@
 import { useState } from "react";
 
 export default function Page() {
+  const [selectedDate, setSelectedDate] = useState("");
+  const [selectedTime, setSelectedTime] = useState("");
   const [isPopupVisible, setIsPopupVisible] = useState(false);
 
   const handleFormSubmit = (e) => {
