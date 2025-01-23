@@ -1,36 +1,22 @@
-"use client";
-import { useRouter } from "next/navigation";
+import { auth, signOut } from "@/auth";
+import BackButton from "../Button/BackButton";
 
-export default function NavbarWithBackButton() {
-  const router = useRouter();
+export default async function NavbarWithBackButton() {
+  const session = await auth();
 
   return (
-    <nav className="h-16 w-full bg-white flex justify-between items-center px-4 shadow-md">
-      <button
-        className="flex items-center space-x-2 text-gray-700"
-        onClick={() => router.back()}
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth="2"
-          stroke="currentColor"
-          className="w-6 h-6"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M15 19l-7-7 7-7"
-          />
-        </svg>
-        <span>Back</span>
-      </button>
+    <nav className="h-16 w-full bg-white flex justify-between items-center px-4 py-4 shadow-md">
+      <BackButton/>
       <img
         src="/logo.png" // Replace this with your logo's path
         alt="Boss Drive-In"
         className="h-10 mx-auto"
       />
+      {session && session.user && (
+        <button onClick={async ()=>{
+          'use server';
+          await signOut({redirectTo :"/"});
+        }}>Logout</button>)}
     </nav>
   );
 }
