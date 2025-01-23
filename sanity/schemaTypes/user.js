@@ -15,21 +15,20 @@ export const user = defineType({
       validation: (Rule) => Rule.required(),
     }),
     defineField({
-      name: "email",
-      title: "Email",
+      name: "userid",
+      title: "User Id",
       type: "string",
       validation: (Rule) =>
         Rule.required()
-          .email()
-          .custom(async (email, context) => {
+          .custom(async (userid, context) => {
             const { document } = context;
             const existingUsers = await client.fetch(
-              `*[_type == "user" && email == $email && _id != $id][0]`,
-              { email, id: document._id }
+              `*[_type == "user" && userid == $userid && _id != $id][0]`,
+              { userid, id: document._id }
             );
 
             if (existingUsers) {
-              return "This email is already in use.";
+              return "This userid is already in use.";
             }
             return true;
           }),
@@ -38,7 +37,7 @@ export const user = defineType({
       name: "password",
       title: "Password",
       type: "string",
-      hidden: true, // Hide the password field in the UI
+      // hidden: true, // Hide the password field in the UI
     }),
     defineField({
       name: "role",
