@@ -1,7 +1,9 @@
+import SafeBalanceHistory from "./safe-balance-history";
+
 export default function Page() {
   return (
     <div>
-      <h1>Route: /admin/daily-safe-balance/history</h1>
+     <SafeBalanceHistory />
     </div>
   );
 }
