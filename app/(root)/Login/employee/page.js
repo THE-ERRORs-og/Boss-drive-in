@@ -3,8 +3,8 @@ import { auth, signIn, signOut } from "@/auth";
 import { doCredentialLogin } from "@/lib/actions/authentication";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import arrow_back from "../../../public/arrow_back.svg";
-import staff_illu from "../../../public/staff_illu.svg";
+import arrow_back from "@/public/arrow_back.svg";
+import staff_illu from "@/public/staff_illu.svg";
 
 export default function Page() {
   const router = useRouter();
