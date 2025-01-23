@@ -21,19 +21,39 @@ export default function Page() {
         {/* Content */}
         <div className="flex flex-col px-8 py-2">
           {/* Staff Details */}
-          <div className="flex justify-between items-center mb-6">
-            <p className="text-lg font-medium text-red-500">
-              Staff Name: <span className="text-black">XXXXXXXXXX</span>
-            </p>
-            <div className="flex space-x-8">
-              <p className="text-lg font-medium">
-                Date: <span className="text-gray-600">DD/MM/YYYY</span>
-              </p>
-              <p className="text-lg font-medium">
-                Shift Time: <span className="text-gray-600">XX:YY PM</span>
-              </p>
-            </div>
+          <div className="w-full flex justify-between items-center m-4 px-6">
+        <p className="text-base font-semibold text-red-500">
+          Staff Name: <span className="text-black">XXXXXXXXXX</span>
+        </p>
+        <div className="flex space-x-4 items-center">
+          <div className="flex items-center">
+            <p className="text-base font-semibold mr-2">Date:</p>
+            <input
+              type="date"
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              className="px-2 py-1 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+            />
           </div>
+          <div className="flex items-center">
+            <p className="text-base font-semibold mr-2">Shift Time:</p>
+            <select
+              value={selectedTime}
+              onChange={(e) => setSelectedTime(e.target.value)}
+              className="px-2 py-1 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+            >
+              <option value="" disabled>
+                Select Time
+              </option>
+              {timeOptions.map((time, index) => (
+                <option key={index} value={time}>
+                  {time}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+      </div>
 
           {/* Form Fields */}
           <form className="space-y-2" onSubmit={handleFormSubmit}>
