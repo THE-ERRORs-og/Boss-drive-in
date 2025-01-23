@@ -5,6 +5,17 @@ import React, { useState } from "react";
 export default function Page() {
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
+  const [isPopupVisible, setIsPopupVisible] = useState(false);
+
+  const handleFormSubmit = (e) => {
+    e.preventDefault(); // Prevent default form submission behavior
+    setIsPopupVisible(true); // Show the popup
+    // Logic for PDF generation and download can be added here
+  };
+
+  const closePopup = () => {
+    setIsPopupVisible(false); // Hide the popup
+  };
 
   const timeOptions = ["5am - 11am", "11am - 5pm", "5pm - 11pm", "11pm - 5am"];
   return (
@@ -46,7 +57,7 @@ export default function Page() {
 
       {/* Form Section */}
       <div className="flex flex-col items-center w-full px-6 mt-6">
-        <form className="w-full max-w-3xl">
+        <form className="w-full max-w-3xl" onSubmit={handleFormSubmit}>
           {/* Table Header */}
           <div className="grid grid-cols-4 gap-4 text-center font-bold text-lg mb-4">
             <p> </p>
@@ -98,6 +109,29 @@ export default function Page() {
             </button>
           </div>
         </form>
+        {isPopupVisible && (
+          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+            <div className="bg-white p-6 rounded-lg shadow-lg text-center">
+              <p className="text-lg font-medium">
+                Your PDF has been downloaded !!
+              </p>
+              <div className="gap-4 flex justify-center">
+                <button
+                  onClick={closePopup}
+                  className="mt-4 px-6 py-2 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 transition duration-300"
+                >
+                  Place Order
+                </button>
+                <button
+                  onClick={closePopup}
+                  className="mt-4 px-6 py-2 border-2 text-black rounded-lg font-medium transition duration-300"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
