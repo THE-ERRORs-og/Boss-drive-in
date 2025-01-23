@@ -3,6 +3,7 @@ import { doCredentialLogin } from "@/lib/actions/authentication";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import arrow_back from "@/public/arrow_back.svg";
+import MainButton from "../Button/MainButton";
 
 export default function EmployeeLoginForm() {
     const router = useRouter();
@@ -72,12 +73,11 @@ export default function EmployeeLoginForm() {
         </div>
 
         {/* Login Button */}
-        <button
+        <MainButton
           type="submit"
+          text="Login"
           className="w-full bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition duration-300"
-        >
-          Login
-        </button>
+        />
       </form>
     </div>
   );
