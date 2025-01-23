@@ -58,7 +58,7 @@ export default function DailySafeBalance() {
         <MainButton className="md:text-xl md:w-1/3" text = "Deposit to bank & Download PDF"/>
         <div className="flex w-2/3 justify-end space-x-6 items-center">
           <p className="text-md md:text-2xl font-semibold">Available Safe Balance</p>
-          <StaticDataBox text="$1000" className="text-md pr-8 " />
+          <StaticDataBox text="$1000" className="text-md pr-8 md:w-1/6 " />
         </div>
       </div>
     </div>
