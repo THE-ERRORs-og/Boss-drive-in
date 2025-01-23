@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import arrow_back from "@/public/arrow_back.svg";
 import admin_avatar from "@/public/admin_avatar.png";
+import MainButton from "@/components/Button/MainButton";
 
 export default function Page() {
   const router = useRouter();
@@ -76,12 +77,7 @@ export default function Page() {
           </div>
 
           {/* Login Button */}
-          <button
-            type="submit"
-            className="w-full bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition duration-300"
-          >
-            Login
-          </button>
+         <MainButton text="Login" type="submit" />
         </form>
       </div>
 
