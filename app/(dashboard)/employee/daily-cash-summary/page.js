@@ -6,6 +6,9 @@ export default function Page() {
   const [selectedTime, setSelectedTime] = useState("");
   const [isPopupVisible, setIsPopupVisible] = useState(false);
 
+  
+  const timeOptions = ["5am - 11am", "11am - 5pm", "5pm - 11pm", "11pm - 5am"];
+
   const handleFormSubmit = (e) => {
     e.preventDefault(); // Prevent default form submission behavior
     setIsPopupVisible(true); // Show the popup

@@ -55,6 +55,20 @@ export default function Page() {
         </div>
       </div>
 
+      <div className="w-full">
+        <div className="flex flex-row justify-between items-center px-16 rounded-xl border-2 mx-10">
+          <h1 className="font-semibold">Order placed successfully !!!</h1>
+          <div className="flex items-center">
+            <button
+              onClick={closePopup}
+              className="my-1 px-6 py-2 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 transition duration-300"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+
       {/* Form Section */}
       <div className="flex flex-col items-center w-full px-6 mt-6">
         <form className="w-full max-w-3xl" onSubmit={handleFormSubmit}>
