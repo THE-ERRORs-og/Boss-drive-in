@@ -11,3 +11,5 @@ export const USER_BY_EMAIL_QUERY = defineQuery(`
   _id,name,userid,role
   }
   `);
+
+export const CASH_SUMMARY_BY_PAGINATION_QUERY = defineQuery(``);
