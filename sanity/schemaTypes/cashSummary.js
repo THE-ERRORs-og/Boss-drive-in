@@ -76,8 +76,16 @@ export const cash_summary = defineType({
   ],
   preview: {
     select: {
-      title: "datetime",
-      subtitle: "shiftNumber",
+      datetime: "datetime",
+      shiftNumber: "shiftNumber",
+    },
+    prepare({ datetime, shiftNumber }) {
+      // Format the datetime to display only the date
+      const date = new Date(datetime).toLocaleDateString();
+      return {
+        title: date, // Display the formatted date
+        subtitle: `Shift Number: ${shiftNumber}`,
+      };
     },
   },
 });

@@ -1,6 +1,6 @@
 "use client";
 
-import { createCashSummary } from "@/lib/actions/cashSummary";
+import { createCashSummary, deleteAllCashSummaries } from "@/lib/actions/cashSummary";
 import React, { useState } from "react";
 
 const InsertCashSummary = () => {
@@ -63,7 +63,7 @@ const InsertCashSummary = () => {
       // Assuming you're calling an API to insert data
        dummyData.forEach(async (data,idx) => {
         const response = await createCashSummary(data);
-        const result = await response.json();
+        const result = response;
         if (result.status === "SUCCESS") {
           setMessage(`Dummy data ${idx} inserted successfully!`);
         } else {
@@ -78,6 +78,21 @@ const InsertCashSummary = () => {
     }
   };
 
+  const deleteAllData = async () => {
+    setLoading(true);
+    setMessage("");
+
+    try {
+      // Assuming you're calling an API to delete all data
+      const response =await deleteAllCashSummaries();
+    } catch (error) {
+      console.error("Error deleting data", error);
+      setMessage("An error occurred while deleting data.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <div className="p-4">
       <h2 className="text-xl mb-4">Insert Dummy Cash Summary Data</h2>
@@ -89,6 +104,9 @@ const InsertCashSummary = () => {
         {loading ? "Inserting..." : "Insert Dummy Data"}
       </button>
       {message && <p className="mt-4 text-sm">{message}</p>}
+
+      <br/>
+      <button  onClick={deleteAllData} className="bg-red">delete all document of cash summary </button>
     </div>
   );
 };
