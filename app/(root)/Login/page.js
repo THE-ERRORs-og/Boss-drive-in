@@ -11,7 +11,7 @@ export default function Page() {
     const formData = new FormData(event.target); // Create a new FormData object
     try {
       const formValues = {
-        email: formData.get("email"),
+        userid: formData.get("userid"),
         password: formData.get("password"),
       }
       const response = await doCredentialLogin(formValues);
@@ -35,8 +35,8 @@ export default function Page() {
         {" "}
         {/* Use `onSubmit` instead of `action` */}
         <label>
-          Email
-          <input name="email" type="email" required />
+          User Id
+          <input name="userid" type="text" required />
         </label>
         <label>
           Password

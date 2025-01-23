@@ -1,8 +1,9 @@
-import NextAuth from "next-auth";
+import NextAuth, { CredentialsSignin } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { signInSchema } from "./lib/validation";
 import { client } from "./sanity/lib/client";
 import { USER_SIGNIN_QUERY } from "./sanity/lib/queries";
+import { z } from "zod";
 
 export const { signIn, signOut, auth } = NextAuth({
   session: {
@@ -12,21 +13,20 @@ export const { signIn, signOut, auth } = NextAuth({
   providers: [
     Credentials({
       credentials: {
-        username: { label: "Username" },
+        userid: { label: "User Id" },
         password: { label: "Password", type: "password" },
       },
       authorize: async (credentials) => {
         try {
           // Validate credentials using Zod schema
-          const { email, password } =
+          const { userid, password } =
             await signInSchema.parseAsync(credentials);
 
           // Fetch the user from Sanity
           const user = await client
             .withConfig({ useCdn: false })
-            .fetch(USER_SIGNIN_QUERY, { email });
+            .fetch(USER_SIGNIN_QUERY, { userid });
 
-          // Check if the user exists
           if (!user) {
             throw new Error("No user found with this email.");
           }
@@ -40,12 +40,12 @@ export const { signIn, signOut, auth } = NextAuth({
           return {
             id: user._id,
             name: user.name,
-            email: user.email,
+            userid: user.userid,
             role: user.role,
           };
         } catch (error) {
-          console.error("Authorization error:", error);
-          return null; 
+          // console.error("Authorization error:", error);
+          throw new CredentialsSignin(error.message);
         }
       },
     }),
@@ -54,7 +54,7 @@ export const { signIn, signOut, auth } = NextAuth({
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
-        token.email = user.email;
+        token.userid = user.userid;
         token.name = user.name;
         token.role = user.role;
       }
@@ -63,7 +63,7 @@ export const { signIn, signOut, auth } = NextAuth({
     async session({ session, token }) {
       session.user = {
         id: token.id,
-        email: token.email,
+        userid: token.userid,
         name: token.name,
         role: token.role,
       };
