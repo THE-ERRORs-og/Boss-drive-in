@@ -21,9 +21,17 @@ export const order_summary = defineType({
       validation: (Rule) => Rule.required(),
     }),
     defineField({
-      name: "shiftTime",
-      title: "Shift Time",
-      type: "string",
+      name: "shiftNumber",
+      title: "Shift Number",
+      type: "number",
+      options: {
+        list: [
+          { title: "1", value: 1 },
+          { title: "2", value: 2 },
+          { title: "3", value: 3 },
+          { title: "4", value: 4 },
+        ],
+      },
       validation: (Rule) => Rule.required(),
     }),
     defineField({
@@ -79,13 +87,13 @@ export const order_summary = defineType({
     select: {
       createdBy: "createdBy.name",
       date: "date",
-      shiftTime: "shiftTime",
+      shiftNumber: "shiftNumber",
       submissionDate: "submissionDate",
     },
-    prepare({ createdBy, date, shiftTime, submissionDate }) {
+    prepare({ createdBy, date, shiftNumber, submissionDate }) {
       const formattedDate = date ? date : "No date provided";
-      const formattedShiftTime = shiftTime
-        ? shiftTime
+      const formattedShiftTime = shiftNumber
+        ? shiftNumber
         : "No shift time provided";
       const formattedSubmissionDate = submissionDate
         ? new Date(submissionDate).toLocaleString()
@@ -96,7 +104,7 @@ export const order_summary = defineType({
 
       return {
         title,
-        subtitle: `Date: ${formattedDate}, Shift Time: ${formattedShiftTime}, Submitted: ${formattedSubmissionDate}`,
+        subtitle: `Date: ${formattedDate}, Shift Number: ${formattedShiftTime}, Submitted: ${formattedSubmissionDate}`,
       };
     },
   },
