@@ -1,12 +1,12 @@
 import React from "react";
 
-const ScrollViewer = () => {
-  const rows = Array.from({ length: 20 }).map(() => ({
-    date: "11/02/25",
-    name: "The Errors",
-    shifts: ["Shift 1", "Shift 2", "Shift 3", "Shift 4"],
-    balance: "$1000",
-  }));
+const ScrollViewer = ({groupedData}) => {
+  // const rows = Array.from({ length: 20 }).map(() => ({
+  //   date: "11/02/25",
+  //   name: "The Errors",
+  //   shifts: ["Shift 1", "Shift 2", "Shift 3", "Shift 4"],
+  //   balance: "$1000",
+  // }));
 
   return (
     <div className="h-2/3 w-full rounded-md border shadow-lg overflow-y-auto">
@@ -20,7 +20,7 @@ const ScrollViewer = () => {
 
       {/* Table Body */}
       <div>
-        {rows.map((row, index) => (
+        {groupedData.map((row, index) => (
           <div
             key={index}
             className="grid grid-cols-5 border-2 border-black rounded-xl m-1 text-center items-center hover:bg-gray-50 p-1"
@@ -29,13 +29,14 @@ const ScrollViewer = () => {
             <div className="p-2">{row.name}</div>
             <div className="p-2 col-span-2">
               <div className="flex gap-2 flex-wrap justify-center">
-                {row.shifts.map((shift, i) => (
-                  <span
+                {row.shiftIds.map((shift, i) => (
+                  <a
+                    href={`/employee/daily-safe-balance/[${shift.id}]`}
                     key={i}
                     className="px-5 py-1 rounded-full bg-[#ED1C24AB] text-white text-sm font-semibold"
                   >
-                    {shift}
-                  </span>
+                    Shift {shift.No}
+                  </a>
                 ))}
               </div>
             </div>

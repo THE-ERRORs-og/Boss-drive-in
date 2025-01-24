@@ -12,4 +12,19 @@ export const USER_BY_EMAIL_QUERY = defineQuery(`
   }
   `);
 
-export const CASH_SUMMARY_BY_PAGINATION_QUERY = defineQuery(``);
+export const CASH_SUMMARY_BY_PAGINATION_QUERY = defineQuery(`
+    *[_type == "cash_summary"] | order(datetime desc, shiftNumber desc)[$indexOfFirstRecord .. $indexOfLastRecord]
+    {
+      _id,
+      datetime,
+      shiftNumber,
+      ownedToRestaurantSafe,
+      createdBy->{
+        name,
+        userid
+      }
+    }`);
+
+export const TOTAL_NUMBER_OF_CASH_SUMMARY_QUERY = defineQuery(`
+  count(*[_type == "cash_summary"])`);
+

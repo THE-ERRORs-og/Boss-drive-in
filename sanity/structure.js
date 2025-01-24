@@ -3,5 +3,6 @@ export const structure = (S) =>
   S.list()
     .title("Content")
     .items([S.documentTypeListItem("user").title("Users"),
-    S.documentTypeListItem("cash_summary").title("Cash Summary")
+    S.documentTypeListItem("cash_summary").title("Cash Summary"),
+    S.documentTypeListItem("order_summary").title("Order Summary")
     ]);

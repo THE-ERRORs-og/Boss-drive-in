@@ -7,7 +7,8 @@ import { useState } from "react";
 import { z } from "zod";
 
 export default function Page() {
-    const { toast } = useToast();
+  const { toast } = useToast();
+  const {user} = useSession();
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
   const [isPopupVisible, setIsPopupVisible] = useState(false);
@@ -21,7 +22,6 @@ export default function Page() {
     ownedToRestaurantSafe: "0",
   });
   const [errors, setErrors] = useState({});
-  const session = useSession();
   const timeOptions = ["Morning", "Afternoon", "Evening", "Night"];
 
   const handleInputChange = (e) => {
@@ -68,7 +68,7 @@ export default function Page() {
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
-    if (!session) {
+    if (!user) {
       toast({
         variant: "destructive",
         title: "User not logged in",
@@ -86,7 +86,7 @@ export default function Page() {
       ownedToRestaurantSafe: parseFloat(formData.ownedToRestaurantSafe || 0),
       datetime: selectedDate,
       shiftNumber: parseInt(selectedTime),
-      createdBy: session?.user?.id || "",
+      createdBy: user?.id || "",
     };
     if (!validateForm(data)) {
       return;
@@ -124,7 +124,7 @@ export default function Page() {
           <div className="w-full flex justify-between items-center m-4 px-6">
             <p className="text-base font-semibold text-red-500">
               Staff Name:{" "}
-              <span className="text-black">{session?.user.name}</span>
+              <span className="text-black">{user?.name}</span>
             </p>
             <div className="flex space-x-4 items-center">
               <div className="flex items-center">
