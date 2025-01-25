@@ -23,6 +23,16 @@ export default async function DailySafeBalance({ searchParams }) {
   const indexOfLastRecord = currentPage * recordsPerPage - 1;
   const indexOfFirstRecord = indexOfLastRecord - recordsPerPage + 1;
 
+  const handleFormSubmit = (e) => {
+    e.preventDefault(); // Prevent default form submission behavior
+    setIsPopupVisible(true); // Show the popup
+    // Logic for PDF generation and download can be added here
+  };
+
+  const closePopup = () => {
+    setIsPopupVisible(false); // Hide the popup
+  };
+
   const nPages = Math.ceil(processInfo / recordsPerPage);
   const rawData = await client.fetch(CASH_SUMMARY_BY_PAGINATION_QUERY, {
     indexOfLastRecord,
@@ -74,6 +84,19 @@ export default async function DailySafeBalance({ searchParams }) {
           <StaticDataBox text="$1000" className="text-md pr-8 md:w-1/6 " />
         </div>
       </div>
+
+      {isPopupVisible && (
+            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+              <div className="bg-white p-6 rounded-lg shadow-lg text-center">
+                <p className="text-lg font-medium">Your PDF has been downloaded !!</p>
+                <button
+                  onClick={closePopup}
+                  className="mt-4 px-6 py-2 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 transition duration-300"
+                >
+                  Close
+                </button>
+              </div>
+            </div>)}
     </div>
   );
 }
