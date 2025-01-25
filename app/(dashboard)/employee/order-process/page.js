@@ -39,8 +39,6 @@ export default function Page() {
     }
   };
 
-
-
   const validateOrderData = () => {
     const newErrors = {};
     Object.entries(orderData).forEach(([itemName, fields]) => {
@@ -96,7 +94,7 @@ export default function Page() {
     const isOrderDataValid = validateOrderData();
     const isSchemaValid = validateForm(data);
 
-    if(!isOrderDataValid){
+    if (!isOrderDataValid) {
       toast({
         variant: "destructive",
         title: "Validation Error",
