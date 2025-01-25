@@ -5,7 +5,7 @@ import { client } from "./sanity/lib/client";
 import { USER_SIGNIN_QUERY } from "./sanity/lib/queries";
 import { z } from "zod";
 
-export const { signIn, signOut, auth } = NextAuth({
+export const { signIn, signOut, auth, } = NextAuth({
   session: {
     strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60,
