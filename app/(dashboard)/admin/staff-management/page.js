@@ -9,14 +9,14 @@ export default function Page() {
         <SquareButton
           text="Add Staff Member"
           imageUrl={add_staff_member}
-          redirectUrl="/Login/admin"
+          redirectUrl="/admin/staff-management/add-staff"
         />
 
         {/* Staff Login */}
         <SquareButton
           text="Edit Staff Member"
           imageUrl={edit_staff}
-          redirectUrl="/Login/employee"
+          redirectUrl="/admin/staff-management/edit-staff"
         />
         {/* <SquareButton
         text="Employee Order History"

@@ -6,9 +6,9 @@ export const USER_SIGNIN_QUERY = defineQuery(
     _id,userid,password,name,role
     }`);
 
-export const USER_BY_EMAIL_QUERY = defineQuery(`
+export const USER_BY_USERID_QUERY = defineQuery(`
   *[_type == "author" && userid == $userid][0]{
-  _id,name,userid,role
+  _id,userid
   }
   `);
 
