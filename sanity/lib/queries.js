@@ -12,6 +12,11 @@ export const USER_BY_USERID_QUERY = defineQuery(`
   }
   `);
 
+export const ALL_USERS_QUERY = defineQuery(`
+  *[_type == "user"]{
+    _id,userid,name,role
+  }`);
+
 export const CASH_SUMMARY_BY_PAGINATION_QUERY = defineQuery(`
     *[_type == "cash_summary"] | order(datetime desc, shiftNumber desc)[$indexOfFirstRecord .. $indexOfLastRecord]
     {
