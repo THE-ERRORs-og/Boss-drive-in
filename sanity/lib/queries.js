@@ -33,3 +33,8 @@ export const CASH_SUMMARY_BY_PAGINATION_QUERY = defineQuery(`
 export const TOTAL_NUMBER_OF_CASH_SUMMARY_QUERY = defineQuery(`
   count(*[_type == "cash_summary"])`);
 
+export const ALL_ORDER_ITEMS_QUERY = defineQuery(`
+  *[_type == "order_item"]{
+    _id,
+    name,
+  }`);
