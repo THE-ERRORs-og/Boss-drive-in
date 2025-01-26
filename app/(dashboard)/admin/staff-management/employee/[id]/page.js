@@ -1,6 +1,14 @@
-import { Button } from "@/components/ui/button";
+import { client } from "@/sanity/lib/client";
+import { USER_DATA_QUERY} from "@/sanity/lib/queries";
+import Link from "next/link";
 
-export default function Page({}) {
+export default async function Page({ params }) {
+    const { id:userid} = await params;
+
+    const employee = await client
+      .withConfig({ useCdn: false })
+      .fetch(USER_DATA_QUERY, { userid });
+    console.log(employee);
   return (
     <div className="flex flex-col items-center justify-center h-screen w-screen text-xl  gap-2">
       {/* <h1>Route: /admin/staff-management/employee</h1> */}
@@ -10,7 +18,7 @@ export default function Page({}) {
           type="text"
           className="border-2 border-gray-300 p-2 rounded-md w-[30vw] h-[60] font-semibold text-2xl justify-center items-center flex"
         >
-          xxxxx
+          {userid}
         </div>
       </div>
       <div className="flex justify-between items-center gap-10 w-[50vw]">
@@ -19,7 +27,7 @@ export default function Page({}) {
           type="text"
           className="border-2 border-gray-300 p-2 rounded-md w-[30vw] h-[60] font-semibold text-2xl justify-center items-center flex"
         >
-          xxxxx
+          {employee?.name}
         </div>
       </div>
       <div className="flex justify-between items-center gap-10 w-[50vw]">
@@ -28,20 +36,25 @@ export default function Page({}) {
           type="text"
           className="border-2 border-gray-300 p-2 rounded-md w-[30vw] h-[60] font-semibold text-2xl justify-center items-center flex"
         >
-          xxxxx
+          {employee?.password}
         </div>
       </div>
 
-      <p className="text-blue-boss font-bold text-lg">Forgot Password ?</p>
+      <Link
+        href="/admin/staff-management/employee/shivamjvm/edit"
+        className="text-blue-boss font-bold text-lg"
+      >
+        Forgot Password ?
+      </Link>
       <p>Last Login</p>
 
       <div className="flex gap-4">
-        <button
+        <div
           // onClick={closePopup}
-          className="mt-4 w-[20vw] px-6 py-2 bg-brown-boss text-white rounded-lg font-medium hover:bg-red-600 transition duration-300"
+          className="text-center mt-4 w-[20vw] px-6 py-2 bg-brown-boss text-white rounded-lg font-medium hover:bg-red-600 transition duration-300"
         >
-          9:00 AM
-        </button>
+          {employee?.lastLogin && new Date(employee?.lastLogin).toLocaleString()}
+        </div>
       </div>
     </div>
   );
