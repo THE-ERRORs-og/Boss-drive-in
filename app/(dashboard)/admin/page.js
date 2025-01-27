@@ -17,7 +17,7 @@ export default function Page() {
         <SquareButton
           text="Daily Safe Balance History"
           imageUrl={daily_safe_balance_history}
-          redirectUrl="/employee/daily-safe-balance"
+          redirectUrl="/admin/daily-safe-balance"
         />
         <SquareButton
           text="Employee Order History"
