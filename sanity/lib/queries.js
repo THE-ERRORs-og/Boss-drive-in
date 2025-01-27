@@ -43,3 +43,9 @@ export const ALL_ORDER_ITEMS_QUERY = defineQuery(`
     _id,
     name,
   }`);
+
+export const GET_CURRENT_SAFE_BALANCE_QUERY = defineQuery(`
+  *[_type == "constant" && name == "current_safe_balance"][0]{
+    _id,
+    value
+  }`);

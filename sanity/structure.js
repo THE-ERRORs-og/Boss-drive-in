@@ -6,4 +6,5 @@ export const structure = (S) =>
     S.documentTypeListItem("cash_summary").title("Cash Summary"),
     S.documentTypeListItem("order_summary").title("Order Summary"),
     S.documentTypeListItem("order_item").title("Order Item"),
+    S.documentTypeListItem("constant").title("Constants"),
     ]);
