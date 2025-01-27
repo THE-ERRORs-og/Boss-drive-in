@@ -1,15 +1,17 @@
 const { defineQuery } = require("next-sanity");
 
 export const USER_SIGNIN_QUERY = defineQuery(
-    `*[_type == "user" && userid == $userid][0]
+  `*[_type == "user" && userid == $userid][0]
     {
     _id,userid,password,name,role
-    }`);
+    }`
+);
 export const USER_DATA_QUERY = defineQuery(
-    `*[_type == "user" && userid == $userid][0]
+  `*[_type == "user" && userid == $userid][0]
     {
     _id,userid,password,name,lastLogin
-    }`);
+    }`
+);
 
 export const USER_BY_USERID_QUERY = defineQuery(`
   *[_type == "user" && userid == $userid][0]{
@@ -34,6 +36,21 @@ export const CASH_SUMMARY_BY_PAGINATION_QUERY = defineQuery(`
         userid
       }
     }`);
+
+export const CASH_SUMMARY_BY_ID_QUERY = defineQuery(`
+  *[_type == "cash_summary" && _id == $id][0]{
+    _id,
+    datetime,
+    shiftNumber,
+    expectedCloseoutCash,
+    startingRegisterCash,
+    onlineTipsKiosk,
+    onlineTipCash,
+    onlineTipsToast,
+    totalTipDeduction,
+    ownedToRestaurantSafe,
+    createdBy->{name,userid}
+  }`);
 
 export const TOTAL_NUMBER_OF_CASH_SUMMARY_QUERY = defineQuery(`
   count(*[_type == "cash_summary"])`);

@@ -31,7 +31,7 @@ const ScrollViewer = ({groupedData}) => {
               <div className="flex gap-2 flex-wrap justify-center">
                 {row.shiftIds.map((shift, i) => (
                   <a
-                    href={`/employee/daily-safe-balance/[${shift.id}]`}
+                    href={`/employee/daily-safe-balance/${shift.id}`}
                     key={i}
                     className="px-5 py-1 rounded-full bg-[#ED1C24AB] text-white text-sm font-semibold"
                   >
