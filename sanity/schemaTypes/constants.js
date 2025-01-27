@@ -6,12 +6,6 @@ export const constant = defineType({
   type: "document",
   fields: [
     defineField({
-      name: "lastUpdated",
-      title: "Last Updated",
-      type: "datetime",
-      validation: (Rule) => Rule.required(),
-    }),
-    defineField({
       name: "lastUpdated_by",
       title: "Last Updated By",
       type: "reference",
