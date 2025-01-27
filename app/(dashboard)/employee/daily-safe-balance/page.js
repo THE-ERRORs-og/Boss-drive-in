@@ -7,27 +7,29 @@ import { processCashSummaryData } from "@/lib/utils";
 import { client } from "@/sanity/lib/client";
 import {
   CASH_SUMMARY_BY_PAGINATION_QUERY,
+  GET_CURRENT_SAFE_BALANCE_QUERY,
   TOTAL_NUMBER_OF_CASH_SUMMARY_QUERY,
 } from "@/sanity/lib/queries";
 import { ArrowDownWideNarrow, ListFilter, Search } from "lucide-react";
 
 export default async function DailySafeBalance({ searchParams }) {
-  const processInfo = await client.fetch(TOTAL_NUMBER_OF_CASH_SUMMARY_QUERY); //this will be info array and we will be using length of info for pagination
-  // const [currentPage, setCurrentPage] = useState(1);
-  // const [recordsPerPage] = useState(5);
   const searchParamsv = await searchParams;
-
+  
   const currentPage = parseInt(searchParamsv.page || 1); // Default to page 1
   const recordsPerPage = parseInt(searchParamsv.recordsPerPage || 12);
   const indexOfLastRecord = currentPage * recordsPerPage - 1;
   const indexOfFirstRecord = indexOfLastRecord - recordsPerPage + 1;
-
-
-  const nPages = Math.ceil(processInfo / recordsPerPage);
-  const rawData = await client.fetch(CASH_SUMMARY_BY_PAGINATION_QUERY, {
+  
+const [current_safe_balance, rawData, processInfo] = await Promise.all([
+  client.fetch(GET_CURRENT_SAFE_BALANCE_QUERY),
+  client.fetch(CASH_SUMMARY_BY_PAGINATION_QUERY, {
     indexOfLastRecord,
     indexOfFirstRecord,
-  });
+  }),
+  client.fetch(TOTAL_NUMBER_OF_CASH_SUMMARY_QUERY),
+]);
+
+  const nPages = Math.ceil(processInfo / recordsPerPage);
   const groupedData = processCashSummaryData(rawData);
 
   return (
@@ -62,7 +64,7 @@ export default async function DailySafeBalance({ searchParams }) {
       <div className="flex w-full justify-center">
         <Pagination nPages={nPages} currentPage={currentPage} />
       </div>
-      <BottomContainer />
+      <BottomContainer currentSafeBalance={current_safe_balance} />
 
     </div>
   );
