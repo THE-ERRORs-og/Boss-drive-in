@@ -21,7 +21,7 @@ export default async function DailySafeBalance({ searchParams }) {
   const indexOfFirstRecord = indexOfLastRecord - recordsPerPage + 1;
   
 const [current_safe_balance, rawData, processInfo] = await Promise.all([
-  client.fetch(GET_CURRENT_SAFE_BALANCE_QUERY),
+  client.withConfig({useCdn:false}).fetch(GET_CURRENT_SAFE_BALANCE_QUERY),
   client.fetch(CASH_SUMMARY_BY_PAGINATION_QUERY, {
     indexOfLastRecord,
     indexOfFirstRecord,

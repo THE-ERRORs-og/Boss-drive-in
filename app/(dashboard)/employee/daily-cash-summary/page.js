@@ -12,6 +12,7 @@ export default function Page() {
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
   const [isPopupVisible, setIsPopupVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); 
   const [formData, setFormData] = useState({
     expectedCloseoutCash: "",
     startingRegisterCash: "",
@@ -68,12 +69,14 @@ export default function Page() {
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true); // Start loader
     if (!user) {
       toast({
         variant: "destructive",
         title: "User not logged in",
         description: "Please login to submit the form.",
       });
+      setIsLoading(false); // Stop loader
       return;
     }
     const data = {
@@ -89,12 +92,23 @@ export default function Page() {
       createdBy: user?.id || "",
     };
     if (!validateForm(data)) {
+      setIsLoading(false); // Stop loader
       return;
     }
 
     try {
       const response = await createCashSummary(data);
       if (response.status === "SUCCESS") {
+        //reset the form
+        setFormData({
+          expectedCloseoutCash: "",
+          startingRegisterCash: "",
+          onlineTipsToast: "",
+          onlineTipsKiosk: "",
+          onlineTipCash: "",
+          totalTipDeduction: "0",
+          ownedToRestaurantSafe: "0",
+        });
         setIsPopupVisible(true);
       } else {
         toast({
@@ -110,6 +124,8 @@ export default function Page() {
         title: "Error",
         description: "An error occurred while submitting the form.",
       });
+    } finally {
+      setIsLoading(false); // Stop loader
     }
   };
 
@@ -123,8 +139,7 @@ export default function Page() {
         <div className="flex flex-col px-8 py-2">
           <div className="w-full flex justify-between items-center m-4 px-6">
             <p className="text-base font-semibold text-red-500">
-              Staff Name:{" "}
-              <span className="text-black">{user?.name}</span>
+              Staff Name: <span className="text-black">{user?.name}</span>
             </p>
             <div className="flex space-x-4 items-center">
               <div className="flex items-center">
@@ -271,9 +286,14 @@ export default function Page() {
             <div className="flex justify-center">
               <button
                 type="submit"
-                className="w-auto px-10 bg-red-500 text-white py-3 rounded-lg font-medium hover:bg-red-600 transition duration-300"
+                className={`w-auto px-10 text-white py-3 rounded-lg font-medium transition duration-300
+                ${
+                  isLoading
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-red-500 hover:bg-red-600"
+                }`}
               >
-                Submit & Download PDF
+                {isLoading ? "Processing..." : "Submit & Download PDF"}
               </button>
             </div>
           </form>
