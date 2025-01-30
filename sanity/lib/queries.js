@@ -81,8 +81,11 @@ export const GET_ALL_SAFE_BALANCE_HISTORY_QUERY = defineQuery(`
   }`);
 
 export const GET_SAFE_BALANCE_HISTORY_BY_PAGINATION_QUERY = defineQuery(`
-  *[_type == "safe_balance_history"]| 
-  order(_updatedAt desc)
+  *[_type == "safe_balance_history"
+    && (defined($query) && depositAmount match $query + "*" || !defined($query))
+    && (!defined($startDate) || _updatedAt >= $startDate)
+    && (!defined($endDate) || _updatedAt <= $endDate)
+  ] | order(_updatedAt $sortOrder)
   [$indexOfFirstRecord .. $indexOfLastRecord]
   {
     _id,
@@ -91,8 +94,10 @@ export const GET_SAFE_BALANCE_HISTORY_BY_PAGINATION_QUERY = defineQuery(`
     submittedBy->{
       name,
       userid
-    }, 
-  }`);
+    }
+  }
+`);
+
 
 export const TOTAL_NUMBER_OF_SAFE_BALANCE_HISTORY_QUERY = defineQuery(`
   count(*[_type == "safe_balance_history"])`);
