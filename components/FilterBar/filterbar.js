@@ -37,7 +37,7 @@ export default function FilterPage() {
 
   return (
     <div className="flex flex-col w-full items-center space-y-4 p-6">
-      <div className="flex w-full lg:w-1/2 items-center space-x-2">
+      <div className="flex w-full  items-center space-x-2">
         {/* Filter Button */}
         <Button
           className="bg-white text-xl text-black border border-gray-300 hover:bg-gray-300"
@@ -80,7 +80,11 @@ export default function FilterPage() {
       </Button>
 
       {/* Filter Dialog */}
-      <Dialog open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+      <Dialog
+        open={isFilterOpen}
+        onOpenChange={setIsFilterOpen}
+
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Select Date Range</DialogTitle>
