@@ -25,17 +25,23 @@ export const ALL_USERS_QUERY = defineQuery(`
   }`);
 
 export const CASH_SUMMARY_BY_PAGINATION_QUERY = defineQuery(`
-    *[_type == "cash_summary"] | order(datetime desc, shiftNumber desc)[$indexOfFirstRecord .. $indexOfLastRecord]
-    {
-      _id,
-      datetime,
-      shiftNumber,
-      ownedToRestaurantSafe,
-      createdBy->{
-        name,
-        userid
-      }
-    }`);
+  *[_type == "cash_summary"
+    && (defined($query) && ownedToRestaurantSafe match $query + "*" || !defined($query))
+    && (!defined($startDate) || datetime >= $startDate)
+    && (!defined($endDate) || datetime <= $endDate)
+  ] | order(datetime $sortOrder, shiftNumber $sortOrder)
+  [$indexOfFirstRecord .. $indexOfLastRecord]
+  {
+    _id,
+    datetime,
+    shiftNumber,
+    ownedToRestaurantSafe,
+    createdBy->{
+      name,
+      userid
+    }
+  }
+`);
 
 export const CASH_SUMMARY_BY_ID_QUERY = defineQuery(`
   *[_type == "cash_summary" && _id == $id][0]{

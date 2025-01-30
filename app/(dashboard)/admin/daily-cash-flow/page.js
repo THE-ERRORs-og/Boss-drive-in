@@ -29,17 +29,12 @@ export default function EmployeeOrderHistory() {
   });
   const [currentPage,setCurrentPage] = useState(parseInt(searchParams.get("page") || "1"));
   const recordsPerPage = parseInt(searchParams.get("recordsPerPage") || "5");
-  const [indexOfLastRecord, setIndexOfLastRecord] = useState(
-    currentPage * recordsPerPage - 1
-  );
-  const [indexOfFirstRecord, setIndexOfFirstRecord] = useState(
-    indexOfLastRecord - recordsPerPage + 1
-  );
 
   useEffect(() => {
     const fetchData = async () => {
-      console.log('fetch runnignn');
       setIsLoading(true);
+      const indexOfLastRecord = currentPage * recordsPerPage - 1;
+      const indexOfFirstRecord = indexOfLastRecord - recordsPerPage + 1;
       try {
         const sortOrder = filters.sort === "desc" ? "desc" : "asc";
         const queryParams = {
@@ -90,7 +85,7 @@ export default function EmployeeOrderHistory() {
   }, [currentPage, recordsPerPage, filters]);
 
   const handleFilterChange = (newFilters) => {
-    setFilters(newFilters);
+    setFilters({...newFilters, sort: newFilters.sortOrder});
     // router.push("?page=1"); // Reset to first page on filter change
   };
 
@@ -117,7 +112,11 @@ export default function EmployeeOrderHistory() {
       </div>
 
       <div className="flex w-full justify-center">
-        <Pagination nPages={nPages} currentPage={currentPage} />
+        <Pagination
+          nPages={nPages}
+          currentPage={currentPage}
+          setPage={setCurrentPage}
+        />
       </div>
     </div>
   );

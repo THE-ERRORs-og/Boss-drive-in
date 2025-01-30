@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 
-const Pagination = ({ nPages, currentPage }) => {
+const Pagination = ({ nPages, currentPage , setPage=()=>{} }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pageNumbers = [...Array(nPages + 1).keys()].slice(1);
@@ -11,6 +11,7 @@ const Pagination = ({ nPages, currentPage }) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set("page", pageNumber); // Update the page parameter
     router.push(`?${params.toString()}`); // Push the updated query params to the URL
+    setPage(pageNumber);
   };
   
   const goToNextPage = (event) => {
