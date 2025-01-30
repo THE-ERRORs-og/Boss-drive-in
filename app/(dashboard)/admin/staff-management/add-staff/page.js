@@ -7,7 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { createUser } from "@/lib/actions/registerUser";
 
 export default function Page() {
-    const { toast } = useToast();
+  const { toast } = useToast();
   const [isPopupVisible, setIsPopupVisible] = useState(false);
   const [formData, setFormData] = useState({
     role:"employee",

@@ -59,6 +59,13 @@ export const ALL_ORDER_ITEMS_QUERY = defineQuery(`
   *[_type == "order_item"]{
     _id,
     name,
+    isEnabled,
+  }`);
+  
+export const ALL_ENABLED_ORDER_ITEMS_QUERY = defineQuery(`
+  *[_type == "order_item" && isEnabled == true]{
+    _id,
+    name,
   }`);
 
 export const GET_CURRENT_SAFE_BALANCE_QUERY = defineQuery(`
@@ -66,3 +73,10 @@ export const GET_CURRENT_SAFE_BALANCE_QUERY = defineQuery(`
     _id,
     value
   }`);
+
+export const GET_ALL_SAFE_BALANCE_HISTORY_QUERY = defineQuery(`
+  *[_type == "safe_balance_history"]{
+    _id,
+    name,
+  }`);
+
