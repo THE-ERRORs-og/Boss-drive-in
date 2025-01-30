@@ -40,6 +40,41 @@ export default function EmployeeOrderHistory() {
         shiftNumber: 3,
         depositedAmount: "$20000",
       },
+      {
+        date: "11/Feb/2025",
+        time: "12:00 PM",
+        name: "The Errors",
+        shiftNumber: 3,
+        depositedAmount: "$20000",
+      },
+      {
+        date: "11/Feb/2025",
+        time: "12:00 PM",
+        name: "The Errors",
+        shiftNumber: 3,
+        depositedAmount: "$20000",
+      },
+      {
+        date: "11/Feb/2025",
+        time: "12:00 PM",
+        name: "The Errors",
+        shiftNumber: 3,
+        depositedAmount: "$20000",
+      },
+      {
+        date: "11/Feb/2025",
+        time: "12:00 PM",
+        name: "The Errors",
+        shiftNumber: 3,
+        depositedAmount: "$20000",
+      },
+      {
+        date: "11/Feb/2025",
+        time: "12:00 PM",
+        name: "The Errors",
+        shiftNumber: 3,
+        depositedAmount: "$20000",
+      },
   ];
 
   const processInfo = 22; //this will be info array and we will be using length of info for pagination
@@ -56,7 +91,8 @@ export default function EmployeeOrderHistory() {
       <h1 className="text-3xl font-semibold mb-4">
         Employee Order History
       </h1>
-    
+
+      <div className="h-[60vh] w-full m-4 overscroll-contain">
       {data.map((item, index) => (
         <div
           key={index}
@@ -81,6 +117,7 @@ export default function EmployeeOrderHistory() {
           <MainButton text="View Details" className="" />
         </div>
       ))}
+      </div>
       <div className="flex w-full justify-center">
         <Pagination
           nPages={nPages}

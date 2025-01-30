@@ -4,7 +4,6 @@ import { signInSchema } from "./lib/validation";
 import { client } from "./sanity/lib/client";
 import { USER_SIGNIN_QUERY } from "./sanity/lib/queries";
 import { z } from "zod";
-import { writeClient } from "./sanity/lib/write_client";
 
 export const { handlers, signIn, signOut, auth, } = NextAuth({
   session: {
@@ -39,10 +38,11 @@ export const { handlers, signIn, signOut, auth, } = NextAuth({
           }
 
           // Update the lastLogin field with the current datetime
-          await writeClient
-            .patch(user._id)
-            .set({ lastLogin: new Date().toISOString() })
-            .commit();
+          const result = await updateUserLogin(user);
+
+          if(result.error) {
+            throw new Error(result.error);
+          }
 
           return {
             id: user._id,
