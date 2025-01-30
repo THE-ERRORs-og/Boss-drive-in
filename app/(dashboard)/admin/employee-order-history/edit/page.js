@@ -1,10 +1,37 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { client } from "@/sanity/lib/client";
+import { ALL_ORDER_ITEMS_QUERY } from "@/sanity/lib/queries";
+import { createOrderItem, deleteItem,  toggleItemStatus } from "@/lib/actions/orderItems";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Page() {
+  const { toast } = useToast();
+  const [orderItems, setOrderItems] = useState();
   const [showAddItemBar, setShowAddItemBar] = useState(false);
   const [newItem, setNewItem] = useState("");
   const [isPopupVisible, setIsPopupVisible] = useState(false);
+  const [popupAction, setPopupAction] = useState(null);
+  const [selectedItemId, setSelectedItemId] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  // Fetch order items
+  async function fetchOrderItems() {
+    try {
+      const data = await client
+        .withConfig({ useCdn: false })
+        .fetch(ALL_ORDER_ITEMS_QUERY);
+      console.log(data);
+      setOrderItems(data);
+    } catch (error) {
+      console.error("Error fetching order items:", error);
+    } finally {
+      return true;
+    }
+  }
+  useEffect(() => {
+    fetchOrderItems();
+  }, []);
 
   const closePopup = () => {
     setIsPopupVisible(false);
@@ -15,14 +42,97 @@ export default function Page() {
   };
 
   const handleAddItemClick = () => {
-    setShowAddItemBar(true);
+    setShowAddItemBar(!showAddItemBar);
   };
 
-  const handleSaveNewItem = () => {
+  const handleConfirmPopup = async () => {
+    setLoading(true);
+    if (popupAction === "save") {
+      await handleSaveNewItem();
+    } else if (popupAction === "disable") {
+      await handleDisableItem(selectedItemId);
+    } else if (popupAction === "delete") {
+      await handleDeleteItem(selectedItemId);
+    }
+    console.log("Popup action:", popupAction);
+    await fetchOrderItems();
+    setSelectedItemId(null);
+    setIsPopupVisible(false);
+    setLoading(false);
+  };
+
+  const handleSaveNewItem = async () => {
     if (newItem.trim()) {
-      console.log("New Item Added:", newItem); // Replace with actual functionality
-      setNewItem("");
-      setShowAddItemBar(false);
+      try {
+        // Create new item
+        const result = await createOrderItem(newItem);
+        if(result.status === "SUCCESS") {
+          toast({
+            variant: "success",
+            title: "Success",
+            description: result.message,
+          })
+        }
+        setOrderItems((prev) => [...prev, newItem.trim()]);
+        setNewItem("");
+        setShowAddItemBar(false);
+      } catch (error) {
+        console.error("Error adding new item:", error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: error.message,
+        });
+      }
+      finally {
+        return true;
+      }
+    }
+  };
+
+  const handleDisableItem = async (id) => {
+    try {
+      // Disable item
+      const result = await toggleItemStatus(id);
+      if(result.status === "SUCCESS") {
+        toast({
+          variant: "success",
+          title: "Success",
+          description: result.message,
+        })
+      }
+    } catch (error) {
+      console.error("Error disabling item:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message,
+      });
+    } finally {
+      return true;
+    }
+  };
+
+  const handleDeleteItem = async (id) => {
+    try {
+      // Delete item
+      const result = await deleteItem(id);
+      if(result.status === "SUCCESS") {
+        toast({
+          variant: "success",
+          title: "Success",
+          description: result.message,
+        })
+      }
+    } catch (error) {
+      console.error("Error deleting item:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message,
+      });
+    } finally {
+      return true;
     }
   };
 
@@ -33,22 +143,42 @@ export default function Page() {
       </h1>
       <div className="flex flex-col gap-4">
         {/* Existing items with Remove and Disable buttons */}
-        {["Napkin", "Cup", "Candy", "Water"].map((item, index) => (
-          <div key={index} className="flex justify-center items-center gap-3">
+        {orderItems?.length >= 0 &&
+          orderItems.map((item, index) => (
             <div
-              type="text"
-              className="border-2 border-gray-300 p-2 rounded-md w-[60vw] h-[40] font-semibold text-2xl justify-center items-center flex"
+              key={item.key}
+              className="flex justify-center items-center gap-3"
             >
-              {item}
+              <div
+                className={`border-2 border-gray-300 p-2 rounded-md w-[60vw] h-[40] font-semibold text-2xl justify-center items-center flex ${
+                  !item.isEnabled ? "bg-gray-300" : ""
+                }`}
+              >
+                {item.name}
+              </div>
+
+              <button
+                onClick={() => {
+                  setPopupAction("delete");
+                  setSelectedItemId(item._id);
+                  handlePopUp();
+                }}
+                className="w-[10vw] px-6 py-2 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 transition duration-300"
+              >
+                Remove
+              </button>
+              <button
+                onClick={() => {
+                  setPopupAction("disable");
+                  setSelectedItemId(item._id);
+                  handlePopUp();
+                }}
+                className="w-[10vw] px-6 py-2 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 transition duration-300"
+              >
+                {!item.isEnabled ? "Enable" : "Disable"}
+              </button>
             </div>
-            <button className="w-[10vw] px-6 py-2 bg-red-boss text-white rounded-lg font-medium hover:bg-red-600 transition duration-300">
-              Remove
-            </button>
-            <button className="w-[10vw] px-6 py-2 bg-red-boss text-white rounded-lg font-medium hover:bg-red-600 transition duration-300">
-              Disable
-            </button>
-          </div>
-        ))}
+          ))}
       </div>
 
       {/* Add Item bar */}
@@ -65,12 +195,6 @@ export default function Page() {
               onChange={(e) => setNewItem(e.target.value)}
               placeholder="Enter item name"
             />
-            <button
-              onClick={handleSaveNewItem}
-              className="w-[10vw] px-6 py-2 bg-red-boss text-white rounded-lg font-medium hover:bg-red-600 transition duration-300"
-            >
-              Save
-            </button>
           </div>
         </div>
       )}
@@ -79,29 +203,36 @@ export default function Page() {
       <div className="gap-20 flex">
         <button
           onClick={handleAddItemClick}
-          className="mt-4 w-[20vw] px-6 py-2 bg-red-boss text-white rounded-lg font-medium hover:bg-red-600 transition duration-300"
+          className="mt-4 w-[20vw] px-6 py-2 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 transition duration-300"
         >
-          Add Items
+          {showAddItemBar ? "Cancel" : "Add Item"}
         </button>
-        <button
-          // Implement save functionality here
-          onClick={handlePopUp}
-          className="mt-4 w-[20vw] px-6 py-2 bg-red-boss text-white rounded-lg font-medium hover:bg-red-600 transition duration-300"
-        >
-          Save Changes
-        </button>
+        {showAddItemBar && (
+          <button
+            onClick={() => {
+              setPopupAction("save");
+              handlePopUp();
+            }}
+            className="mt-4 w-[20vw] px-6 py-2 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 transition duration-300"
+          >
+            Save Changes
+          </button>
+        )}
       </div>
 
       {isPopupVisible && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-lg shadow-lg text-center">
-            <p className="text-lg font-medium">Are You Sure to save changes?</p>
+            <p className="text-lg font-medium">
+              Are You Sure to {popupAction} Item?
+            </p>
             <div className="flex gap-20">
               <button
-                onClick={closePopup}
+                onClick={handleConfirmPopup}
+                disabled={loading}
                 className="mt-4 px-6 py-2 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 transition duration-300"
               >
-                Save Changes
+                {loading ? "Loading..." : "Confirm"}
               </button>
               <button
                 onClick={closePopup}
