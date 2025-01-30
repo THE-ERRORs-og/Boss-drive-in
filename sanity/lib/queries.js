@@ -25,17 +25,23 @@ export const ALL_USERS_QUERY = defineQuery(`
   }`);
 
 export const CASH_SUMMARY_BY_PAGINATION_QUERY = defineQuery(`
-    *[_type == "cash_summary"] | order(datetime desc, shiftNumber desc)[$indexOfFirstRecord .. $indexOfLastRecord]
-    {
-      _id,
-      datetime,
-      shiftNumber,
-      ownedToRestaurantSafe,
-      createdBy->{
-        name,
-        userid
-      }
-    }`);
+  *[_type == "cash_summary"
+    && (defined($query) && ownedToRestaurantSafe match $query + "*" || !defined($query))
+    && (!defined($startDate) || datetime >= $startDate)
+    && (!defined($endDate) || datetime <= $endDate)
+  ] | order(datetime $sortOrder, shiftNumber $sortOrder)
+  [$indexOfFirstRecord .. $indexOfLastRecord]
+  {
+    _id,
+    datetime,
+    shiftNumber,
+    ownedToRestaurantSafe,
+    createdBy->{
+      name,
+      userid
+    }
+  }
+`);
 
 export const CASH_SUMMARY_BY_ID_QUERY = defineQuery(`
   *[_type == "cash_summary" && _id == $id][0]{
@@ -80,3 +86,24 @@ export const GET_ALL_SAFE_BALANCE_HISTORY_QUERY = defineQuery(`
     name,
   }`);
 
+export const GET_SAFE_BALANCE_HISTORY_BY_PAGINATION_QUERY = defineQuery(`
+  *[_type == "safe_balance_history"
+    && (defined($query) && depositAmount match $query + "*" || !defined($query))
+    && (!defined($startDate) || _updatedAt >= $startDate)
+    && (!defined($endDate) || _updatedAt <= $endDate)
+  ] | order(_updatedAt $sortOrder)
+  [$indexOfFirstRecord .. $indexOfLastRecord]
+  {
+    _id,
+    depositAmount,
+    _updatedAt,
+    submittedBy->{
+      name,
+      userid
+    }
+  }
+`);
+
+
+export const TOTAL_NUMBER_OF_SAFE_BALANCE_HISTORY_QUERY = defineQuery(`
+  count(*[_type == "safe_balance_history"])`);

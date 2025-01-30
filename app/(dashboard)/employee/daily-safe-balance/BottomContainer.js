@@ -65,7 +65,7 @@ const BottomContainer = ({ currentSafeBalance }) => {
           Available Safe Balance
         </p>
         <StaticDataBox
-          text={`$ ${currentSafeBalance.value}`}
+          text={`$ ${currentSafeBalance}`}
           className="text-md pr-8 md:w-1/6"
         />
       </div>

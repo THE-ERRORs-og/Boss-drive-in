@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -10,34 +9,39 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ListFilter, Search, ArrowDownWideNarrow } from "lucide-react";
+import { ListFilter, Search, ArrowDownWideNarrow, ArrowUpWideNarrow } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { useRouter } from "next/navigation";
 
-export default function FilterPage() {
+export default function FilterComponent({
+  query: defaultQuery = "",
+  sortOrder: defaultSortOrder = "desc",
+  dateRange: defaultDateRange = { start: null, end: null },
+  onFilterChange,
+}) {
   const router = useRouter();
-  const [query, setQuery] = useState("");
-  const [sortOrder, setSortOrder] = useState("ascending");
-  const [dateRange, setDateRange] = useState({ start: null, end: null });
+  const [query, setQuery] = useState(defaultQuery);
+  const [sortOrder, setSortOrder] = useState(defaultSortOrder);
+  const [dateRange, setDateRange] = useState(defaultDateRange);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
-  // Handle URL updates
-  const updateURL = () => {
+  useEffect(() => {
     const params = new URLSearchParams();
-
+    const startDate = dateRange.start ? dateRange.start.toISOString() : null;
+    const endDate = dateRange.end ? dateRange.end.toISOString() : null;
     if (query) params.set("query", query);
     if (sortOrder) params.set("sort", sortOrder);
     if (dateRange.start && dateRange.end) {
       params.set("startDate", dateRange.start.toISOString());
       params.set("endDate", dateRange.end.toISOString());
     }
-
     router.push(`?${params.toString()}`);
-  };
+    onFilterChange?.({ query, sortOrder,startDate , endDate });
+  }, [query, sortOrder, dateRange]);
 
   return (
-    <div className="flex flex-col w-full items-center space-y-4 p-6">
-      <div className="flex w-full  items-center space-x-2">
+    <div className="flex flex-col w-full items-center p-6">
+      <div className="flex w-full items-center space-x-2">
         {/* Filter Button */}
         <Button
           className="bg-white text-xl text-black border border-gray-300 hover:bg-gray-300"
@@ -50,7 +54,7 @@ export default function FilterPage() {
         <div className="relative w-full flex-1">
           <Input
             type="search"
-            className="bg-white text-black border  border-gray-300"
+            className="bg-white text-black border border-gray-300"
             placeholder="Search for keyword"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -64,27 +68,15 @@ export default function FilterPage() {
         <Button
           className="bg-white text-xl text-black border border-gray-300 hover:bg-gray-300"
           onClick={() =>
-            setSortOrder(sortOrder === "ascending" ? "descending" : "ascending")
+            setSortOrder(sortOrder === "asc" ? "desc" : "asc")
           }
         >
-          Sort <ArrowDownWideNarrow className="!size-6" />
+          Sort {sortOrder=== "asc" ? <ArrowDownWideNarrow className="!size-6" /> : <ArrowUpWideNarrow className="!size-6" />}
         </Button>
       </div>
 
-      {/* Apply Filters Button */}
-      <Button
-        className="mt-4 bg-blue-600 text-white hover:bg-blue-500"
-        onClick={updateURL}
-      >
-        Apply Filters
-      </Button>
-
       {/* Filter Dialog */}
-      <Dialog
-        open={isFilterOpen}
-        onOpenChange={setIsFilterOpen}
-
-      >
+      <Dialog open={isFilterOpen} onOpenChange={setIsFilterOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Select Date Range</DialogTitle>
