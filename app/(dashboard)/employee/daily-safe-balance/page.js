@@ -11,6 +11,7 @@ import {
   TOTAL_NUMBER_OF_CASH_SUMMARY_QUERY,
 } from "@/sanity/lib/queries";
 import { ArrowDownWideNarrow, ListFilter, Search } from "lucide-react";
+import FilterPage from "@/components/FilterBar/filterbar";
 
 export default async function DailySafeBalance({ searchParams }) {
   const searchParamsv = await searchParams;
@@ -34,32 +35,7 @@ const [current_safe_balance, rawData, processInfo] = await Promise.all([
 
   return (
     <div className="p-8 h-screen w-screen flex flex-col items-center space-y-4 ">
-      <div className="flex w-full lg:w-1/2 items-center space-x-2 ">
-        <Button
-          className="bg-white text-xl text-black border border-gray-300 hover:bg-gray-300 "
-          varient="outline"
-        >
-          Filter <ListFilter className="!size-6" />
-        </Button>
-
-        <div className="relative w-full">
-          <Input
-            type="search"
-            className="bg-white text-black border border-gray-300"
-            placeholder="Search for keyword"
-          />
-          <div className="absolute bg-white m-1 inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-            <Search />
-          </div>
-        </div>
-
-        <Button
-          className="bg-white text-xl text-black border border-gray-300 hover:bg-gray-300 "
-          varient="outline"
-        >
-          Sort <ArrowDownWideNarrow className="!size-6" />
-        </Button>
-      </div>
+      <FilterPage/>
       <ScrollViewer groupedData={groupedData} />
       <div className="flex w-full justify-center">
         <Pagination nPages={nPages} currentPage={currentPage} />

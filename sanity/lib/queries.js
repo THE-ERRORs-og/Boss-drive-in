@@ -66,3 +66,10 @@ export const GET_CURRENT_SAFE_BALANCE_QUERY = defineQuery(`
     _id,
     value
   }`);
+
+export const GET_ALL_SAFE_BALANCE_HISTORY_QUERY = defineQuery(`
+  *[_type == "safe_balance_history"]{
+    _id,
+    name,
+  }`);
+
