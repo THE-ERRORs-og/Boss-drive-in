@@ -100,25 +100,25 @@ export default function Page() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
+    <div className="min-h-screen flex items-start justify-center">
       <div className="bg-white p-6 w-full">
         {/* Form */}
-        <h1 className="text-lg font-semibold mb-4">
+        <h1 className="font-semibold text-3xl p-1 mb-4">
           Enter the details of employee you want to add:
         </h1>
         <form onSubmit={handleFormSubmit}>
           <div className="grid grid-cols-2">
             <div className="items-center">
-              <h1 className="text-lg font-medium place-content-center m-4">
+              <h1 className="text-xl font-medium place-content-center m-4">
                 Enter name of new member
               </h1>
-              <h1 className="text-lg font-medium place-content-center m-4">
+              <h1 className="text-xl font-medium place-content-center m-4">
                 Enter user id of new member
               </h1>
-              <h1 className="text-lg font-medium place-content-center m-4">
+              <h1 className="text-xl font-medium place-content-center m-4">
                 Create password for new member
               </h1>
-              <h1 className="text-lg font-medium place-content-center m-4">
+              <h1 className="text-xl font-medium place-content-center m-4">
                 Confirm password for new member
               </h1>
             </div>
@@ -164,7 +164,7 @@ export default function Page() {
           <div className="flex justify-center">
             <button
               type="submit"
-              className="w-[20vw] bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600 transition"
+              className="w-[20vw]  px-6 py-2 bg-[#ED1C24] text-sm md:text-lg text-white rounded-lg font-medium hover:bg-red-600 transition duration-300"
             >
               Add member
             </button>
@@ -172,20 +172,20 @@ export default function Page() {
         </form>
         {isPopupVisible && (
           <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white p-6 rounded-lg shadow-lg text-center">
-              <p className="text-lg font-medium">
+            <div className="bg-white p-10 rounded-lg shadow-lg text-center">
+              <p className="text-xl font-medium">
                 Are you sure to add the member
               </p>
               <div className="">
                 <button
                   onClick={submitPopupForm} // submit the form after clicking this
-                  className="m-4 px-6 py-2 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 transition duration-300"
+                  className="m-4 px-6 py-2 bg-[#ED1C24]  text-sm md:text-lg text-white rounded-lg font-medium hover:bg-red-600 transition duration-300"
                 >
                   Add Member
                 </button>
                 <button
                   onClick={closePopup}
-                  className="m-4 px-6 py-2 border-2 rounded-lg font-medium transition duration-300"
+                  className="m-4 px-6 py-2 border-2 text-sm md:text-lg text-black rounded-lg font-medium transition duration-300"
                 >
                   Cancel
                 </button>

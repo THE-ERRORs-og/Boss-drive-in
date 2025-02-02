@@ -88,7 +88,7 @@ export default function EmployeeOrderHistory() {
 
       <FilterComponent onFilterChange={handleFilterChange} />
 
-      <div className="h-[55vh] w-full m-4 overflow-y-scroll">
+      <div className="h-[54vh] rounded-md border shadow-inner-lg  w-full m-4 overflow-y-scroll">
         {isLoading
           ? [1, 2, 3, 4, 5].map((item, index) => (
               <SkeletonOrderSummaryCard key={index} />

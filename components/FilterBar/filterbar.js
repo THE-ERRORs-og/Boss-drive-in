@@ -106,12 +106,7 @@ export default function FilterComponent({
               />
             </div>
           </div>
-          <Button
-            className="mt-4 w-auto bg-blue-600 text-white hover:bg-blue-500"
-            onClick={() => setIsFilterOpen(false)}
-          >
-            Close
-          </Button>
+         
         </DialogContent>
       </Dialog>
     </div>

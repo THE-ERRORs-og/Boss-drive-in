@@ -24,8 +24,8 @@ export default function UserList() {
   };
 
   return (
-    <div className="m-5">
-      <h1 className="font-semibold mb-4">
+    <div className="m-5 pl-8 pr-8 flex flex-col  ">
+      <h1 className="font-semibold text-3xl p-1">
         Remove the member you want to remove:
       </h1>
       {users.map((user,idx) => (
