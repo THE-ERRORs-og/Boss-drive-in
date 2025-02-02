@@ -4,6 +4,7 @@ import { signInSchema } from "./lib/validation";
 import { client } from "./sanity/lib/client";
 import { USER_SIGNIN_QUERY } from "./sanity/lib/queries";
 import { z } from "zod";
+import { updateUserLogin } from "./lib/actions/registerUser";
 
 export const { handlers, signIn, signOut, auth, } = NextAuth({
   session: {
