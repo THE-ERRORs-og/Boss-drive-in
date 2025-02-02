@@ -39,13 +39,13 @@ export default function UserItem({ user,idx,  onRemove }) {
         onClick={() =>
           router.push(`/admin/staff-management/employee/${user.userid}`)
         }
-        className="m-2 px-6 py-2 bg-[#ED1C24] text-sm md:text-lg text-white rounded-lg font-medium hover:bg-red-600 transition duration-300"
+        className="m-1 px-6 py-2 bg-[#ED1C24] text-sm md:text-md text-white rounded-lg font-medium hover:bg-red-600 transition duration-300"
       >
         View Profile
       </button>
       <button
         onClick={handleFormSubmit}
-        className="m-2 px-6 py-2 bg-[#ED1C24]  text-sm md:text-lg text-white rounded-lg font-medium hover:bg-red-600 transition duration-300"
+        className="m-1 px-6 py-2 bg-[#ED1C24]  text-sm md:text-md text-white rounded-lg font-medium hover:bg-red-600 transition duration-300"
       >
         Remove
       </button>
