@@ -4,28 +4,61 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import arrow_back from "@/public/arrow_back.svg";
 import MainButton from "../Button/MainButton";
+import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
+import { z } from "zod";
 
 export default function EmployeeLoginForm() {
-    const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
+
+  const router = useRouter();
   const handleFormSubmit = async (event) => {
     event.preventDefault(); // Prevent the default form submission behavior
+    setIsLoading(true); // Set the loading state to true
     const formData = new FormData(event.target); // Create a new FormData object
     try {
       const formValues = {
         userid: formData.get("userid"),
         password: formData.get("password"),
-      }
+      };
       const response = await doCredentialLogin(formValues);
 
-      if (response.success) {
+      if (response.status === "SUCCESS") {
         console.log("User logged in successfully");
+        toast({
+          variant: "success",
+          title: "Login Successful",
+        });
         router.push("/employee");
-      }
-      else {
-        console.error("Error:", response.error);
+      } else {
+        console.log(response.error);
+          toast({
+            variant: "error",
+            title: "Login Failed",
+            description: response.error[0].message,
+          });
       }
     } catch (error) {
       console.error("Error:", error);
+      console.log("hello");
+      if (error instanceof z.ZodError) {
+        console.log("z error");
+        // console.log(fieldErrors);
+        toast({
+          variant: "destructive",
+          title: `Error in ${error.errors[0].path[0]}`,
+          description: `${error.errors[0].message}`,
+        });
+      } else {
+        toast({
+          variant: "error",
+          title: "Login Failed",
+          description: error.message,
+        });
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -76,7 +109,12 @@ export default function EmployeeLoginForm() {
         <MainButton
           type="submit"
           text="Login"
-          className="w-full bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition duration-300"
+          className={`w-full bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition duration-300
+          ${
+            isLoading
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-red-500 hover:bg-red-600"
+          }`}
         />
       </form>
     </div>
