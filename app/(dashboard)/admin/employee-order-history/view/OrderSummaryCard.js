@@ -24,7 +24,7 @@ const OrderSummaryCard = ({ item }) => {
     .replace(/^0/, "");
 
   return (
-    <div className=" w-full space-y-4  border-2 border-black rounded-xl m-1 p-4 mb-4 flex flex-col md:flex-col items-center justify-between">
+    <div className="  space-y-4  border-2 border-black rounded-xl m-1 p-4 mb-4 flex flex-col md:flex-col items-center justify-between">
       <div className=" flex items-center justify-between w-full">
         <p className="font-md text-xl">
           <span className="font-semibold text-xl">Date :</span> {dateStr}

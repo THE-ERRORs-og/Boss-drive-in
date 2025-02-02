@@ -9,7 +9,7 @@ const ScrollViewer = ({groupedData}) => {
   // }));
 
   return (
-    <div className="h-2/3 w-full rounded-md border shadow-lg overflow-y-auto">
+    <div className="h-[50vh] mb-4 w-full rounded-md border shadow-inner-lg overflow-y-auto">
       {/* Table Header */}
       <div className="grid grid-cols-5 bg-white text-center sticky top-0 z-10 text-xl font-semibold border-b">
         <div className="p-2">Date</div>
