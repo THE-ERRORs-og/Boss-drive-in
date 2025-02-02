@@ -7,7 +7,7 @@ import UserItem from "./UserItem";
 
 export default function UserList() {
   const [users, setUsers] = useState([]);
-
+ 
   // Fetch users when the component mounts
   useState(() => {
     const fetchUsers = async () => {
@@ -24,10 +24,14 @@ export default function UserList() {
   };
 
   return (
-    <div className="m-5 pl-8 pr-8 flex flex-col  ">
+    <div className="h-[95vh] m-5 pl-8 pr-8 flex flex-col  ">
       <h1 className="font-semibold text-3xl p-1">
         Remove the member you want to remove:
       </h1>
+      <div className="h-[80vh] mb-4 w-full rounded-md border shadow-inner-lg overflow-y-auto">
+
+      {/* Table Body */}
+      <div>
       {users.map((user,idx) => (
         <UserItem
           key={user._id}
@@ -36,6 +40,10 @@ export default function UserList() {
           onRemove={handleRemoveUserFromList}
         />
       ))}
+      </div>
+    </div>
+
+      
     </div>
   );
 }
