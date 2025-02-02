@@ -5,7 +5,7 @@ import { client } from "./sanity/lib/client";
 import { USER_SIGNIN_QUERY } from "./sanity/lib/queries";
 import { z } from "zod";
 
-export const { signIn, signOut, auth } = NextAuth({
+export const { handlers, signIn, signOut, auth, } = NextAuth({
   session: {
     strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60,
@@ -35,6 +35,13 @@ export const { signIn, signOut, auth } = NextAuth({
           const isPasswordValid = user.password === password;
           if (!isPasswordValid) {
             throw new Error("Invalid password.");
+          }
+
+          // Update the lastLogin field with the current datetime
+          const result = await updateUserLogin(user);
+
+          if(result.error) {
+            throw new Error(result.error);
           }
 
           return {
@@ -67,6 +74,7 @@ export const { signIn, signOut, auth } = NextAuth({
         name: token.name,
         role: token.role,
       };
+      session.id = token.id;
       return session;
     },
   },

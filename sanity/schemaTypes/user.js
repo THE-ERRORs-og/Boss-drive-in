@@ -57,6 +57,11 @@ export const user = defineType({
       type: "reference",
       to: [{ type: "user" }],
     }),
+    defineField({
+      name: "lastLogin",
+      title: "Last Login",
+      type: "datetime",
+    }),
   ],
   preview: {
     select: {
