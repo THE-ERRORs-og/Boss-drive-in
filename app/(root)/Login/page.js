@@ -1,16 +1,20 @@
 "use client";
 import { auth, signIn, signOut } from "@/auth";
 import { doCredentialLogin } from "@/lib/actions/authentication";
-import { useRouter } from "next/navigation";
+import { useRoute } from "next/navigation";
 import Image from "next/image";
 import arrow_back from "../../../public/arrow_back.svg";
 import staff_illu from "../../../public/staff_illu.svg";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Page() {
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
   const handleFormSubmit = async (event) => {
     event.preventDefault(); // Prevent the default form submission behavior
+    setIsLoading(true); // Set the loading state to true
     const formData = new FormData(event.target); // Create a new FormData object
     try {
       const formValues = {
@@ -21,12 +25,28 @@ export default function Page() {
 
       if (response.success) {
         console.log("User logged in successfully");
+        toast({
+          variant: "success",
+          title: "Login Successful",
+        })
         router.push("/admin");
       } else {
         console.error("Error:", response.error);
+        toast({
+          variant: "error",
+          title: "Login Failed",
+          description: response.error,
+        })
       }
     } catch (error) {
       console.error("Error:", error);
+      toast({
+        variant: "error",
+        title: "Login Failed",
+        description: error.message,
+      })
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -81,7 +101,12 @@ export default function Page() {
             {/* Login Button */}
             <button
               type="submit"
-              className="w-full bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition duration-300"
+              className={`w-full text-white py-2 rounded-lg  transition duration-300"
+              ${
+                  isLoading
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-red-500 hover:bg-red-600"
+                }`}
             >
               Login
             </button>
