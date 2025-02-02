@@ -1,5 +1,6 @@
 import { client } from "@/sanity/lib/client";
 import { ORDER_SUMMARY_BY_ID_QUERY } from "@/sanity/lib/queries";
+import DownloadButton from "./DownloadButton";
 
 export default async function Page({ params }) {
   const { id } = await params;
@@ -14,6 +15,7 @@ export default async function Page({ params }) {
     "/" +
     date.getFullYear();
 
+    console.log(orderDetails);
   // // Format Time: "12:00 PM"
   // const time = date
   //   .toLocaleString("en-US", {
@@ -71,9 +73,7 @@ export default async function Page({ params }) {
         ))}
       </div>
 
-      <button className="bg-red-500 text-white px-8 py-3 mt-6 rounded-lg font-medium text-lg hover:bg-red-600 transition">
-        Download as PDF
-      </button>
+      <DownloadButton orderDetails={orderDetails} />
     </div>
   );
 }
