@@ -128,3 +128,14 @@ export const GET_ORDER_SUMMARY_BY_PAGINATION_QUERY = defineQuery(
 
 export const TOTAL_NUMBER_OF_ORDER_SUMMARY_QUERY = defineQuery(`
   count(*[_type == "order_summary"])`);
+
+export const ORDER_SUMMARY_BY_ID_QUERY = defineQuery(`
+  *[_type == "order_summary" && _id == $id][0]
+{
+    _id,
+    date,
+    shiftNumber,
+    items,
+    submissionDate,
+    createdBy->{name,userid}
+  }`);

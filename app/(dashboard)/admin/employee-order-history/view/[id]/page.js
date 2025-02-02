@@ -1,98 +1,79 @@
-// import jsPDF from "jspdf";
+import { client } from "@/sanity/lib/client";
+import { ORDER_SUMMARY_BY_ID_QUERY } from "@/sanity/lib/queries";
 
-export default function Page() {
-  const orderDetails = {
-    date: "11/Feb/2025",
-    time: "12:00 PM",
-    orderedBy: "Pratham Verma",
-    shiftNumber: 3,
-    items: [
-      { name: "Napkin", boh: "$XX", cashOrder: "$XX", inventory: "$XX" },
-      { name: "Cup", boh: "$XX", cashOrder: "$XX", inventory: "$XX" },
-      { name: "Candy", boh: "$XX", cashOrder: "$XX", inventory: "$XX" },
-      { name: "Water", boh: "$XX", cashOrder: "$XX", inventory: "$XX" },
-    ],
-  };
+export default async function Page({ params }) {
+  const { id } = await params;
+  const orderDetails = await client.fetch(ORDER_SUMMARY_BY_ID_QUERY, { id });
+  const date = new Date(orderDetails.date);
 
-  // const handleDownloadPDF = () => {
-    // const doc = new jsPDF();
-    // doc.text("Order Details", 10, 10);
-    // doc.text(`Date: ${orderDetails.date}`, 10, 20);
-    // doc.text(`Time: ${orderDetails.time}`, 10, 30);
-    // doc.text(`Ordered by: ${orderDetails.orderedBy}`, 10, 40);
-    // doc.text(`Shift Number: ${orderDetails.shiftNumber}`, 10, 50);
+  // Format Date: "11/Feb/2025"
+  const dateStr =
+    date.getDate().toString().padStart(2, "0") +
+    "/" +
+    date.toLocaleString("en-US", { month: "short" }) +
+    "/" +
+    date.getFullYear();
 
-    // let startY = 60;
-    // orderDetails.items.forEach((item, index) => {
-    //   doc.text(
-    //     `${index + 1}. ${item.name} - BOH: ${item.boh}, Cash Order: ${item.cashOrder}, Inventory: ${item.inventory}`,
-    //     10,
-    //     startY
-    //   );
-    //   startY += 10;
-    // });
-
-    // doc.save("order-details.pdf");
-  // };
+  // // Format Time: "12:00 PM"
+  // const time = date
+  //   .toLocaleString("en-US", {
+  //     hour: "2-digit",
+  //     minute: "2-digit",
+  //     hour12: true,
+  //   })
+  //   .replace(/^0/, "");
 
   return (
     <div className="flex flex-col items-center w-screen p-6">
-      <div className="text-center mb-6">
-        <p>
-          <span className="font-semibold">Date :</span> {orderDetails.date}{" "}
-          <span className="font-semibold">Time :</span> {orderDetails.time}
-        </p>
-        <p>
-          <span className="font-semibold">Ordered by :</span>{" "}
-          {orderDetails.orderedBy}{" "}
-          <span className="font-semibold">Shift Number :</span>{" "}
-          {orderDetails.shiftNumber}
-        </p>
+      <div className="text-center mb-6 flex flex-col items-center w-full">
+        <div className="flex justify-between w-full text-xl font-semibold border-b pb-2">
+          <p>
+            <span className="font-bold">Date :</span> {dateStr}
+          </p>
+          {/* <p>
+            <span className="font-bold">Time :</span> {time}
+          </p> */}
+          <p>
+            <span className="font-bold">Ordered by :</span>{" "}
+            {orderDetails.createdBy.name}
+          </p>
+          <p>
+            <span className="font-bold">Shift Number :</span>{" "}
+            {orderDetails.shiftNumber}
+          </p>
+        </div>
       </div>
 
-      <div className="w-full  border rounded-lg shadow-md p-4">
-        <h2 className="text-xl font-bold text-center mb-4">Order List</h2>
-        <div className="grid grid-cols-3 gap-4 text-center font-semibold mb-2">
-          <p>BOH</p>
-          <p>Cash Order</p>
-          <p>Inventory</p>
+      <div className="w-full border rounded-lg shadow-md p-6">
+        <h2 className="text-2xl font-bold text-center mb-4">Order List</h2>
+        <div className="grid grid-cols-4 gap-4 text-center font-semibold mb-4">
+          <p className="font-bold"></p>
+          <p className="font-bold">BOH</p>
+          <p className="font-bold">Cash Order</p>
+          <p className="font-bold">Inventory</p>
         </div>
         {orderDetails.items.map((item, index) => (
           <div
             key={index}
-            className="grid grid-cols-3 gap-4 text-center items-center mb-2"
+            className="grid grid-cols-4 gap-4 text-center items-center py-2 border-b"
           >
-            <p>{item.name}</p>
-            <input
-              type="text"
-              value={item.boh}
-              readOnly
-              className="border rounded-lg px-2 py-1"
-            />
-            <input
-              type="text"
-              value={item.cashOrder}
-              readOnly
-              className="border rounded-lg px-2 py-1"
-            />
-            <input
-              type="text"
-              value={item.inventory}
-              readOnly
-              className="border rounded-lg px-2 py-1"
-            />
+            <p className="font-semibold">{item.itemName}</p>
+            <div className="border rounded-lg px-4 py-2 bg-gray-100">
+              {item.boh}
+            </div>
+            <div className="border rounded-lg px-4 py-2 bg-gray-100">
+              {item.cashOrder}
+            </div>
+            <div className="border rounded-lg px-4 py-2 bg-gray-100">
+              {item.inventory}
+            </div>
           </div>
         ))}
       </div>
 
-      <button
-        // onClick={handleDownloadPDF}
-        className="bg-red-500 text-white px-6 py-3 mt-6 rounded-lg font-medium hover:bg-red-600 transition"
-      >
+      <button className="bg-red-500 text-white px-8 py-3 mt-6 rounded-lg font-medium text-lg hover:bg-red-600 transition">
         Download as PDF
       </button>
     </div>
   );
-};
-
-
+}
