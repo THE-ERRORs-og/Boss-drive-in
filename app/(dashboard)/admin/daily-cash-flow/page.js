@@ -106,7 +106,7 @@ export default function EmployeeOrderHistory() {
         </div>
       </div>
 
-      <div className="flex-col w-full h-[50vh] overflow-y-scroll items-center">
+      <div className="flex-col w-full h-[54vh] rounded-md border shadow-inner-lg overflow-y-scroll items-center">
         {isLoading
           ? [1, 2, 3, 4, 5].map((_, index) => (
               <SkeletonSafeBalanceCard key={index} />
