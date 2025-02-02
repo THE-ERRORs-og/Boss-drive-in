@@ -7,7 +7,7 @@ export default async function NavbarWithBackButton() {
   const session = await auth();
 
   return (
-    <nav className="h-20 w-full bg-white flex justify-between items-center px-8 py-8 ">
+    <nav className="h-[5vh] w-full bg-white flex justify-between items-center px-8 py-8 ">
       <BackButton  />
       <Link href="/">
         <img

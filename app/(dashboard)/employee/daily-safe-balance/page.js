@@ -88,7 +88,7 @@ export default function DailySafeBalance() {
   
 
   return (
-    <div className="p-8 h-screen w-full flex flex-col items-center">
+    <div className="p-8 h-[95vh] w-full flex flex-col items-center">
       <h1 className="text-3xl font-semibold mb-4">Daily Safe Balance</h1>
       <FilterPage onFilterChange={handleFilterChange} />
 
