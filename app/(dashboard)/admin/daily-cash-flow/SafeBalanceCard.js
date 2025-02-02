@@ -37,10 +37,6 @@ const SafeBalanceCard = ({item}) => {
           <span className="font-semibold text-xl">Ordered By :</span>{" "}
           {item.submittedBy.name}
         </p>
-        {/* <p className="font-md text-xl">
-                <span className="font-semibold text-xl">Shift Number :</span>{" "}
-                {item.shiftNumber}
-              </p> */}
       </div>
 
       <p className="font-md text-xl">

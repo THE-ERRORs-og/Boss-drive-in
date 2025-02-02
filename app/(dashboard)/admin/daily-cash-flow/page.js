@@ -13,6 +13,7 @@ import SafeBalanceCard from "./SafeBalanceCard";
 // import FilterComponent from "@/components/FilterBar/FilterComponent";
 import { useSearchParams, useRouter } from "next/navigation";
 import FilterComponent from "@/components/FilterBar/filterbar";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function EmployeeOrderHistory() {
   const searchParams = useSearchParams();
@@ -106,9 +107,13 @@ export default function EmployeeOrderHistory() {
       </div>
 
       <div className="flex-col w-full h-[50vh] overflow-y-scroll items-center">
-        {rawData.map((item, index) => (
-          <SafeBalanceCard key={index} item={item} />
-        ))}
+        {isLoading
+          ? [1, 2, 3, 4, 5].map((_, index) => (
+              <SkeletonSafeBalanceCard key={index} />
+            ))
+          : rawData.map((item, index) => (
+              <SafeBalanceCard key={index} item={item} />
+            ))}
       </div>
 
       <div className="flex w-full justify-center">
@@ -121,3 +126,17 @@ export default function EmployeeOrderHistory() {
     </div>
   );
 }
+
+const SkeletonSafeBalanceCard = () => {
+  return (
+    <div className="w-full space-y-4 border-2 border-black rounded-xl m-1 p-4 mb-4 flex flex-col md:flex-col items-center justify-between">
+      <div className="flex items-center justify-between w-full">
+        <Skeleton className="h-6 w-24" />
+        <Skeleton className="h-6 w-24" />
+        <Skeleton className="h-6 w-40" />
+      </div>
+      <Skeleton className="h-6 w-32" />
+      <Skeleton className="h-10 w-32 rounded-lg" />
+    </div>
+  );
+};
