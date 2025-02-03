@@ -2,7 +2,11 @@
 import { useEffect, useState } from "react";
 import { client } from "@/sanity/lib/client";
 import { ALL_ORDER_ITEMS_QUERY } from "@/sanity/lib/queries";
-import { createOrderItem, deleteItem,  toggleItemStatus } from "@/lib/actions/orderItems";
+import {
+  createOrderItem,
+  deleteItem,
+  toggleItemStatus,
+} from "@/lib/actions/orderItems";
 import { useToast } from "@/hooks/use-toast";
 
 export default function Page() {
@@ -66,12 +70,12 @@ export default function Page() {
       try {
         // Create new item
         const result = await createOrderItem(newItem);
-        if(result.status === "SUCCESS") {
+        if (result.status === "SUCCESS") {
           toast({
             variant: "success",
             title: "Success",
             description: result.message,
-          })
+          });
         }
         setOrderItems((prev) => [...prev, newItem.trim()]);
         setNewItem("");
@@ -83,8 +87,7 @@ export default function Page() {
           title: "Error",
           description: error.message,
         });
-      }
-      finally {
+      } finally {
         return true;
       }
     }
@@ -94,12 +97,12 @@ export default function Page() {
     try {
       // Disable item
       const result = await toggleItemStatus(id);
-      if(result.status === "SUCCESS") {
+      if (result.status === "SUCCESS") {
         toast({
           variant: "success",
           title: "Success",
           description: result.message,
-        })
+        });
       }
     } catch (error) {
       console.error("Error disabling item:", error);
@@ -117,12 +120,12 @@ export default function Page() {
     try {
       // Delete item
       const result = await deleteItem(id);
-      if(result.status === "SUCCESS") {
+      if (result.status === "SUCCESS") {
         toast({
           variant: "success",
           title: "Success",
           description: result.message,
-        })
+        });
       }
     } catch (error) {
       console.error("Error deleting item:", error);
@@ -138,7 +141,7 @@ export default function Page() {
 
   return (
     <div className="flex flex-col justify-start items-center h-screen gap-4 m-4">
-      <h1 className="text-lg font-bold text-start self-start ml-4">
+      <h1 className="text-2xl font-bold text-start self-start ml-4">
         Remove the Item you want to remove:
       </h1>
       <div className="flex flex-col gap-4">
@@ -163,7 +166,9 @@ export default function Page() {
                   setSelectedItemId(item._id);
                   handlePopUp();
                 }}
-                className="w-[10vw] px-6 py-2 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 transition duration-300"
+                className="px-4 py-3 sm:px-6 sm:py-3 md:px-8 md:py-3 lg:px-10 lg:py-3 
+      bg-[#ED1C24] text-white text-sm sm:text-base md:text-md lg:text-lg 
+      font-semibold border rounded-lg hover:bg-red-600 transition duration-300"
               >
                 Remove
               </button>
@@ -173,7 +178,9 @@ export default function Page() {
                   setSelectedItemId(item._id);
                   handlePopUp();
                 }}
-                className="w-[10vw] px-6 py-2 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 transition duration-300"
+                className="px-4 py-3 sm:px-6 sm:py-3 md:px-8 md:py-3 lg:px-10 lg:py-3 
+      bg-[#ED1C24] text-white text-sm sm:text-base md:text-md lg:text-lg 
+      font-semibold border rounded-lg hover:bg-red-600 transition duration-300"
               >
                 {!item.isEnabled ? "Enable" : "Disable"}
               </button>
@@ -203,7 +210,9 @@ export default function Page() {
       <div className="gap-20 flex">
         <button
           onClick={handleAddItemClick}
-          className="mt-4 w-[20vw] px-6 py-2 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 transition duration-300"
+          className="px-4 py-3 sm:px-6 sm:py-3 md:px-8 md:py-3 lg:px-10 lg:py-3 
+      bg-[#ED1C24] text-white text-sm sm:text-base md:text-md lg:text-lg 
+      font-semibold border rounded-lg hover:bg-red-600 transition duration-300"
         >
           {showAddItemBar ? "Cancel" : "Add Item"}
         </button>

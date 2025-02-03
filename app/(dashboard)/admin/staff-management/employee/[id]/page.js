@@ -51,7 +51,7 @@ export default async function Page({ params }) {
       <div className="flex gap-4">
         <div
           // onClick={closePopup}
-          className="text-center mt-4 w-[20vw] px-6 py-2 bg-brown-boss text-white rounded-lg font-medium hover:bg-red-600 transition duration-300"
+          className="text-center mt-4 w-[20vw] px-6 py-2 text-white rounded-lg font-medium bg-red-600 transition duration-300"
         >
           {employee?.lastLogin && new Date(employee?.lastLogin).toLocaleString()}
         </div>

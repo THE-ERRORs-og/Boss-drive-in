@@ -6,7 +6,7 @@ import employee_order_history from "@/public/employee_order_history.svg";
 export default function Page() {
   return (
     <div className="flex h-screen justify-center items-center">
-      <div className="flex justify-center items-center gap-12">
+      <div className="flex flex-wrap justify-center items-center gap-6 sm:gap-8 md:gap-12 max-w-4xl">
         <SquareButton
           text="Staff Management"
           imageUrl={staff_management}

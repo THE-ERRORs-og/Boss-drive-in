@@ -54,10 +54,10 @@ const BottomContainer = ({ currentSafeBalance }) => {
   return (
     <form
       onSubmit={showPopup}
-      className="flex w-full justify-between pl-8 pr-8 space-x-3 items-center"
+      className="flex w-full mt-1 justify-between pl-8 pr-8 space-x-3 items-center"
     >
       <MainButton
-        className="md:text-xl md:w-1/3"
+        className=""
         text="Deposit to bank & Download PDF"
       />
       <div className="flex w-2/3 justify-end space-x-6 items-center">
@@ -66,7 +66,7 @@ const BottomContainer = ({ currentSafeBalance }) => {
         </p>
         <StaticDataBox
           text={`$ ${currentSafeBalance}`}
-          className="text-md pr-8 md:w-1/6"
+          className="text-xs pr-8 md:w-1/6"
         />
       </div>
 
