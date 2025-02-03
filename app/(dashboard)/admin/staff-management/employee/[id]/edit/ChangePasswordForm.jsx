@@ -4,11 +4,12 @@ import { useToast } from "@/hooks/use-toast";
 import { changePassword } from "@/lib/actions/registerUser";
 import { useState } from "react";
 
-export default function ChangePasswordForm({userid}) {
+export default function ChangePasswordForm({ userid }) {
   const { toast } = useToast();
   const [isPopupVisible, setIsPopupVisible] = useState(false);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const closePopup = () => {
     setIsPopupVisible(false);
@@ -21,6 +22,16 @@ export default function ChangePasswordForm({userid}) {
         variant: "destructive",
         title: "Error",
         description: "Password cannot be empty",
+      });
+      setConfirmPassword("");
+      setPassword("");
+      return;
+    }
+    if (password.trim().length < 5) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Password must be at least 5 characters long",
       });
       setConfirmPassword("");
       setPassword("");
@@ -39,9 +50,10 @@ export default function ChangePasswordForm({userid}) {
 
   const resetPassword = async () => {
     try {
-        // console.log('userid', userid);
+      // console.log('userid', userid);
+      setIsLoading(true);
       const result = await changePassword(userid, password);
-      if(result.status == "SUCCESS") {
+      if (result.status == "SUCCESS") {
         toast({
           variant: "success",
           title: "Success",
@@ -49,12 +61,12 @@ export default function ChangePasswordForm({userid}) {
         });
       } else {
         toast({
-            variant: "destructive",
-            title: "Error",
-            description: "Failed to change password",
-            });
-        }
-        console.log(result);
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to change password",
+        });
+      }
+      console.log(result);
     } catch (error) {
       toast({
         variant: "destructive",
@@ -62,6 +74,7 @@ export default function ChangePasswordForm({userid}) {
         description: "Failed to change password",
       });
     } finally {
+      setIsLoading(false);
       setConfirmPassword("");
       setPassword("");
       setIsPopupVisible(false);
@@ -105,9 +118,15 @@ export default function ChangePasswordForm({userid}) {
             <div className="flex justify-center mt-6 gap-2">
               <button
                 onClick={resetPassword}
-                className="mt-4 px-6 py-2 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 transition duration-300 w-auto"
+                disabled={isLoading}
+                className={`mt-4 px-6 py-2 text-white rounded-lg font-medium transition duration-300 w-auto
+                ${
+                  isLoading
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-red-500 hover:bg-red-600"
+                }`}
               >
-                Change Password
+                {isLoading ? "Changing Password..." : "Change Password"}
               </button>
               <button
                 onClick={closePopup}

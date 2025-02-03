@@ -8,7 +8,7 @@ export default async function Page({ params }) {
     const employee = await client
       .withConfig({ useCdn: false })
       .fetch(USER_DATA_QUERY, { userid });
-    console.log(employee);
+    // console.log(employee);
   return (
     <div className="flex flex-col items-center justify-center h-screen w-screen text-xl  gap-2">
       {/* <h1>Route: /admin/staff-management/employee</h1> */}

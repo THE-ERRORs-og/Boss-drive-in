@@ -3,11 +3,11 @@ const { defineQuery } = require("next-sanity");
 export const USER_SIGNIN_QUERY = defineQuery(
   `*[_type == "user" && userid == $userid][0]
     {
-    _id,userid,password,name,role
+    _id,userid,password,name,role,isActive
     }`
 );
 export const USER_DATA_QUERY = defineQuery(
-  `*[_type == "user" && userid == $userid][0]
+  `*[_type == "user" && isActive == true && userid == $userid][0]
     {
     _id,userid,password,name,lastLogin
     }`
@@ -20,7 +20,7 @@ export const USER_BY_USERID_QUERY = defineQuery(`
   `);
 
 export const ALL_USERS_QUERY = defineQuery(`
-  *[_type == "user"]{
+  *[_type == "user" && isActive == true]{
     _id,userid,name,role
   }`);
 

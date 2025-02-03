@@ -58,7 +58,7 @@ export const user = defineType({
       to: [{ type: "user" }],
     }),
     defineField({
-      name:"isactive",
+      name:"isActive",
       title:"Active",
       type:"boolean",
     }),

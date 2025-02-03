@@ -3,19 +3,41 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { deleteUser } from "@/lib/actions/registerUser";
+import { useToast } from "@/hooks/use-toast";
 
 export default function UserItem({ user,idx,  onRemove }) {
   const router = useRouter();
+  const {toast} = useToast();
   const [isPopupVisible, setIsPopupVisible] = useState(false);
 
   const handleRemoveUser = async () => {
     try {
-      await deleteUser(user._id);
-      console.log(`User ${user.name} removed successfully`);
-      setIsPopupVisible(false);
-      onRemove(user._id); // Call the parent's remove function to update the list
+      const result = await deleteUser(user._id);
+      if (result.status === "SUCCESS"){
+        console.log(`User ${user.name} removed successfully`);
+        setIsPopupVisible(false);
+        toast({
+          variant: "success",
+          title: "Success",
+          description: `User ${user.name} removed successfully`,
+        });
+        onRemove(user._id); // Call the parent's remove function to update the list
+      }
+      else {
+        console.error("Error removing user:", result.error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: result.error,
+        })
+      }
     } catch (error) {
       console.error("Error removing user:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message,
+      });
     }
   };
 
