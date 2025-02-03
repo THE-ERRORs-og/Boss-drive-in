@@ -14,14 +14,32 @@ export default function EmployeeLoginForm() {
 
   const router = useRouter();
   const handleFormSubmit = async (event) => {
-    event.preventDefault(); // Prevent the default form submission behavior
-    setIsLoading(true); // Set the loading state to true
-    const formData = new FormData(event.target); // Create a new FormData object
+    event.preventDefault(); 
+    setIsLoading(true);
+    const formData = new FormData(event.target);
     try {
       const formValues = {
         userid: formData.get("userid"),
         password: formData.get("password"),
       };
+        if (formValues.userid.trim() === "") {
+          toast({
+            variant: "destructive",
+            title: "Employee ID is required",
+            description: "Login Failed",
+          });
+          setIsLoading(false);
+          return;
+        }
+        if (formValues.password.trim().length < 5) {
+          toast({
+            variant: "destructive",
+            title: "Password must be at least 5 characters long",
+            description: "Login Failed",
+          });
+          setIsLoading(false);
+          return;
+        }
       const response = await doCredentialLogin(formValues);
 
       if (response.status === "SUCCESS") {
@@ -33,30 +51,28 @@ export default function EmployeeLoginForm() {
         router.push("/employee");
       } else {
         console.log(response.error);
+        if (response.error.toString().includes("Invalid password")) {
           toast({
-            variant: "error",
-            title: "Login Failed",
-            description: response.error[0].message,
+            variant: "destructive",
+            title: "Wrong Password",
+            description: "Login Failed",
           });
+        }
+        else if (response.error.toString().includes("No user found")) {
+          toast({
+            variant: "destructive",
+            title: "No user found",
+            description: "Login Failed",
+          });
+        }
       }
     } catch (error) {
       console.error("Error:", error);
-      console.log("hello");
-      if (error instanceof z.ZodError) {
-        console.log("z error");
-        // console.log(fieldErrors);
-        toast({
-          variant: "destructive",
-          title: `Error in ${error.errors[0].path[0]}`,
-          description: `${error.errors[0].message}`,
-        });
-      } else {
-        toast({
-          variant: "error",
-          title: "Login Failed",
-          description: error.message,
-        });
-      }
+      toast({
+        variant: "error",
+        title: "Login Failed",
+        description: error.message,
+      });
     } finally {
       setIsLoading(false);
     }
@@ -109,12 +125,8 @@ export default function EmployeeLoginForm() {
         <MainButton
           type="submit"
           text="Login"
-          className={`w-full bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition duration-300
-          ${
-            isLoading
-              ? "bg-gray-400 cursor-not-allowed"
-              : "bg-red-500 hover:bg-red-600"
-          }`}
+          isLoading={isLoading}
+          className={`w-full text-white py-2 rounded-lg transition duration-30`}
         />
       </form>
     </div>

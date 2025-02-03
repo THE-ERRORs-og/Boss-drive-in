@@ -58,6 +58,11 @@ export const user = defineType({
       to: [{ type: "user" }],
     }),
     defineField({
+      name:"isactive",
+      title:"Active",
+      type:"boolean",
+    }),
+    defineField({
       name: "lastLogin",
       title: "Last Login",
       type: "datetime",

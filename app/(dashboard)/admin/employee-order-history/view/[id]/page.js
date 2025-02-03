@@ -1,6 +1,7 @@
 import { client } from "@/sanity/lib/client";
 import { ORDER_SUMMARY_BY_ID_QUERY } from "@/sanity/lib/queries";
 import DownloadButton from "./DownloadButton";
+import { timeOptions } from "@/lib/constants";
 
 export default async function Page({ params }) {
   const { id } = await params;
@@ -15,7 +16,7 @@ export default async function Page({ params }) {
     "/" +
     date.getFullYear();
 
-    console.log(orderDetails);
+    // console.log(orderDetails);
   // // Format Time: "12:00 PM"
   // const time = date
   //   .toLocaleString("en-US", {
@@ -40,8 +41,8 @@ export default async function Page({ params }) {
             {orderDetails.createdBy.name}
           </p>
           <p>
-            <span className="font-bold">Shift Number :</span>{" "}
-            {orderDetails.shiftNumber}
+            <span className="font-bold">Shift :</span>{" "}
+            {timeOptions[orderDetails.shiftNumber - 1]}
           </p>
         </div>
       </div>
