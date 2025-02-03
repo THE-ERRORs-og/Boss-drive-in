@@ -15,7 +15,7 @@ export default async function Page({ params }) {
     "/" +
     date.getFullYear();
 
-    console.log(orderDetails);
+    // console.log(orderDetails);
   // // Format Time: "12:00 PM"
   // const time = date
   //   .toLocaleString("en-US", {
