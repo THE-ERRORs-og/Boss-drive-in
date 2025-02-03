@@ -140,7 +140,7 @@ export default function Page() {
     <div>
       <div className="h-screen bg-gray-50 flex flex-col">
         <div className="flex flex-col px-8 py-2">
-          <div className="w-full flex justify-between items-center m-4 px-6">
+          <div className="w-full flex justify-between items-center m-4">
             <p className="text-base font-semibold text-red-500">
               Staff Name: <span className="text-black">{user?.name}</span>
             </p>
@@ -205,7 +205,7 @@ export default function Page() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4 m-4">
               <div>
                 <p className="text-lg font-bold">Online Tips</p>
               </div>

@@ -41,7 +41,7 @@ export default function UserItem({ user,idx,  onRemove }) {
         }
         className="m-1 px-6 py-2 bg-[#ED1C24] text-sm md:text-md text-white rounded-lg font-medium hover:bg-red-600 transition duration-300"
       >
-        View Profile
+        Profile
       </button>
       <button
         onClick={handleFormSubmit}
