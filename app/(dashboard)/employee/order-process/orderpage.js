@@ -5,6 +5,7 @@ import { useSession } from "@/context/SessionContext";
 import { useToast } from "@/hooks/use-toast";
 import { createOrderSummary } from "@/lib/actions/orderSummary";
 import { orderSummarySchema } from "@/lib/validation";
+import {timeOptions} from '@/lib/constants';
 import { z } from "zod";
 
 export default function OrderForm({ orderData: initialOrderData }) {
@@ -17,7 +18,6 @@ export default function OrderForm({ orderData: initialOrderData }) {
   const [errors, setErrors] = useState({});
   const [isPopupVisible, setIsPopupVisible] = useState(false);
 
-  const timeOptions = ["5am - 11am", "11am - 5pm", "5pm - 11pm", "11pm - 5am"];
 
   const handleInputChange = (e, item, field) => {
     const value = e.target.value;

@@ -2,7 +2,9 @@
 import { useSession } from "@/context/SessionContext";
 import { useToast } from "@/hooks/use-toast";
 import { createCashSummary } from "@/lib/actions/cashSummary";
+import { downloadCashSummary } from "@/lib/utils";
 import { cashSummarySchema } from "@/lib/validation";
+import { startingRegisterCash, timeOptions } from "@/lib/constants";
 import { useState } from "react";
 import { z } from "zod";
 
@@ -15,7 +17,7 @@ export default function Page() {
   const [isLoading, setIsLoading] = useState(false); 
   const [formData, setFormData] = useState({
     expectedCloseoutCash: "",
-    startingRegisterCash: "",
+    startingRegisterCash: startingRegisterCash,
     onlineTipsToast: "",
     onlineTipsKiosk: "",
     onlineTipCash: "",
@@ -23,7 +25,6 @@ export default function Page() {
     ownedToRestaurantSafe: "0",
   });
   const [errors, setErrors] = useState({});
-  const timeOptions = ["Morning", "Afternoon", "Evening", "Night"];
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -99,10 +100,12 @@ export default function Page() {
     try {
       const response = await createCashSummary(data);
       if (response.status === "SUCCESS") {
+
+        await downloadCashSummary({...data,username:user?.name}); // Download the PDF
         //reset the form
         setFormData({
           expectedCloseoutCash: "",
-          startingRegisterCash: "",
+          startingRegisterCash: startingRegisterCash,
           onlineTipsToast: "",
           onlineTipsKiosk: "",
           onlineTipCash: "",
@@ -195,6 +198,7 @@ export default function Page() {
                   name="startingRegisterCash"
                   value={formData.startingRegisterCash}
                   onChange={handleInputChange}
+                  disabled={true}
                   placeholder="$---"
                   className={`mt-1 w-full px-4 py-1 border ${errors.shiftNumber ? "border-red-600" : "border-gray-300"} rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500`}
                 />
