@@ -28,7 +28,9 @@ export const { handlers, signIn, signOut, auth, } = NextAuth({
             .withConfig({ useCdn: false })
             .fetch(USER_SIGNIN_QUERY, { userid });
 
-          if (!user) {
+          console.log(user);
+
+          if (!user || !user.isActive) {
             throw new Error("No user found with this email.");
           }
 
