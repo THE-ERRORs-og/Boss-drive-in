@@ -7,7 +7,7 @@ import Image from "next/image";
 export default async function Page() {
   const session = await auth();
   if (session && session.user) redirect("/employee");
-
+  
   return (
     <div className="h-screen flex flex-col">
       {/* Content */}
