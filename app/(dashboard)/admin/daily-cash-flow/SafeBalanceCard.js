@@ -43,7 +43,7 @@ const SafeBalanceCard = ({item}) => {
         <span className="font-semibold text-xl">Deposited Amount :</span>{" "}
         {item.depositAmount}
       </p>
-      <MainButton text="Downlaod PDF" className="" />
+      <MainButton text="Download PDF" className="" />
     </div>
   );
 }

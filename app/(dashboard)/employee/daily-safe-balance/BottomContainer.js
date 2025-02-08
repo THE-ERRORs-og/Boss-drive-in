@@ -71,7 +71,7 @@ const BottomContainer = ({ currentSafeBalance }) => {
       </div>
 
       {isPopupVisible && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+        <div className="fixed inset-0 z-10 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-lg shadow-lg text-center">
             <p className="text-lg font-medium">
               Are You Sure You Want to Deposit Safe Balance to Bank?
