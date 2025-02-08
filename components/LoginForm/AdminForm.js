@@ -13,10 +13,11 @@ export default function AdminLoginForm() {
     event.preventDefault(); // Prevent the default form submission behavior
     const formData = new FormData(event.target); // Create a new FormData object
     try {
+     
       const formValues = {
-        userid: formData.get("userid"),
-        password: formData.get("password"),
-      }
+        userid: formData.get("userid")?.trim().toLowerCase(),  
+        password: formData.get("password")?.trim().toLowerCase(), 
+      };
       const response = await doCredentialLogin(formValues);
 
       if (response.success) {
