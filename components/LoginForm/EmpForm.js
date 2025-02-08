@@ -17,11 +17,12 @@ export default function EmployeeLoginForm() {
     event.preventDefault(); 
     setIsLoading(true);
     const formData = new FormData(event.target);
+
     try {
-      const formValues = {
-        userid: formData.get("userid"),
-        password: formData.get("password"),
-      };
+     const formValues = {
+      userid: formData.get("userid")?.trim().toLowerCase(),  
+      password: formData.get("password")?.trim().toLowerCase(), 
+    };
         if (formValues.userid.trim() === "") {
           toast({
             variant: "destructive",
