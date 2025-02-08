@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSession } from "@/context/SessionContext";
 import { useToast } from "@/hooks/use-toast";
 import { createOrderSummary } from "@/lib/actions/orderSummary";
 import { orderSummarySchema } from "@/lib/validation";
-import {timeOptions} from '@/lib/constants';
+import { timeOptions } from "@/lib/constants";
 import { z } from "zod";
 
 export default function OrderForm({ orderData: initialOrderData }) {
@@ -17,7 +17,7 @@ export default function OrderForm({ orderData: initialOrderData }) {
   const [orderData, setOrderData] = useState(initialOrderData);
   const [errors, setErrors] = useState({});
   const [isPopupVisible, setIsPopupVisible] = useState(false);
-
+  const [isPopupVisible2, setIsPopupVisible2] = useState(false);
 
   const handleInputChange = (e, item, field) => {
     const value = e.target.value;
@@ -46,6 +46,32 @@ export default function OrderForm({ orderData: initialOrderData }) {
     return Object.keys(newErrors).length === 0;
   };
 
+  const [currentDate, setCurrentDate] = useState("");
+  const [currentTime, setCurrentTime] = useState("");
+
+  useEffect(() => {
+    // Function to update date and time
+    const updateDateTime = () => {
+      const now = new Date();
+      const formattedDate = now.toISOString().split("T")[0]; // YYYY-MM-DD
+      const formattedTime = now.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: true,
+      });
+
+      setCurrentDate(formattedDate);
+      setCurrentTime(formattedTime);
+    };
+
+    // Update time every second
+    updateDateTime();
+    const interval = setInterval(updateDateTime, 1000);
+
+    return () => clearInterval(interval); // Cleanup on unmount
+  }, []);
+
   const validateForm = (data) => {
     try {
       orderSummarySchema.parse(data);
@@ -69,6 +95,8 @@ export default function OrderForm({ orderData: initialOrderData }) {
   };
 
   const handleFormSubmit = async (e) => {
+    setIsLoading(true);
+    setIsPopupVisible(true);
     e.preventDefault();
 
     const data = {
@@ -116,10 +144,47 @@ export default function OrderForm({ orderData: initialOrderData }) {
         title: "Submission Error",
         description: "An error occurred while submitting the form.",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const closePopup = () => setIsPopupVisible(false);
+  const closePopup = () => {
+    setIsPopupVisible(false);
+    setIsPopupVisible2(false);
+  };
+
+  const handleInventoryChange = (e, item, field) => {
+    const { value } = e.target;
+
+    if (!/^\d*\.?\d*$/.test(value)) return;
+
+    // Update the order data
+    setOrderData((prevData) => {
+      const updatedData = {
+        ...prevData,
+        [item]: {
+          ...prevData[item],
+          [field]: value,
+        },
+      };
+
+      // If "boh" or "cashOrder" is updated, recalculate "inventory"
+      if (field === "boh" || field === "cashOrder") {
+        updatedData[item].inventory =
+          (parseFloat(updatedData[item].boh) || 0) +
+          (parseFloat(updatedData[item].cashOrder) || 0);
+      }
+
+      return updatedData;
+    });
+  };
+
+  const handleFormSubmit2 = async () => {
+    setIsPopupVisible2(true); // Start loader
+    e.preventDefault();
+  };
+  const [isLoading, setIsLoading] = useState(false);
 
   return (
     <div className="h-screen bg-white flex flex-col items-center">
@@ -128,7 +193,7 @@ export default function OrderForm({ orderData: initialOrderData }) {
         <p className="text-base font-semibold text-red-500">
           Staff Name: <span className="text-black">{user?.name}</span>
         </p>
-        <div className="flex space-x-4 items-center">
+        {/* <div className="flex space-x-4 items-center">
           <div className="flex items-center">
             <p className="text-base font-semibold mr-2">Date:</p>
             <input
@@ -159,15 +224,29 @@ export default function OrderForm({ orderData: initialOrderData }) {
               ))}
             </select>
           </div>
+        </div> */}
+        <div className="flex space-x-4 items-center">
+          <div className="flex items-center">
+            <p className="text-base font-semibold mr-2">Date:</p>
+            <p className="text-sm px-2 py-1 border border-gray-300 rounded-lg">
+              {currentDate}
+            </p>
+          </div>
+          <div className="flex items-center">
+            <p className="text-base font-semibold mr-2">Shift Time:</p>
+            <p className="text-sm px-2 py-1 border border-gray-300 rounded-lg">
+              {currentTime}
+            </p>
+          </div>
         </div>
       </div>
 
       {/* Form */}
-      <form className="w-full max-w-3xl px-6 mt-6" onSubmit={handleFormSubmit}>
+      <form className="w-full max-w-3xl px-6 mt-6" onSubmit={handleFormSubmit2}>
         <div className="grid grid-cols-4 gap-4 text-center font-bold text-lg mb-4">
           <p> </p>
           <p>BOH</p>
-          <p>Cash Order</p>
+          <p>Case Order</p>
           <p>Inventory</p>
         </div>
 
@@ -179,8 +258,13 @@ export default function OrderForm({ orderData: initialOrderData }) {
                 <input
                   type="text"
                   value={orderData[item][field]}
-                  onChange={(e) => handleInputChange(e, item, field)}
-                  placeholder="$---"
+                  onChange={
+                    field === "inventory"
+                      ? undefined
+                      : (e) => handleInventoryChange(e, item, field)
+                  }
+                  placeholder=""
+                  readOnly={field === "inventory"} // Make inventory read-only
                   className={`w-full px-4 py-2 border ${
                     errors[`${item}.${field}`]
                       ? "border-red-600"
@@ -206,6 +290,37 @@ export default function OrderForm({ orderData: initialOrderData }) {
           </button>
         </div>
       </form>
+
+      {isPopupVisible2 && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg text-center">
+            <p className="text-lg font-medium">
+              Are You Sure You Want to Deposit Safe Balance to Bank?
+            </p>
+
+            <div className="flex justify-center mt-6 gap-2">
+              <button
+                onClick={handleFormSubmit}
+                disabled={isLoading} // Disable button during loading
+                className={`mt-4 px-6 py-2 rounded-lg font-medium w-auto transition duration-300 ${
+                  isLoading
+                    ? "bg-gray-400 text-white cursor-not-allowed"
+                    : "bg-red-500 text-white hover:bg-red-600"
+                }`}
+              >
+                {isLoading ? "Processing..." : "Submit"}{" "}
+                {/* Show loader text */}
+              </button>
+              <button
+                onClick={closePopup}
+                className="mt-4 px-2 py-2 rounded-lg font-medium border-2 transition duration-300 w-[15vw]"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {isPopupVisible && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">

@@ -9,7 +9,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ListFilter, Search, ArrowDownWideNarrow, ArrowUpWideNarrow } from "lucide-react";
+import {
+  ListFilter,
+  Search,
+  ArrowDownWideNarrow,
+  ArrowUpWideNarrow,
+} from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { useRouter } from "next/navigation";
 
@@ -36,7 +41,7 @@ export default function FilterComponent({
       params.set("endDate", dateRange.end.toISOString());
     }
     router.push(`?${params.toString()}`);
-    onFilterChange?.({ query, sortOrder,startDate , endDate });
+    onFilterChange?.({ query, sortOrder, startDate, endDate });
   }, [query, sortOrder, dateRange]);
 
   return (
@@ -67,11 +72,14 @@ export default function FilterComponent({
         {/* Sort Button */}
         <Button
           className="bg-white text-xl text-black border border-gray-300 hover:bg-gray-300"
-          onClick={() =>
-            setSortOrder(sortOrder === "asc" ? "desc" : "asc")
-          }
+          onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
         >
-          Sort {sortOrder=== "asc" ? <ArrowDownWideNarrow className="!size-6" /> : <ArrowUpWideNarrow className="!size-6" />}
+          Sort{" "}
+          {sortOrder === "asc" ? (
+            <ArrowDownWideNarrow className="!size-6" />
+          ) : (
+            <ArrowUpWideNarrow className="!size-6" />
+          )}
         </Button>
       </div>
 
@@ -106,7 +114,6 @@ export default function FilterComponent({
               />
             </div>
           </div>
-         
         </DialogContent>
       </Dialog>
     </div>
