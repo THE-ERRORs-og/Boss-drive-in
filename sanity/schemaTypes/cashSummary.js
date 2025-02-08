@@ -45,7 +45,7 @@ export const cash_summary = defineType({
       name: "ownedToRestaurantSafe",
       title: "Owned to Restaurant Safe",
       type: "number",
-      validation: (Rule) => Rule.min(0).precision(2),
+      validation: (Rule) => Rule.precision(2),
     }),
     defineField({
       name: "datetime",
