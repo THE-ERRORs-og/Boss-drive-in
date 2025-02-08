@@ -68,7 +68,7 @@ const Pagination = ({ nPages, currentPage, setPage = () => {} }) => {
             ) : (
               <a
                 onClick={(event) => goToPage(pgNumber, event)}
-                className={`page-link flex items-center justify-center px-3 ml-1 h-10 md:px-4 md:ml-2 md:h-11 border border-black rounded-full bg-white text-black hover:bg-gray-300 ${currentPage === pgNumber ? "bg-gray-600 text-white" : ""}`}
+                className={`page-link flex items-center justify-center px-3 ml-1 h-10 md:px-4 md:ml-2 md:h-11 border border-black rounded-full text-black hover:bg-gray-300 ${currentPage === pgNumber ? "bg-gray-600 text-white" : ""}`}
                 href="#"
               >
                 {pgNumber}
