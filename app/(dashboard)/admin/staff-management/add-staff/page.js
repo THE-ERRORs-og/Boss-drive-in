@@ -20,21 +20,27 @@ export default function Page() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setFormData({ ...formData, [name]: name === "userid" ? value.toLowerCase() : value, });
   };
 
   const validateForm = async (data) => {
     try {
-      // console.log('validating form', data);
-      await userSchema.parseAsync(data);
-      if (data.password !== data.confirmPassword) {
-        setErrors({ confirmPassword: "Passwords do not match" });
+      // Normalize userId for validation
+      const normalizedData = {
+        ...data,
+        userid: data.userid.toLowerCase(), // Ensure userId is lowercase
+      };
+  
+      await userSchema.parseAsync(normalizedData);
+  
+      if (data.password.toLowerCase() !== data.confirmPassword.toLowerCase()) {
+        setErrors({ confirmPassword: "Passwords do not match (case-insensitive check)" });
         return false;
       }
+  
       setErrors({});
       return true;
     } catch (error) {
-      // console.log(error);
       if (error instanceof z.ZodError) {
         const fieldErrors = error.errors.reduce((acc, curr) => {
           acc[curr.path[0]] = curr.message;
@@ -60,12 +66,17 @@ export default function Page() {
 
   const submitPopupForm = async () => {
     try {
-      const response =await  createUser(formData);
-      if(response.status === "SUCCESS"){
+      const normalizedData = {
+        ...formData,
+        userid: formData.userid.toLowerCase(), // Ensure userId is lowercase before submission
+      };
+  
+      const response = await createUser(normalizedData);
+      if (response.status === "SUCCESS") {
         toast({
           variant: "success",
           title: "User added successfully",
-          description: "User has been added successfully",  
+          description: "User has been added successfully",
         });
         setFormData({
           role: "employee",
@@ -74,7 +85,7 @@ export default function Page() {
           password: "",
           confirmPassword: "",
         });
-      }else{
+      } else {
         toast({
           variant: "destructive",
           title: "Error",
@@ -88,11 +99,9 @@ export default function Page() {
         title: "Error",
         description: "An error occurred while adding user",
       });
-      
     } finally {
       setIsPopupVisible(false);
     }
-
   };
 
   const closePopup = () => {
