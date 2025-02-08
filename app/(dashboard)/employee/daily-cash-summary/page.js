@@ -22,7 +22,7 @@ export default function Page() {
     onlineTipsKiosk: "",
     onlineTipCash: "",
     totalTipDeduction: "0",
-    ownedToRestaurantSafe: "0",
+    ownedToRestaurantSafe: -1 * startingRegisterCash,
   });
   const [errors, setErrors] = useState({});
 
@@ -31,8 +31,7 @@ export default function Page() {
     const fvlues = { ...formData, [name]: value };
     var totalTipDeduction =
       parseFloat(fvlues.onlineTipsToast || 0) +
-      parseFloat(fvlues.onlineTipsKiosk || 0) +
-      parseFloat(fvlues.onlineTipCash || 0);
+      parseFloat(fvlues.onlineTipsKiosk || 0);
     var ownedToRestaurantSafe =
       parseFloat(fvlues.expectedCloseoutCash || 0) -
       parseFloat(fvlues.startingRegisterCash || 0) -
@@ -99,6 +98,7 @@ export default function Page() {
 
     try {
       const response = await createCashSummary(data);
+      console.log('response', response);
       if (response.status === "SUCCESS") {
 
         await downloadCashSummary({...data,username:user?.name}); // Download the PDF
@@ -110,7 +110,7 @@ export default function Page() {
           onlineTipsKiosk: "",
           onlineTipCash: "",
           totalTipDeduction: "0",
-          ownedToRestaurantSafe: "0",
+          ownedToRestaurantSafe: -1 * startingRegisterCash,
         });
         setIsPopupVisible(true);
       } else {

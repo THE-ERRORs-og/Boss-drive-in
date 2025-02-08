@@ -1,3 +1,4 @@
+import { timeOptions } from "@/lib/constants";
 import { client } from "@/sanity/lib/client";
 import { CASH_SUMMARY_BY_ID_QUERY } from "@/sanity/lib/queries";
 
@@ -23,7 +24,9 @@ export default async function Page({ params }) {
               </div>
               <div className="flex items-center">
                 <p className="text-base font-semibold mr-2">Shift Time:</p>
-                <p className="text-sm">{cashSummary?.shiftNumber || "N/A"}</p>
+                <p className="text-sm">
+                  {timeOptions[cashSummary?.shiftNumber - 1] || "N/A"}
+                </p>
               </div>
             </div>
           </div>
