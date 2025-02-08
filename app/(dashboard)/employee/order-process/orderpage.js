@@ -5,15 +5,14 @@ import { useSession } from "@/context/SessionContext";
 import { useToast } from "@/hooks/use-toast";
 import { createOrderSummary } from "@/lib/actions/orderSummary";
 import { orderSummarySchema } from "@/lib/validation";
-import { timeOptions } from "@/lib/constants";
 import { z } from "zod";
+import { downloadOrderHistorySummary } from "@/lib/utils";
 
 export default function OrderForm({ orderData: initialOrderData }) {
   const { toast } = useToast();
   const { user } = useSession();
 
   const [selectedDate, setSelectedDate] = useState("");
-  const [selectedTime, setSelectedTime] = useState("");
   const [orderData, setOrderData] = useState(initialOrderData);
   const [errors, setErrors] = useState({});
   const [isPopupVisible, setIsPopupVisible] = useState(false);
@@ -37,7 +36,7 @@ export default function OrderForm({ orderData: initialOrderData }) {
     const newErrors = {};
     Object.entries(orderData).forEach(([itemName, fields]) => {
       Object.entries(fields).forEach(([fieldName, value]) => {
-        if (value.trim() === "") {
+        if (value.toString().trim() === "") {
           newErrors[`${itemName}.${fieldName}`] = "This field is required.";
         }
       });
@@ -46,31 +45,6 @@ export default function OrderForm({ orderData: initialOrderData }) {
     return Object.keys(newErrors).length === 0;
   };
 
-  const [currentDate, setCurrentDate] = useState("");
-  const [currentTime, setCurrentTime] = useState("");
-
-  useEffect(() => {
-    // Function to update date and time
-    const updateDateTime = () => {
-      const now = new Date();
-      const formattedDate = now.toISOString().split("T")[0]; // YYYY-MM-DD
-      const formattedTime = now.toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-        hour12: true,
-      });
-
-      setCurrentDate(formattedDate);
-      setCurrentTime(formattedTime);
-    };
-
-    // Update time every second
-    updateDateTime();
-    const interval = setInterval(updateDateTime, 1000);
-
-    return () => clearInterval(interval); // Cleanup on unmount
-  }, []);
 
   const validateForm = (data) => {
     try {
@@ -78,6 +52,7 @@ export default function OrderForm({ orderData: initialOrderData }) {
       setErrors({});
       return true;
     } catch (error) {
+      console.log(error);
       if (error instanceof z.ZodError) {
         const fieldErrors = error.errors.reduce((acc, curr) => {
           acc[curr.path.join(".")] = curr.message;
@@ -95,14 +70,12 @@ export default function OrderForm({ orderData: initialOrderData }) {
   };
 
   const handleFormSubmit = async (e) => {
-    setIsLoading(true);
-    setIsPopupVisible(true);
     e.preventDefault();
+    setIsLoading(true);
 
     const data = {
       createdBy: user?.id || "",
       date: selectedDate,
-      shiftNumber: parseInt(selectedTime),
       items: Object.entries(orderData).map(([itemName, values]) => ({
         itemName,
         boh: parseFloat(values.boh) || 0,
@@ -129,6 +102,11 @@ export default function OrderForm({ orderData: initialOrderData }) {
     try {
       const response = await createOrderSummary(data);
       if (response.status === "SUCCESS") {
+        setOrderData(initialOrderData);
+        downloadOrderHistorySummary({
+          ...data,
+          createdBy: { name: user?.name },
+        });
         setIsPopupVisible(true);
       } else {
         toast({
@@ -146,6 +124,7 @@ export default function OrderForm({ orderData: initialOrderData }) {
       });
     } finally {
       setIsLoading(false);
+      setIsPopupVisible2(false);
     }
   };
 
@@ -180,9 +159,36 @@ export default function OrderForm({ orderData: initialOrderData }) {
     });
   };
 
-  const handleFormSubmit2 = async () => {
-    setIsPopupVisible2(true); // Start loader
+  const handleFormSubmit2 = async (e) => {
     e.preventDefault();
+
+    const data = {
+      createdBy: user?.id || "",
+      date: selectedDate,
+      items: Object.entries(orderData).map(([itemName, values]) => ({
+        itemName,
+        boh: parseFloat(values.boh) || 0,
+        cashOrder: parseFloat(values.cashOrder) || 0,
+        inventory: parseFloat(values.inventory) || 0,
+      })),
+      submissionDate: new Date().toISOString(),
+    };
+
+    const isOrderDataValid = validateOrderData();
+    const isSchemaValid = validateForm(data);
+
+    if (!isOrderDataValid) {
+      toast({
+        variant: "destructive",
+        title: "Validation Error",
+        description: "Please fill all the fields.",
+      });
+    }
+    if (!isOrderDataValid || !isSchemaValid) {
+      return;
+    }
+
+    setIsPopupVisible2(true); // Start loader
   };
   const [isLoading, setIsLoading] = useState(false);
 
@@ -193,7 +199,7 @@ export default function OrderForm({ orderData: initialOrderData }) {
         <p className="text-base font-semibold text-red-500">
           Staff Name: <span className="text-black">{user?.name}</span>
         </p>
-        {/* <div className="flex space-x-4 items-center">
+        <div className="flex space-x-4 items-center">
           <div className="flex items-center">
             <p className="text-base font-semibold mr-2">Date:</p>
             <input
@@ -204,39 +210,6 @@ export default function OrderForm({ orderData: initialOrderData }) {
                 errors.date ? "border-red-600" : "border-gray-300"
               } rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500`}
             />
-          </div>
-          <div className="flex items-center">
-            <p className="text-base font-semibold mr-2">Shift Time:</p>
-            <select
-              value={selectedTime}
-              onChange={(e) => setSelectedTime(e.target.value)}
-              className={`px-2 py-1 text-sm border ${
-                errors.shiftTime ? "border-red-600" : "border-gray-300"
-              } rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500`}
-            >
-              <option value="" disabled>
-                Select Time
-              </option>
-              {timeOptions.map((time, index) => (
-                <option key={index} value={index + 1}>
-                  {time}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div> */}
-        <div className="flex space-x-4 items-center">
-          <div className="flex items-center">
-            <p className="text-base font-semibold mr-2">Date:</p>
-            <p className="text-sm px-2 py-1 border border-gray-300 rounded-lg">
-              {currentDate}
-            </p>
-          </div>
-          <div className="flex items-center">
-            <p className="text-base font-semibold mr-2">Shift Time:</p>
-            <p className="text-sm px-2 py-1 border border-gray-300 rounded-lg">
-              {currentTime}
-            </p>
           </div>
         </div>
       </div>
