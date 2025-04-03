@@ -10,7 +10,7 @@ export default async function OrderPage() {
     .withConfig({ useCdn: false })
     .fetch(ALL_ENABLED_ORDER_ITEMS_QUERY);
   const sortedOrderItems = orderItems.sort((a, b) => a.order - b.order);
-  
+
   console.log("orderItems", orderItems);
 
   const orderData = sortedOrderItems.reduce((acc, item) => {
