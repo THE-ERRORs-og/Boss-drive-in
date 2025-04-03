@@ -6,10 +6,14 @@ import OrderForm from "./orderpage";
 
 export default async function OrderPage() {
   // Fetch order items from Sanity
-  const orderItems = await client.withConfig({useCdn:false}).fetch(ALL_ENABLED_ORDER_ITEMS_QUERY);
+  const orderItems = await client
+    .withConfig({ useCdn: false })
+    .fetch(ALL_ENABLED_ORDER_ITEMS_QUERY);
+  const sortedOrderItems = orderItems.sort((a, b) => a.order - b.order);
+  
+  console.log("orderItems", orderItems);
 
-  // Transform the fetched data into the required structure
-  const orderData = orderItems.reduce((acc, item) => {
+  const orderData = sortedOrderItems.reduce((acc, item) => {
     acc[item.name] = { boh: "", cashOrder: "", inventory: "" };
     return acc;
   }, {});
