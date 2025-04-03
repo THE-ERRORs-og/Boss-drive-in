@@ -62,17 +62,21 @@ export const TOTAL_NUMBER_OF_CASH_SUMMARY_QUERY = defineQuery(`
   count(*[_type == "cash_summary"])`);
 
 export const ALL_ORDER_ITEMS_QUERY = defineQuery(`
-  *[_type == "order_item"]{
+  *[_type == "order_item"] | order(order asc) {
     _id,
     name,
     isEnabled,
-  }`);
+    order
+  }
+`);
   
 export const ALL_ENABLED_ORDER_ITEMS_QUERY = defineQuery(`
-  *[_type == "order_item" && isEnabled == true]{
+  *[_type == "order_item" && isEnabled == true] | order(order asc) {
     _id,
     name,
-  }`);
+    order
+  }
+`);
 
 export const GET_CURRENT_SAFE_BALANCE_QUERY = defineQuery(`
   *[_type == "constant" && name == "current_safe_balance"][0]{
