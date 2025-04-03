@@ -3,7 +3,7 @@ import React from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
-const SquareButton = ({ text, imageUrl,redirectUrl='/'}) => {
+const SquareButton = ({ text, imageUrl="",redirectUrl='/'}) => {
   const router = useRouter();
   return (
    
