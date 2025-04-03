@@ -6,6 +6,7 @@ import {
   createOrderItem,
   deleteItem,
   toggleItemStatus,
+  updateOrder,
 } from "@/lib/actions/orderItems";
 import { useToast } from "@/hooks/use-toast";
 
@@ -63,6 +64,29 @@ export default function Page() {
     setSelectedItemId(null);
     setIsPopupVisible(false);
     setLoading(false);
+  };
+
+  const moveItem = (index, direction) => {
+    const swapIndex = index + direction;
+    if (swapIndex < 0 || swapIndex >= orderItems.length) return;
+
+    const newItems = [...orderItems];
+    [newItems[index], newItems[swapIndex]] = [
+      newItems[swapIndex],
+      newItems[index],
+    ];
+
+    setOrderItems(newItems); // Update UI instantly
+    updateSanityOrder(newItems); // Debounced Sanity Update
+  };
+
+  let debounceTimer;
+
+  const updateSanityOrder = (newItems) => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      updateOrder(newItems); 
+    }, 500); 
   };
 
   const handleSaveNewItem = async () => {
@@ -152,6 +176,16 @@ export default function Page() {
               key={item.key}
               className="flex justify-center items-center gap-3"
             >
+              {/* Move up down button */}
+              <div className="border-2 border-gray-300 flex flex-col p-2 rounded-md">
+                <div
+                  className="w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-b-[15px] border-b-black"
+                  onClick={() => moveItem(index, -1)}
+                ></div>
+                <div className="w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-t-[15px] border-t-black mt-1"
+                onClick={()=>moveItem(index,1)}></div>
+              </div>
+
               <div
                 className={`border-2 border-gray-300 p-2 rounded-md w-[60vw] h-[40] font-semibold text-2xl justify-center items-center flex ${
                   !item.isEnabled ? "bg-gray-300" : ""
@@ -160,6 +194,19 @@ export default function Page() {
                 {item.name}
               </div>
 
+              <button
+                onClick={() => {
+                  setPopupAction("disable");
+                  setSelectedItemId(item._id);
+                  handlePopUp();
+                }}
+                className={`px-4 py-3 sm:px-6 sm:py-3 md:px-8 md:py-3 lg:px-10 lg:py-3 
+      bg-[#ED1C24] text-white text-sm sm:text-base md:text-md lg:text-lg 
+      font-semibold border rounded-lg hover:bg-red-600 transition duration-300
+      ${item.isEnabled ? "bg-green-500" : "bg-red-500"}`}
+              >
+                {!item.isEnabled ? "Disabled" : "Enabled"}
+              </button>
               <button
                 onClick={() => {
                   setPopupAction("delete");
@@ -171,18 +218,6 @@ export default function Page() {
       font-semibold border rounded-lg hover:bg-red-600 transition duration-300"
               >
                 Remove
-              </button>
-              <button
-                onClick={() => {
-                  setPopupAction("disable");
-                  setSelectedItemId(item._id);
-                  handlePopUp();
-                }}
-                className="px-4 py-3 sm:px-6 sm:py-3 md:px-8 md:py-3 lg:px-10 lg:py-3 
-      bg-[#ED1C24] text-white text-sm sm:text-base md:text-md lg:text-lg 
-      font-semibold border rounded-lg hover:bg-red-600 transition duration-300"
-              >
-                {!item.isEnabled ? "Enable" : "Disable"}
               </button>
             </div>
           ))}
@@ -222,7 +257,9 @@ export default function Page() {
               setPopupAction("save");
               handlePopUp();
             }}
-            className="mt-4 w-[20vw] px-6 py-2 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 transition duration-300"
+            className="px-4 py-3 sm:px-6 sm:py-3 md:px-8 md:py-3 lg:px-10 lg:py-3 
+      bg-[#ED1C24] text-white text-sm sm:text-base md:text-md lg:text-lg 
+      font-semibold border rounded-lg hover:bg-red-600 transition duration-300"
           >
             Save Changes
           </button>
