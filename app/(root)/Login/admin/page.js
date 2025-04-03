@@ -7,7 +7,7 @@ import Image from "next/image";
 export default async function Page() {
   const session = await auth();
 
-  if (session && session.user && session.user.role === "admin")
+  if (session && session.user && (session.user.role === "admin" || session.user.role === "superadmin"))
     redirect("/admin");
   
   return (

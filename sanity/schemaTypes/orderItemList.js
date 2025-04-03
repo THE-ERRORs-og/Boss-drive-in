@@ -20,7 +20,7 @@ export const order_item = defineType({
     defineField({
       name:"Order",
       title:"Order",
-      type: Number,
+      type: "number",
       validation: (Rule) => Rule.required(),
       default: 0,
     }),
