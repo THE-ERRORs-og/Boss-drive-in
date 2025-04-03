@@ -10,11 +10,11 @@ import { z } from "zod";
 
 export default function Page() {
   const { toast } = useToast();
-  const {user} = useSession();
+  const { user } = useSession();
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
   const [isPopupVisible, setIsPopupVisible] = useState(false);
-  const [isLoading, setIsLoading] = useState(false); 
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     expectedCloseoutCash: "",
     startingRegisterCash: startingRegisterCash,
@@ -22,6 +22,9 @@ export default function Page() {
     onlineTipsKiosk: "",
     onlineTipCash: "",
     totalTipDeduction: "0",
+    otherClosingRemovalAmount: "",
+    otherClosingRemovalItemCount: "",
+    otherClosingDiscounts: "",
     ownedToRestaurantSafe: -1 * startingRegisterCash,
   });
   const [errors, setErrors] = useState({});
@@ -98,10 +101,9 @@ export default function Page() {
 
     try {
       const response = await createCashSummary(data);
-      console.log('response', response);
+      console.log("response", response);
       if (response.status === "SUCCESS") {
-
-        await downloadCashSummary({...data,username:user?.name}); // Download the PDF
+        await downloadCashSummary({ ...data, username: user?.name }); // Download the PDF
         //reset the form
         setFormData({
           expectedCloseoutCash: "",
@@ -140,7 +142,7 @@ export default function Page() {
     <div>
       <div className="h-screen bg-gray-50 flex flex-col">
         <div className="flex flex-col px-8 py-2">
-          <div className="w-full flex justify-between items-center m-4">
+          <div className="w-full flex justify-between items-center px-4">
             <p className="text-base font-semibold text-red-500">
               Staff Name: <span className="text-black">{user?.name}</span>
             </p>
@@ -174,13 +176,13 @@ export default function Page() {
             </div>
           </div>
 
-          <form className="space-y-2" onSubmit={handleFormSubmit}>
+          <form className="space-y-0" onSubmit={handleFormSubmit}>
             <div className="grid grid-cols-2">
               <div className="">
-                <h1 className="text-lg font-medium text-gray-700 place-content-center m-4">
+                <h1 className="text-lg font-medium text-gray-700 place-content-center px-4 py-2">
                   Expected Closeout Cash
                 </h1>
-                <h1 className="text-lg font-medium text-gray-700 place-content-center m-4">
+                <h1 className="text-lg font-medium text-gray-700 place-content-center px-4 py-2">
                   Starting Register Cash
                 </h1>
               </div>
@@ -205,7 +207,7 @@ export default function Page() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 m-4">
+            <div className="grid grid-cols-2 gap-4 px-4 py-2">
               <div>
                 <p className="text-lg font-bold">Online Tips</p>
               </div>
@@ -216,14 +218,11 @@ export default function Page() {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col">
-                <h1 className="text-lg font-medium text-gray-700 place-content-center m-4">
+                <h1 className="text-lg font-medium text-gray-700 place-content-center px-4 py-2">
                   Toast
                 </h1>
-                <h1 className="text-lg font-medium text-gray-700 place-content-center m-4">
+                <h1 className="text-lg font-medium text-gray-700 place-content-center px-4 py-2">
                   Kiosk
-                </h1>
-                <h1 className="text-lg font-medium text-gray-700 place-content-center m-4">
-                  Cash
                 </h1>
               </div>
               <div className="gap-2 items-center flex flex-col place-content-center">
@@ -243,25 +242,20 @@ export default function Page() {
                   placeholder="$---"
                   className={`mt-1 w-full px-4 py-2 border ${errors.onlineTipsKiosk ? "border-red-600" : "border-gray-300"} rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500`}
                 />
-                <input
-                  type="text"
-                  name="onlineTipCash"
-                  value={formData.onlineTipCash}
-                  onChange={handleInputChange}
-                  placeholder="$---"
-                  className={`mt-1 w-full px-4 py-2 border ${errors.onlineTipCash ? "border-red-600" : "border-gray-300"} rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500`}
-                />
               </div>
             </div>
 
-            <hr className="my-4 border-gray-300 font-extrabold" />
+            <div>
+              {" "}
+              <hr className="m-2 border-gray-300 font-extrabold" />
+            </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col">
-                <h1 className="text-lg font-medium text-gray-700 place-content-center m-4">
+                <h1 className="text-lg font-medium text-gray-700 place-content-center px-4 py-2">
                   Total Tip Deduction
                 </h1>
-                <h1 className="text-lg font-medium text-gray-700 place-content-center m-4">
+                <h1 className="text-lg font-medium text-gray-700 place-content-center px-4 py-2">
                   Owned To Restaurant Safe
                 </h1>
               </div>
@@ -283,6 +277,69 @@ export default function Page() {
                   disabled={true}
                   placeholder="$XX"
                   className={`mt-1 w-full px-4 py-2 border ${errors.ownedToRestaurantSafe ? "border-red-600" : "border-gray-300"} rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500`}
+                />
+              </div>
+            </div>
+            <div>
+              {" "}
+              <hr className="m-2 border-gray-300 font-extrabold" />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 px-4 py-2">
+              <div>
+                <p className="text-lg font-bold">Other Closing Info</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex flex-col">
+                <h1 className="text-lg font-medium text-gray-700 place-content-center px-4 py-[0.6rem]">
+                  Cash Tips
+                </h1>
+                <h1 className="text-lg font-medium text-gray-700 place-content-center px-4 py-[0.6rem]">
+                  Removal Amount
+                </h1>
+                <h1 className="text-lg font-medium text-gray-700 place-content-center px-4 py-[0.6rem]">
+                  Removal Item Count
+                </h1>
+                <h1 className="text-lg font-medium text-gray-700 place-content-center px-4 py-[0.6rem] mb-2">
+                  Discounts
+                </h1>
+              </div>
+              <div className="gap-2 items-center flex flex-col place-content-center">
+                <input
+                  type="text"
+                  name="onlineTipCash"
+                  value={formData.onlineTipCash}
+                  onChange={handleInputChange}
+                  placeholder="$---"
+                  className={` w-full px-4 py-2 border ${errors.onlineTipCash ? "border-red-600" : "border-gray-300"} rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500`}
+                />
+
+                <input
+                  type="text"
+                  name="otherClosingRemovalAmount"
+                  value={formData.otherClosingRemovalAmount}
+                  onChange={handleInputChange}
+                  placeholder="$---"
+                  className={` w-full px-4 py-2 border ${errors.onlineTipsToast ? "border-red-600" : "border-gray-300"} rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500`}
+                />
+
+                <input
+                  type="text"
+                  name="otherClosingRemovalItemCount"
+                  value={formData.otherClosingRemovalItemCount}
+                  onChange={handleInputChange}
+                  placeholder="$---"
+                  className={` w-full px-4 py-2 border ${errors.onlineTipsToast ? "border-red-600" : "border-gray-300"} rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500`}
+                />
+                <input
+                  type="text"
+                  name="otherClosingDiscounts"
+                  value={formData.otherClosingDiscounts}
+                  onChange={handleInputChange}
+                  placeholder="$---"
+                  className={`mb-2 w-full px-4 py-2 border ${errors.onlineTipsKiosk ? "border-red-600" : "border-gray-300"} rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500`}
                 />
               </div>
             </div>
