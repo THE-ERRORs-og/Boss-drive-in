@@ -31,14 +31,23 @@ export default function Page() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    
+    // Only allow numbers and decimal point
+    if (value && !/^\d*\.?\d*$/.test(value)) {
+      return;
+    }
+
     const fvlues = { ...formData, [name]: value };
     var totalTipDeduction =
       parseFloat(fvlues.onlineTipsToast || 0) +
       parseFloat(fvlues.onlineTipsKiosk || 0);
+    
+    // Calculate OWED amount (can be negative)
     var ownedToRestaurantSafe =
       parseFloat(fvlues.expectedCloseoutCash || 0) -
       parseFloat(fvlues.startingRegisterCash || 0) -
       totalTipDeduction;
+
     setFormData({
       ...fvlues,
       totalTipDeduction: totalTipDeduction.toFixed(2),
@@ -90,6 +99,9 @@ export default function Page() {
       onlineTipCash: parseFloat(formData.onlineTipCash || 0),
       totalTipDeduction: parseFloat(formData.totalTipDeduction || 0),
       ownedToRestaurantSafe: parseFloat(formData.ownedToRestaurantSafe || 0),
+      otherClosingRemovalAmount: parseFloat(formData.otherClosingRemovalAmount || 0),
+      otherClosingRemovalItemCount: parseInt(formData.otherClosingRemovalItemCount || 0),
+      otherClosingDiscounts: parseFloat(formData.otherClosingDiscounts || 0),
       datetime: selectedDate,
       shiftNumber: parseInt(selectedTime),
       createdBy: user?.id || "",
@@ -113,6 +125,9 @@ export default function Page() {
           onlineTipCash: "",
           totalTipDeduction: "0",
           ownedToRestaurantSafe: -1 * startingRegisterCash,
+          otherClosingRemovalAmount: "",
+          otherClosingRemovalItemCount: "",
+          otherClosingDiscounts: "",
         });
         setIsPopupVisible(true);
       } else {
@@ -193,6 +208,7 @@ export default function Page() {
                   value={formData.expectedCloseoutCash}
                   onChange={handleInputChange}
                   placeholder="$---"
+                  inputMode="decimal"
                   className={`mt-1 w-full px-4 py-1 border ${errors.expectedCloseoutCash ? "border-red-600" : "border-gray-300"} rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500`}
                 />
                 <input
@@ -232,6 +248,7 @@ export default function Page() {
                   value={formData.onlineTipsToast}
                   onChange={handleInputChange}
                   placeholder="$---"
+                  inputMode="decimal"
                   className={`mt-1 w-full px-4 py-2 border ${errors.onlineTipsToast ? "border-red-600" : "border-gray-300"} rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500`}
                 />
                 <input
@@ -240,6 +257,7 @@ export default function Page() {
                   value={formData.onlineTipsKiosk}
                   onChange={handleInputChange}
                   placeholder="$---"
+                  inputMode="decimal"
                   className={`mt-1 w-full px-4 py-2 border ${errors.onlineTipsKiosk ? "border-red-600" : "border-gray-300"} rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500`}
                 />
               </div>
@@ -256,7 +274,10 @@ export default function Page() {
                   Total Tip Deduction
                 </h1>
                 <h1 className="text-lg font-medium text-gray-700 place-content-center px-4 py-2">
-                  Owned To Restaurant Safe
+                  OWED To Restaurant Safe
+                  <span className="text-sm text-gray-500 block">
+                    (Negative value means reduction from bank safe)
+                  </span>
                 </h1>
               </div>
               <div className="gap-2 items-center flex flex-col place-content-center">
@@ -276,7 +297,13 @@ export default function Page() {
                   onChange={handleInputChange}
                   disabled={true}
                   placeholder="$XX"
-                  className={`mt-1 w-full px-4 py-2 border ${errors.ownedToRestaurantSafe ? "border-red-600" : "border-gray-300"} rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500`}
+                  className={`mt-1 w-full px-4 py-2 border ${
+                    errors.ownedToRestaurantSafe 
+                      ? "border-red-600" 
+                      : parseFloat(formData.ownedToRestaurantSafe) < 0 
+                        ? "border-yellow-400 bg-yellow-50" 
+                        : "border-gray-300"
+                  } rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500`}
                 />
               </div>
             </div>
@@ -313,6 +340,7 @@ export default function Page() {
                   value={formData.onlineTipCash}
                   onChange={handleInputChange}
                   placeholder="$---"
+                  inputMode="decimal"
                   className={` w-full px-4 py-2 border ${errors.onlineTipCash ? "border-red-600" : "border-gray-300"} rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500`}
                 />
 
@@ -322,6 +350,7 @@ export default function Page() {
                   value={formData.otherClosingRemovalAmount}
                   onChange={handleInputChange}
                   placeholder="$---"
+                  inputMode="decimal"
                   className={` w-full px-4 py-2 border ${errors.onlineTipsToast ? "border-red-600" : "border-gray-300"} rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500`}
                 />
 
@@ -330,7 +359,9 @@ export default function Page() {
                   name="otherClosingRemovalItemCount"
                   value={formData.otherClosingRemovalItemCount}
                   onChange={handleInputChange}
-                  placeholder="$---"
+                  placeholder="0"
+                  inputMode="numeric"
+                  pattern="\d*"
                   className={` w-full px-4 py-2 border ${errors.onlineTipsToast ? "border-red-600" : "border-gray-300"} rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500`}
                 />
                 <input
@@ -339,6 +370,7 @@ export default function Page() {
                   value={formData.otherClosingDiscounts}
                   onChange={handleInputChange}
                   placeholder="$---"
+                  inputMode="decimal"
                   className={`mb-2 w-full px-4 py-2 border ${errors.onlineTipsKiosk ? "border-red-600" : "border-gray-300"} rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500`}
                 />
               </div>
