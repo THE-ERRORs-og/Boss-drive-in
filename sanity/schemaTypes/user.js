@@ -45,6 +45,7 @@ export const user = defineType({
       type: "string",
       options: {
         list: [
+          { title: "Super Admin", value: "superadmin" },
           { title: "Admin", value: "admin" },
           { title: "Employee", value: "employee" },
         ],
