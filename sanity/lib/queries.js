@@ -55,7 +55,13 @@ export const CASH_SUMMARY_BY_ID_QUERY = defineQuery(`
     onlineTipsToast,
     totalTipDeduction,
     ownedToRestaurantSafe,
-    createdBy->{name,userid}
+    removalAmount,
+    removalItemCount,
+    discounts,
+    createdBy->{
+      name,
+      userid
+    }
   }`);
 
 export const TOTAL_NUMBER_OF_CASH_SUMMARY_QUERY = defineQuery(`

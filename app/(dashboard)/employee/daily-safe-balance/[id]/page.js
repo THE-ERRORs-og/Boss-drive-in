@@ -43,10 +43,10 @@ export default async function Page({ params }) {
               </div>
               <div className="gap-2 items-center flex flex-col place-content-center">
                 <p className="mt-1 w-full px-4 py-1 text-sm border border-gray-300 rounded-lg shadow-sm">
-                  {cashSummary?.expectedCloseoutCash || "$ 0"}
+                  ${(cashSummary?.expectedCloseoutCash || 0).toFixed(2)}
                 </p>
                 <p className="mt-1 w-full px-4 py-1 text-sm border border-gray-300 rounded-lg shadow-sm">
-                  {cashSummary?.startingRegisterCash || "$ 0"}
+                  ${(cashSummary?.startingRegisterCash || 0).toFixed(2)}
                 </p>
               </div>
             </div>
@@ -74,13 +74,13 @@ export default async function Page({ params }) {
               </div>
               <div className="gap-2 items-center flex flex-col place-content-center">
                 <p className="mt-1 w-full px-4 py-2 text-sm border border-gray-300 rounded-lg shadow-sm">
-                  {cashSummary?.onlineTipsToast || "$ 0"}
+                  ${(cashSummary?.onlineTipsToast || 0).toFixed(2)}
                 </p>
                 <p className="mt-1 w-full px-4 py-2 text-sm border border-gray-300 rounded-lg shadow-sm">
-                  {cashSummary?.onlineTipsKiosk || "$ 0"}
+                  ${(cashSummary?.onlineTipsKiosk || 0).toFixed(2)}
                 </p>
                 <p className="mt-1 w-full px-4 py-2 text-sm border border-gray-300 rounded-lg shadow-sm">
-                  {cashSummary?.onlineTipCash || "$ 0"}
+                  ${(cashSummary?.onlineTipCash || 0).toFixed(2)}
                 </p>
               </div>
             </div>
@@ -93,15 +93,63 @@ export default async function Page({ params }) {
                   Total Tip Deduction
                 </h1>
                 <h1 className="text-lg font-medium text-gray-700 place-content-center m-4">
-                  Owned To Restaurant Safe
+                  OWED To Restaurant Safe
+                  <span className="text-sm text-gray-500 block font-normal">
+                    (Negative value means reduction from bank safe)
+                  </span>
                 </h1>
               </div>
               <div className="gap-2 items-center flex flex-col place-content-center">
                 <p className="mt-1 w-full px-4 py-2 text-sm border border-gray-300 rounded-lg shadow-sm">
-                  {cashSummary?.totalTipDeduction || "$ 0"}
+                  ${(cashSummary?.totalTipDeduction || 0).toFixed(2)}
+                </p>
+                <p
+                  className={`mt-1 w-full px-4 py-2 text-sm border rounded-lg shadow-sm ${
+                    cashSummary?.ownedToRestaurantSafe < 0
+                      ? "border-yellow-400 bg-yellow-50 text-red-600"
+                      : "border-gray-300"
+                  }`}
+                >
+                  ${(cashSummary?.ownedToRestaurantSafe || 0).toFixed(2)}
+                </p>
+              </div>
+            </div>
+
+            <hr className="my-4 border-gray-300 font-extrabold" />
+
+            <div className="grid grid-cols-2 gap-4 ml-4">
+              <div>
+                <p className="text-lg font-bold">Other Closing Info</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex flex-col">
+                <h1 className="text-lg font-medium text-gray-700 place-content-center m-4">
+                  Cash Tips
+                </h1>
+                <h1 className="text-lg font-medium text-gray-700 place-content-center m-4">
+                  Removal Amount
+                </h1>
+                <h1 className="text-lg font-medium text-gray-700 place-content-center m-4">
+                  Removal Item Count
+                </h1>
+                <h1 className="text-lg font-medium text-gray-700 place-content-center m-4">
+                  Discounts
+                </h1>
+              </div>
+              <div className="gap-2 items-center flex flex-col place-content-center">
+                <p className="mt-1 w-full px-4 py-2 text-sm border border-gray-300 rounded-lg shadow-sm">
+                  ${(cashSummary?.onlineTipCash || 0).toFixed(2)}
                 </p>
                 <p className="mt-1 w-full px-4 py-2 text-sm border border-gray-300 rounded-lg shadow-sm">
-                  {cashSummary?.ownedToRestaurantSafe || "$ 0"}
+                  ${(cashSummary?.removalAmount || 0).toFixed(2)}
+                </p>
+                <p className="mt-1 w-full px-4 py-2 text-sm border border-gray-300 rounded-lg shadow-sm">
+                  {cashSummary?.removalItemCount || 0}
+                </p>
+                <p className="mt-1 w-full px-4 py-2 text-sm border border-gray-300 rounded-lg shadow-sm">
+                  ${(cashSummary?.discounts || 0).toFixed(2)}
                 </p>
               </div>
             </div>

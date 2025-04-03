@@ -48,6 +48,24 @@ export const cash_summary = defineType({
       validation: (Rule) => Rule.precision(2),
     }),
     defineField({
+      name: "removalAmount",
+      title: "Removal Amount",
+      type: "number",
+      validation: (Rule) => Rule.min(0).precision(2),
+    }),
+    defineField({
+      name: "removalItemCount",
+      title: "Removal Item Count",
+      type: "number",
+      validation: (Rule) => Rule.min(0).precision(0),
+    }),
+    defineField({
+      name: "discounts",
+      title: "Discounts",
+      type: "number",
+      validation: (Rule) => Rule.min(0).precision(2),
+    }),
+    defineField({
       name: "datetime",
       title: "Date and Time",
       type: "datetime",
