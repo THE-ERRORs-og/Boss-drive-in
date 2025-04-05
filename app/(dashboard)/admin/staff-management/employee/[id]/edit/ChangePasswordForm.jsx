@@ -1,7 +1,7 @@
 "use client";
 
 import { useToast } from "@/hooks/use-toast";
-import { changePassword } from "@/lib/actions/registerUser";
+import { updateUserPassword } from "@/lib/actions/user";
 import { useState } from "react";
 
 export default function ChangePasswordForm({ userid }) {
@@ -50,10 +50,9 @@ export default function ChangePasswordForm({ userid }) {
 
   const resetPassword = async () => {
     try {
-      // console.log('userid', userid);
       setIsLoading(true);
-      const result = await changePassword(userid, password);
-      if (result.status == "SUCCESS") {
+      const result = await updateUserPassword(userid, password);
+      if (result.status === "SUCCESS") {
         toast({
           variant: "success",
           title: "Success",
@@ -63,10 +62,9 @@ export default function ChangePasswordForm({ userid }) {
         toast({
           variant: "destructive",
           title: "Error",
-          description: "Failed to change password",
+          description: result.error || "Failed to change password",
         });
       }
-      console.log(result);
     } catch (error) {
       toast({
         variant: "destructive",
@@ -94,7 +92,7 @@ export default function ChangePasswordForm({ userid }) {
       />
       <h1 className="font-semibold">Confirm New Password</h1>
       <input
-        type="text"
+        type="password"
         name="confirmPassword"
         value={confirmPassword}
         onChange={(e) => setConfirmPassword(e.target.value)}

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useSession } from "@/context/SessionContext";
 import { useToast } from "@/hooks/use-toast";
 import { createOrderSummary } from "@/lib/actions/orderSummary";
+import { getOrderItems } from "@/lib/actions/orderItems";
 import { orderSummarySchema } from "@/lib/validation";
 import { z } from "zod";
 import { downloadOrderHistorySummary } from "@/lib/utils";
@@ -11,12 +12,43 @@ import { downloadOrderHistorySummary } from "@/lib/utils";
 export default function OrderForm({ orderData: initialOrderData }) {
   const { toast } = useToast();
   const { user } = useSession();
+  const [isLoading, setIsLoading] = useState(false);
 
   const [selectedDate, setSelectedDate] = useState("");
   const [orderData, setOrderData] = useState(initialOrderData);
   const [errors, setErrors] = useState({});
   const [isPopupVisible, setIsPopupVisible] = useState(false);
   const [isPopupVisible2, setIsPopupVisible2] = useState(false);
+
+  useEffect(() => {
+    const fetchOrderItems = async () => {
+      try {
+        const result = await getOrderItems();
+        if (result.status === "SUCCESS") {
+          const orderData = result.data.reduce((acc, item) => {
+            acc[item.name] = { boh: "", cashOrder: "", inventory: "" };
+            return acc;
+          }, {});
+          setOrderData(orderData);
+        } else {
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: result.error || "Failed to fetch order items",
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching order items:", error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to fetch order items",
+        });
+      }
+    };
+
+    fetchOrderItems();
+  }, [toast]);
 
   const handleInputChange = (e, item, field) => {
     const value = e.target.value;
@@ -44,7 +76,6 @@ export default function OrderForm({ orderData: initialOrderData }) {
     setErrors((prevErrors) => ({ ...prevErrors, ...newErrors }));
     return Object.keys(newErrors).length === 0;
   };
-
 
   const validateForm = (data) => {
     try {
@@ -96,35 +127,37 @@ export default function OrderForm({ orderData: initialOrderData }) {
       });
     }
     if (!isOrderDataValid || !isSchemaValid) {
+      setIsLoading(false);
       return;
     }
 
     try {
-      const response = await createOrderSummary(data);
-      if (response.status === "SUCCESS") {
-        setOrderData(initialOrderData);
-        downloadOrderHistorySummary({
-          ...data,
-          createdBy: { name: user?.name },
+      const result = await createOrderSummary(data);
+      if (result.status === "SUCCESS") {
+        toast({
+          title: "Success",
+          description: "Order summary created successfully",
         });
-        setIsPopupVisible(true);
+        setIsPopupVisible(false);
+        // Reset form
+        setSelectedDate("");
+        setOrderData(initialOrderData);
       } else {
         toast({
           variant: "destructive",
           title: "Error",
-          description: response.error,
+          description: result.error || "Failed to create order summary",
         });
       }
     } catch (error) {
       console.error("Error submitting form:", error);
       toast({
         variant: "destructive",
-        title: "Submission Error",
-        description: "An error occurred while submitting the form.",
+        title: "Error",
+        description: "Failed to submit order summary",
       });
     } finally {
       setIsLoading(false);
-      setIsPopupVisible2(false);
     }
   };
 
@@ -134,33 +167,22 @@ export default function OrderForm({ orderData: initialOrderData }) {
   };
 
   const handleInventoryChange = (e, item, field) => {
-    const { value } = e.target;
+    const value = e.target.value;
 
-    if (!/^\d*\.?\d*$/.test(value)) return;
-
-    // Update the order data
-    setOrderData((prevData) => {
-      const updatedData = {
-        ...prevData,
+    if (/^\d*\.?\d{0,2}$/.test(value)) {
+      setOrderData((prevState) => ({
+        ...prevState,
         [item]: {
-          ...prevData[item],
+          ...prevState[item],
           [field]: value,
         },
-      };
-
-      // If "boh" or "cashOrder" is updated, recalculate "inventory"
-      if (field === "boh" || field === "cashOrder") {
-        updatedData[item].inventory =
-          (parseFloat(updatedData[item].boh) || 0) +
-          (parseFloat(updatedData[item].cashOrder) || 0);
-      }
-
-      return updatedData;
-    });
+      }));
+    }
   };
 
   const handleFormSubmit2 = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
 
     const data = {
       createdBy: user?.id || "",
@@ -185,12 +207,39 @@ export default function OrderForm({ orderData: initialOrderData }) {
       });
     }
     if (!isOrderDataValid || !isSchemaValid) {
+      setIsLoading(false);
       return;
     }
 
-    setIsPopupVisible2(true); // Start loader
+    try {
+      const result = await createOrderSummary(data);
+      if (result.status === "SUCCESS") {
+        toast({
+          title: "Success",
+          description: "Order summary created successfully",
+        });
+        setIsPopupVisible2(false);
+        // Reset form
+        setSelectedDate("");
+        setOrderData(initialOrderData);
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: result.error || "Failed to create order summary",
+        });
+      }
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to submit order summary",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
-  const [isLoading, setIsLoading] = useState(false);
 
   return (
     <div className="h-screen bg-white flex flex-col items-center">

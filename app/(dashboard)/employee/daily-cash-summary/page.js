@@ -1,11 +1,11 @@
 "use client";
 import { useSession } from "@/context/SessionContext";
 import { useToast } from "@/hooks/use-toast";
-import { createCashSummary } from "@/lib/actions/cashSummary";
+import { createCashSummary, getCashSummaryByDate } from "@/lib/actions/cashSummary";
 import { downloadCashSummary } from "@/lib/utils";
 import { cashSummarySchema } from "@/lib/validation";
 import { startingRegisterCash, timeOptions } from "@/lib/constants";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { z } from "zod";
 
 export default function Page() {
@@ -21,13 +21,41 @@ export default function Page() {
     onlineTipsToast: "",
     onlineTipsKiosk: "",
     onlineTipCash: "",
-    totalTipDeduction: "0",
+    totalTipDeduction: "",
     otherClosingRemovalAmount: "",
     otherClosingRemovalItemCount: "",
     otherClosingDiscounts: "",
     ownedToRestaurantSafe: -1 * startingRegisterCash,
   });
   const [errors, setErrors] = useState({});
+
+  useEffect(() => {
+    const checkExistingSummary = async () => {
+      if (selectedDate && selectedTime) {
+        try {
+          const result = await getCashSummaryByDate(selectedDate);
+          console.log('result', result);
+          if (result.status === "SUCCESS" && result.data) {
+            // Check if there's a summary for the selected shift time
+            const existingSummary = result.data.find(
+              summary => summary.shiftNumber === parseInt(selectedTime)
+            );
+            
+            if (existingSummary) {
+              toast({
+                title: "Warning",
+                description: `A cash summary already exists for ${selectedDate} (Shift ${selectedTime}).`,
+              });
+            }
+          }
+        } catch (error) {
+          console.error("Error checking existing summary:", error);
+        }
+      }
+    };
+
+    checkExistingSummary();
+  }, [selectedDate, selectedTime, toast]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -67,7 +95,6 @@ export default function Page() {
           acc[curr.path[0]] = curr.message;
           return acc;
         }, {});
-        // console.log(fieldErrors);
         toast({
           variant: "destructive",
           title: `Error in ${error.errors[0].path[0]}`,
@@ -81,16 +108,18 @@ export default function Page() {
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true); // Start loader
+    setIsLoading(true);
+
     if (!user) {
       toast({
         variant: "destructive",
         title: "User not logged in",
         description: "Please login to submit the form.",
       });
-      setIsLoading(false); // Stop loader
+      setIsLoading(false);
       return;
     }
+
     const data = {
       expectedCloseoutCash: parseFloat(formData.expectedCloseoutCash || 0),
       startingRegisterCash: parseFloat(formData.startingRegisterCash || 0),
@@ -99,24 +128,31 @@ export default function Page() {
       onlineTipCash: parseFloat(formData.onlineTipCash || 0),
       totalTipDeduction: parseFloat(formData.totalTipDeduction || 0),
       ownedToRestaurantSafe: parseFloat(formData.ownedToRestaurantSafe || 0),
-      otherClosingRemovalAmount: parseFloat(formData.otherClosingRemovalAmount || 0),
-      otherClosingRemovalItemCount: parseInt(formData.otherClosingRemovalItemCount || 0),
-      otherClosingDiscounts: parseFloat(formData.otherClosingDiscounts || 0),
+      removalAmount: parseFloat(formData.otherClosingRemovalAmount || 0),
+      removalItemCount: parseInt(formData.otherClosingRemovalItemCount || 0),
+      discounts: parseFloat(formData.otherClosingDiscounts || 0),
       datetime: selectedDate,
       shiftNumber: parseInt(selectedTime),
-      createdBy: user?.id || "",
+      createdBy: user.id
     };
+
     if (!validateForm(data)) {
-      setIsLoading(false); // Stop loader
+      setIsLoading(false);
       return;
     }
 
     try {
-      const response = await createCashSummary(data);
-      console.log("response", response);
-      if (response.status === "SUCCESS") {
-        await downloadCashSummary({ ...data, username: user?.name }); // Download the PDF
-        //reset the form
+      const result = await createCashSummary(data);
+      if (result.status === "SUCCESS") {
+        await downloadCashSummary({ ...data, username: user?.name });
+        toast({
+          title: "Success",
+          description: "Cash summary created successfully",
+        });
+        setIsPopupVisible(true);
+        // Reset form
+        setSelectedDate("");
+        setSelectedTime("");
         setFormData({
           expectedCloseoutCash: "",
           startingRegisterCash: startingRegisterCash,
@@ -124,17 +160,17 @@ export default function Page() {
           onlineTipsKiosk: "",
           onlineTipCash: "",
           totalTipDeduction: "0",
+          otherClosingRemovalAmount: "0",
+          otherClosingRemovalItemCount: "0",
+          otherClosingDiscounts: "0",
           ownedToRestaurantSafe: -1 * startingRegisterCash,
-          otherClosingRemovalAmount: "",
-          otherClosingRemovalItemCount: "",
-          otherClosingDiscounts: "",
         });
-        setIsPopupVisible(true);
       } else {
+        console.log('result', result);
         toast({
           variant: "destructive",
           title: "Error",
-          description: response.error,
+          description: result.error || "Failed to create cash summary",
         });
       }
     } catch (error) {
@@ -142,15 +178,15 @@ export default function Page() {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "An error occurred while submitting the form.",
+        description: "Failed to submit cash summary",
       });
     } finally {
-      setIsLoading(false); // Stop loader
+      setIsLoading(false);
     }
   };
 
   const closePopup = () => {
-    setIsPopupVisible(false); // Hide the popup
+    setIsPopupVisible(false);
   };
 
   return (
