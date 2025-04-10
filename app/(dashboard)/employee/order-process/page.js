@@ -1,7 +1,5 @@
 // app/order/page.js
-"use client";
-import OrderForm from "./orderpage";
-import SquareButton from "@/components/Button/SquareButton";
+"use client"
 import { useRouter } from "next/navigation";
 
 export default function OrderPage() {

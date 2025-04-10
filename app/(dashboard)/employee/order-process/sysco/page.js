@@ -232,6 +232,7 @@ const Page = () => {
             className="grid grid-cols-5 gap-4 items-center mb-4"
           >
             <p className="text-left text-lg font-medium">{item.name}</p>
+            
             <input
               type="text"
               value={formData[item._id]?.yesterdayOrder || ""}
