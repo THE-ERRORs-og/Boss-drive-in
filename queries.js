@@ -75,7 +75,7 @@ export const ALL_ORDER_ITEMS_QUERY = defineQuery(`
     order
   }
 `);
-  
+
 export const ALL_ENABLED_ORDER_ITEMS_QUERY = defineQuery(`
   *[_type == "order_item" && isEnabled == true] | order(order asc) {
     _id,
@@ -114,7 +114,6 @@ export const GET_SAFE_BALANCE_HISTORY_BY_PAGINATION_QUERY = defineQuery(`
   }
 `);
 
-
 export const TOTAL_NUMBER_OF_SAFE_BALANCE_HISTORY_QUERY = defineQuery(`
   count(*[_type == "safe_balance_history"])`);
 
@@ -134,7 +133,8 @@ export const GET_ORDER_SUMMARY_BY_PAGINATION_QUERY = defineQuery(
       userid
     }
   }
-`);
+`
+);
 
 export const TOTAL_NUMBER_OF_ORDER_SUMMARY_QUERY = defineQuery(`
   count(*[_type == "order_summary"])`);

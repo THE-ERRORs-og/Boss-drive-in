@@ -6,73 +6,61 @@ import arrow_back from "@/public/arrow_back.svg";
 import MainButton from "../Button/MainButton";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
-import { z } from "zod";
 
 export default function EmployeeLoginForm() {
-  const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
-
   const router = useRouter();
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
+  const [formErrors, setFormErrors] = useState({});
+
   const handleFormSubmit = async (event) => {
-    event.preventDefault(); 
+    event.preventDefault();
     setIsLoading(true);
+    setFormErrors({});
+
     const formData = new FormData(event.target);
+    const userid = formData.get("userid")?.trim();
+    const password = formData.get("password")?.trim();
+
+    // Client-side validation
+    const errors = {};
+    if (!userid) errors.userid = "Employee ID is required";
+    if (!password) errors.password = "Password is required";
+
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      setIsLoading(false);
+      return;
+    }
 
     try {
-     const formValues = {
-      userid: formData.get("userid")?.trim().toLowerCase(),  
-      password: formData.get("password")?.trim().toLowerCase(), 
-    };
-        if (formValues.userid.trim() === "") {
-          toast({
-            variant: "destructive",
-            title: "Employee ID is required",
-            description: "Login Failed",
-          });
-          setIsLoading(false);
-          return;
-        }
-        if (formValues.password.trim().length < 5) {
-          toast({
-            variant: "destructive",
-            title: "Password must be at least 5 characters long",
-            description: "Login Failed",
-          });
-          setIsLoading(false);
-          return;
-        }
-      const response = await doCredentialLogin(formValues);
+      const response = await doCredentialLogin({ userid, password });
 
       if (response.status === "SUCCESS") {
-        console.log("User logged in successfully");
         toast({
-          variant: "success",
-          title: "Login Successful",
+          title: "Success",
+          description: "Logged in successfully",
         });
         router.push("/employee");
+        router.refresh();
       } else {
-        console.log(response.error);
-        if (response.error.toString().includes("Invalid password")) {
-          toast({
-            variant: "destructive",
-            title: "Wrong Password",
-            description: "Login Failed",
-          });
-        }
-        else if (response.error.toString().includes("No user found")) {
-          toast({
-            variant: "destructive",
-            title: "No user found",
-            description: "Login Failed",
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: response.error || "Failed to login",
+        });
+        if (response.error?.toLowerCase().includes("credentials")) {
+          setFormErrors({
+            general: "Invalid employee ID or password",
           });
         }
       }
     } catch (error) {
       console.error("Error:", error);
       toast({
-        variant: "error",
-        title: "Login Failed",
-        description: error.message,
+        variant: "destructive",
+        title: "Error",
+        description: "An error occurred during login",
       });
     } finally {
       setIsLoading(false);
@@ -96,6 +84,10 @@ export default function EmployeeLoginForm() {
 
       {/* Form */}
       <form className="space-y-6" onSubmit={handleFormSubmit}>
+        {formErrors.general && (
+          <div className="text-sm text-red-500">{formErrors.general}</div>
+        )}
+
         {/* Employee ID */}
         <div>
           <label className="block text-sm font-medium text-gray-700">
@@ -105,8 +97,13 @@ export default function EmployeeLoginForm() {
             name="userid"
             type="text"
             placeholder="Example: 12345678"
-            className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+            className={`mt-1 w-full px-4 py-2 border ${
+              formErrors.userid ? "border-red-500" : "border-gray-300"
+            } rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500`}
           />
+          {formErrors.userid && (
+            <div className="text-sm text-red-500 mt-1">{formErrors.userid}</div>
+          )}
         </div>
 
         {/* Password */}
@@ -118,16 +115,25 @@ export default function EmployeeLoginForm() {
             name="password"
             type="password"
             placeholder="Example: 12345678"
-            className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+            className={`mt-1 w-full px-4 py-2 border ${
+              formErrors.password ? "border-red-500" : "border-gray-300"
+            } rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500`}
           />
+          {formErrors.password && (
+            <div className="text-sm text-red-500 mt-1">{formErrors.password}</div>
+          )}
         </div>
 
         {/* Login Button */}
         <MainButton
           type="submit"
-          text="Login"
-          isLoading={isLoading}
-          className={`w-full text-white py-2 rounded-lg transition duration-30`}
+          text={isLoading ? "Logging in..." : "Login"}
+          disabled={isLoading}
+          className={`w-full text-white py-2 rounded-lg transition duration-300 ${
+            isLoading
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-red-500 hover:bg-red-600"
+          }`}
         />
       </form>
     </div>

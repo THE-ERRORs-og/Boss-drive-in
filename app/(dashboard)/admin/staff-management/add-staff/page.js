@@ -2,15 +2,15 @@
 
 import { useState } from "react";
 import { z } from "zod";
-import { userSchema } from "@/lib/validation"; // use this for schema
+import { userSchema } from "@/lib/validation";
 import { useToast } from "@/hooks/use-toast";
-import { createUser } from "@/lib/actions/registerUser";
+import { createUser } from "@/lib/actions/user";
 
 export default function Page() {
   const { toast } = useToast();
   const [isPopupVisible, setIsPopupVisible] = useState(false);
   const [formData, setFormData] = useState({
-    role:"employee",
+    role: "employee",
     name: "",
     userid: "",
     password: "",
@@ -20,7 +20,7 @@ export default function Page() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: name === "userid" ? value.toLowerCase() : value, });
+    setFormData({ ...formData, [name]: name === "userid" ? value.toLowerCase() : value });
   };
 
   const validateForm = async (data) => {
@@ -28,13 +28,13 @@ export default function Page() {
       // Normalize userId for validation
       const normalizedData = {
         ...data,
-        userid: data.userid.toLowerCase(), // Ensure userId is lowercase
+        userid: data.userid.toLowerCase(),
       };
   
       await userSchema.parseAsync(normalizedData);
   
-      if (data.password.toLowerCase() !== data.confirmPassword.toLowerCase()) {
-        setErrors({ confirmPassword: "Passwords do not match (case-insensitive check)" });
+      if (data.password !== data.confirmPassword) {
+        setErrors({ confirmPassword: "Passwords do not match" });
         return false;
       }
   
@@ -68,7 +68,7 @@ export default function Page() {
     try {
       const normalizedData = {
         ...formData,
-        userid: formData.userid.toLowerCase(), // Ensure userId is lowercase before submission
+        userid: formData.userid.toLowerCase(),
       };
   
       const response = await createUser(normalizedData);
@@ -105,7 +105,7 @@ export default function Page() {
   };
 
   const closePopup = () => {
-    setIsPopupVisible(false); // Hide the popup
+    setIsPopupVisible(false);
   };
 
   return (
@@ -173,7 +173,7 @@ export default function Page() {
           <div className="flex justify-center">
             <button
               type="submit"
-              className="w-[20vw]  px-6 py-2 bg-[#ED1C24] text-sm md:text-lg text-white rounded-lg font-medium hover:bg-red-600 transition duration-300"
+              className="w-[20vw] px-6 py-2 bg-[#ED1C24] text-sm md:text-lg text-white rounded-lg font-medium hover:bg-red-600 transition duration-300"
             >
               Add member
             </button>
@@ -187,8 +187,8 @@ export default function Page() {
               </p>
               <div className="">
                 <button
-                  onClick={submitPopupForm} // submit the form after clicking this
-                  className="m-4 px-6 py-2 bg-[#ED1C24]  text-sm md:text-lg text-white rounded-lg font-medium hover:bg-red-600 transition duration-300"
+                  onClick={submitPopupForm}
+                  className="m-4 px-6 py-2 bg-[#ED1C24] text-sm md:text-lg text-white rounded-lg font-medium hover:bg-red-600 transition duration-300"
                 >
                   Add Member
                 </button>

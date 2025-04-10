@@ -1,27 +1,8 @@
 // app/order/page.js
-"use client";
-import { client } from "@/sanity/lib/client";
-import { ALL_ENABLED_ORDER_ITEMS_QUERY } from "@/sanity/lib/queries";
-import OrderForm from "./orderpage";
-import SquareButton from "@/components/Button/SquareButton";
+"use client"
 import { useRouter } from "next/navigation";
-// import OrderForm from "./OrderForm";
 
 export default function OrderPage() {
-  // // Fetch order items from Sanity
-  // const orderItems = await client
-  //   .withConfig({ useCdn: false })
-  //   .fetch(ALL_ENABLED_ORDER_ITEMS_QUERY);
-  // const sortedOrderItems = orderItems.sort((a, b) => a.order - b.order);
-
-  // console.log("orderItems", orderItems);
-
-  // const orderData = sortedOrderItems.reduce((acc, item) => {
-  //   acc[item.name] = { boh: "", cashOrder: "", inventory: "" };
-  //   return acc;
-  // }, {});
-
-  // return <OrderForm orderData={orderData} />;
   const router = useRouter();
 
   return (

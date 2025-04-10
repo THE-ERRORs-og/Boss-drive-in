@@ -3,12 +3,15 @@ import React from "react";
 const MainButton = ({
   text,
   className = "",
-  isLoading = false,
   handleFormSubmit,
+  isLoading = false,
+  onClick=()=>{},
+  type="submit"
 }) => {
   return (
     <button
-    type="submit"
+    type={type}
+    onClick={onClick}
     onSubmit={handleFormSubmit}
     className={` ${className} 
       px-4 py-3 sm:px-6 sm:py-3 md:px-8 md:py-3 lg:px-10 lg:py-3 

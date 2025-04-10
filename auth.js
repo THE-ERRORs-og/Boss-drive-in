@@ -1,61 +1,49 @@
-import NextAuth, { CredentialsSignin } from "next-auth";
-import Credentials from "next-auth/providers/credentials";
-import { signInSchema } from "./lib/validation";
-import { client } from "./sanity/lib/client";
-import { USER_SIGNIN_QUERY } from "./sanity/lib/queries";
-import { z } from "zod";
-import { updateUserLogin } from "./lib/actions/registerUser";
+import NextAuth from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
+import connectDB from "./lib/mongodb";
+import User from "./models/User";
 
-export const { handlers, signIn, signOut, auth, } = NextAuth({
-  session: {
-    strategy: "jwt",
-    maxAge: 30 * 24 * 60 * 60,
-  },
+export const {
+  handlers: { GET, POST },
+  auth,
+  signIn,
+  signOut,
+} = NextAuth({
   providers: [
-    Credentials({
+    CredentialsProvider({
+      name: "Credentials",
       credentials: {
-        userid: { label: "User Id" },
+        userid: { label: "User ID", type: "text" },
         password: { label: "Password", type: "password" },
       },
-      authorize: async (credentials) => {
+      async authorize(credentials) {
         try {
-          // Validate credentials using Zod schema
-          const { userid, password } =
-            await signInSchema.parseAsync(credentials);
+          await connectDB();
 
-          // Fetch the user from Sanity
-          const user = await client
-            .withConfig({ useCdn: false })
-            .fetch(USER_SIGNIN_QUERY, { userid });
-
-          console.log(user);
-
-          if (!user || !user.isActive) {
-            throw new Error("No user found with this email.");
+          const user = await User.findOne({ userid: credentials.userid });
+          
+          if (!user) {
+            return null;
           }
 
-          // Verify the password
-          const isPasswordValid = user.password === password;
+          // Direct password comparison since passwords are stored as plain text
+          const isPasswordValid = credentials.password === user.password;
           if (!isPasswordValid) {
-            throw new Error("Invalid password.");
+            return null;
           }
 
-          // Update the lastLogin field with the current datetime
-          const result = await updateUserLogin(user);
-
-          if(result.error) {
-            throw new Error(result.error);
-          }
+          // Update last login
+          await User.findByIdAndUpdate(user._id, { lastLogin: new Date() });
 
           return {
-            id: user._id,
+            id: user._id.toString(),
             name: user.name,
             userid: user.userid,
             role: user.role,
           };
         } catch (error) {
-          // console.error("Authorization error:", error);
-          throw new CredentialsSignin(error.message);
+          console.error("Auth error:", error);
+          return null;
         }
       },
     }),
@@ -71,14 +59,19 @@ export const { handlers, signIn, signOut, auth, } = NextAuth({
       return token;
     },
     async session({ session, token }) {
-      session.user = {
-        id: token.id,
-        userid: token.userid,
-        name: token.name,
-        role: token.role,
-      };
-      session.id = token.id;
+      if (token) {
+        session.user = {
+          id: token.id,
+          userid: token.userid,
+          name: token.name,
+          role: token.role,
+        };
+        session.id = token.id;
+      }
       return session;
     },
+  },
+  pages: {
+    signIn: "/login",
   },
 });

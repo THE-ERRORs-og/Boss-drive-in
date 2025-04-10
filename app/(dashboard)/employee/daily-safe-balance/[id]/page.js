@@ -1,13 +1,22 @@
 import { timeOptions } from "@/lib/constants";
-import { client } from "@/sanity/lib/client";
-import { CASH_SUMMARY_BY_ID_QUERY } from "@/sanity/lib/queries";
+import { getCashSummaryById } from "@/lib/actions/cashSummary";
 
 export default async function Page({ params }) {
   const { id } = await params;
 
   // Fetch data for the cash summary using the id
-  const cashSummary = await client.fetch(CASH_SUMMARY_BY_ID_QUERY, { id });
-  console.log(cashSummary);
+  const result = await getCashSummaryById(id);
+  
+  if (result.status === "ERROR") {
+    return (
+      <div className="h-screen bg-gray-50 flex items-center justify-center">
+        <p className="text-red-500 text-lg">{result.error}</p>
+      </div>
+    );
+  }
+
+  const cashSummary = result.data;
+
   return (
     <div>
       <div className="h-screen bg-gray-50 flex flex-col">
@@ -20,7 +29,7 @@ export default async function Page({ params }) {
             <div className="flex space-x-4 items-center">
               <div className="flex items-center">
                 <p className="text-base font-semibold mr-2">Date:</p>
-                <p className="text-sm">{cashSummary?.datetime || "N/A"}</p>
+                <p className="text-sm">{new Date(cashSummary?.datetime).toLocaleDateString() || "N/A"}</p>
               </div>
               <div className="flex items-center">
                 <p className="text-base font-semibold mr-2">Shift Time:</p>
