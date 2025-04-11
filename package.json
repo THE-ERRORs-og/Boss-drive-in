@@ -42,6 +42,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@tailwindcss/typography": "^0.5.16",
     "dotenv": "^16.4.7",
     "eslint": "^9",
     "eslint-config-next": "15.1.5",
