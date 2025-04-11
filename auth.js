@@ -3,12 +3,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import connectDB from "./lib/mongodb";
 import User from "./models/User";
 
-export const {
-  handlers: { GET, POST },
-  auth,
-  signIn,
-  signOut,
-} = NextAuth({
+const handler = NextAuth({
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -21,7 +16,7 @@ export const {
           await connectDB();
 
           const user = await User.findOne({ userid: credentials.userid });
-          
+
           if (!user) {
             return null;
           }
@@ -75,3 +70,6 @@ export const {
     signIn: "/login",
   },
 });
+
+export const { auth, signIn, signOut } = handler;
+export { handler as GET, handler as POST };
