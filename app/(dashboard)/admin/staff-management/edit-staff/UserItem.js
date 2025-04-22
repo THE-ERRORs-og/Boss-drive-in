@@ -2,13 +2,18 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { deleteUser } from "@/lib/actions/user";
+import { deleteUser, updateUserRole } from "@/lib/actions/user";
 import { useToast } from "@/hooks/use-toast";
+import { useSession } from "@/context/SessionContext";
+import { rolesPriority } from "@/lib/constants";
 
 export default function UserItem({ user, idx, onRemove }) {
+  const currentUser = useSession();
   const router = useRouter();
   const { toast } = useToast();
   const [isPopupVisible, setIsPopupVisible] = useState(false);
+  const currUserRole = rolesPriority[currentUser?.user?.role] || 0;
+  const [userRole,setUserRole] = useState(rolesPriority[user.role] || 0);
 
   const handleRemoveUser = async () => {
     try {
@@ -37,6 +42,33 @@ export default function UserItem({ user, idx, onRemove }) {
     }
   };
 
+  const handleRoleChange = async () => {
+    try {
+      const newRole = userRole === 0 ? 'admin' : 'employee';
+      const result = await updateUserRole(user._id, newRole);
+      if (result.status === "SUCCESS") {
+        setUserRole(rolesPriority[newRole]);
+        toast({
+          variant: "success",
+          title: "Success",
+          description: `User role updated to ${newRole}`,
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: result.error,
+        });
+      }
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to update user role",
+      });
+    }
+  };
+
   const handleFormSubmit = (e) => {
     e.preventDefault();
     setIsPopupVisible(true);
@@ -57,16 +89,34 @@ export default function UserItem({ user, idx, onRemove }) {
         onClick={() =>
           router.push(`/admin/staff-management/employee/${user.userid}`)
         }
-        className="m-1 px-6 py-2 bg-[#ED1C24] text-sm md:text-md text-white rounded-lg font-medium hover:bg-red-600 transition duration-300"
+        disabled={currUserRole <= userRole ? true : false}
+        className={`m-1 px-6 py-2 bg-[#ED1C24] text-sm md:text-md text-white rounded-lg font-medium hover:bg-red-600 transition duration-300 ${
+          currUserRole <= userRole ? "cursor-not-allowed opacity-50" : ""
+        }`}
       >
         Profile
       </button>
       <button
         onClick={handleFormSubmit}
-        className="m-1 px-6 py-2 bg-[#ED1C24] text-sm md:text-md text-white rounded-lg font-medium hover:bg-red-600 transition duration-300"
+        disabled={currUserRole <= userRole ? true : false}
+        className={`m-1 px-6 py-2 bg-[#ED1C24] text-sm md:text-md text-white rounded-lg font-medium hover:bg-red-600 transition duration-300 ${
+          currUserRole <= userRole ? "cursor-not-allowed opacity-50" : ""
+        }`}
       >
         Remove
       </button>
+
+      {currUserRole >= 2 && (
+        <button
+          onClick={handleRoleChange}
+          disabled={currUserRole <= userRole ? true : false}
+          className={`m-1 px-6 py-2 min-w-40 bg-[#ED1C24] text-sm md:text-md text-white rounded-lg font-medium hover:bg-red-600 transition duration-300 ${
+            currUserRole <= userRole ? "cursor-not-allowed opacity-50" : ""
+          }`}
+        >
+          {userRole === 0 ? "Make Admin" : "Make Employee"}
+        </button>
+      )}
 
       {isPopupVisible && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
