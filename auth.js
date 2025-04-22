@@ -43,6 +43,11 @@ const handler = NextAuth({
       },
     }),
   ],
+  session: {
+    strategy: "jwt",
+    maxAge: 24 * 60 * 60, // 1 day
+    updateAge: 15 * 60, // refresh every 15 min
+  },
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
@@ -54,14 +59,15 @@ const handler = NextAuth({
       return token;
     },
     async session({ session, token }) {
-      if (token) {
+      await connectDB();
+      const dbUser = await User.findById(token.id);
+      if (dbUser) {
         session.user = {
-          id: token.id,
-          userid: token.userid,
-          name: token.name,
-          role: token.role,
+          id: dbUser._id.toString(),
+          userid: dbUser.userid,
+          name: dbUser.name,
+          role: dbUser.role, // latest role
         };
-        session.id = token.id;
       }
       return session;
     },
