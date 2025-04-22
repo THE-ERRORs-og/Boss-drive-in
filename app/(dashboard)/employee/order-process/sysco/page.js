@@ -111,7 +111,7 @@ const Page = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-
+    console.log('starting submit',formData);
     try {
       // Validate required fields
       const items = Object.values(formData);
@@ -151,7 +151,7 @@ const Page = () => {
           order: parseFloat(item.order),
         })),
       };
-
+      console.log('orderData',orderData);
       const result = await createSyscoOrder(orderData);
       if (result.status === "SUCCESS") {
         toast({
