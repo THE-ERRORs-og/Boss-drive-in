@@ -24,7 +24,7 @@ const Page = () => {
     const fetchData = async () => {
       try {
         // Fetch order items
-        const itemsResult = await getOrderItems();
+        const itemsResult = await getOrderItems("special-online");
         if (itemsResult.status === "SUCCESS") {
           setOrderItems(itemsResult.data);
           
