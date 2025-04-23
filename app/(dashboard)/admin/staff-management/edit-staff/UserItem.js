@@ -89,9 +89,15 @@ export default function UserItem({ user, idx, onRemove }) {
         onClick={() =>
           router.push(`/admin/staff-management/employee/${user.userid}`)
         }
-        disabled={currUserRole <= userRole ? true : false}
+        disabled={
+          currUserRole <= userRole && currentUser.user.id != user._id
+            ? true
+            : false
+        }
         className={`m-1 px-6 py-2 bg-[#ED1C24] text-sm md:text-md text-white rounded-lg font-medium hover:bg-red-600 transition duration-300 ${
-          currUserRole <= userRole ? "cursor-not-allowed opacity-50" : ""
+          currUserRole <= userRole && currentUser.user.id != user._id
+            ? "cursor-not-allowed opacity-50"
+            : ""
         }`}
       >
         Profile
