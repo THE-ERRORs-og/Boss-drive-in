@@ -33,7 +33,7 @@ export default function OrderPage() {
 
         <button
           onClick={() =>
-            router.push("/employee/order-process/special-online-order")
+            router.push("/employee/order-process/special-online")
           }
           className="w-60 h-60  text-lg flex flex-col items-center justify-center font-semibold border-2 border-red-500 rounded-lg p-10 hover:scale-105 transition transform duration-300 hover:text-red-500"
         >
