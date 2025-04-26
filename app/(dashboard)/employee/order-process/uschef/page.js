@@ -7,10 +7,12 @@ import { useToast } from "@/hooks/use-toast";
 import { getOrderItems } from "@/lib/actions/orderItems";
 import { createUSChefOrder } from "@/lib/actions/usChefOrder";
 import { timeOptions as SHIFT_OPTIONS } from "@/lib/constants";
+import { useRouter } from "next/navigation";
 
 const Page = () => {
   const { user } = useSession();
   const { toast } = useToast();
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split("T")[0]
@@ -135,8 +137,8 @@ const Page = () => {
           description: "USChef order created successfully",
         });
         
-        // Refresh the page
-        window.location.reload();
+        // go the last page
+        router.back();
       } else {
         toast({
           variant: "destructive",

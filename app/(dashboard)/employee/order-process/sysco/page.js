@@ -6,11 +6,13 @@ import { useToast } from "@/hooks/use-toast";
 import { getOrderItems } from "@/lib/actions/orderItems";
 import { getLastSyscoOrder, createSyscoOrder } from "@/lib/actions/syscoOrder";
 import { timeOptions as SHIFT_OPTIONS } from "@/lib/constants";
+import { useRouter } from "next/navigation";
 
 
 const Page = () => {
   const { user } = useSession();
   const { toast } = useToast();
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split("T")[0]
@@ -158,11 +160,9 @@ const Page = () => {
           title: "Success",
           description: "Sysco order created successfully",
         });
-        
-        //  refresh the page
-        window.location.reload();
 
-        
+        // go the last page
+        router.back();
       } else {
         toast({
           variant: "destructive",
@@ -195,6 +195,7 @@ const Page = () => {
               type="date"
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
+              disabled
               className="px-2 py-1 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
             />
           </div>
