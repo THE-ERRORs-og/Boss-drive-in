@@ -8,7 +8,6 @@ import { getLastSyscoOrder, createSyscoOrder } from "@/lib/actions/syscoOrder";
 import { timeOptions as SHIFT_OPTIONS } from "@/lib/constants";
 import { useRouter } from "next/navigation";
 
-
 const Page = () => {
   const { user } = useSession();
   const { toast } = useToast();
@@ -26,10 +25,10 @@ const Page = () => {
     const fetchData = async () => {
       try {
         // Fetch order items
-        const itemsResult = await getOrderItems('sysco');
+        const itemsResult = await getOrderItems("sysco");
         if (itemsResult.status === "SUCCESS") {
           setOrderItems(itemsResult.data);
-          
+
           // Initialize form data
           const initialFormData = itemsResult.data.reduce((acc, item) => {
             acc[item._id] = {
@@ -46,13 +45,14 @@ const Page = () => {
 
           // Fetch last order
           const lastOrderResult = await getLastSyscoOrder();
-          console.log('lastOrderResult',lastOrderResult);
+          console.log("lastOrderResult", lastOrderResult);
           if (lastOrderResult.status === "SUCCESS" && lastOrderResult.data) {
             // Update form data with last order values
             const updatedFormData = { ...initialFormData };
             lastOrderResult.data.items.forEach((item) => {
               if (updatedFormData[item.itemId._id]) {
-                updatedFormData[item.itemId._id].yesterdayOrder = item.order || 0;
+                updatedFormData[item.itemId._id].yesterdayOrder =
+                  item.order || 0;
               }
             });
             setFormData(updatedFormData);
@@ -113,13 +113,11 @@ const Page = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    console.log('starting submit',formData);
+    console.log("starting submit", formData);
     try {
       // Validate required fields
       const items = Object.values(formData);
-      const hasEmptyFields = items.some(
-        (item) => !item.boh || !item.order
-      );
+      const hasEmptyFields = items.some((item) => !item.boh || !item.order);
 
       if (hasEmptyFields) {
         toast({
@@ -153,7 +151,7 @@ const Page = () => {
           order: parseFloat(item.order),
         })),
       };
-      console.log('orderData',orderData);
+      console.log("orderData", orderData);
       const result = await createSyscoOrder(orderData);
       if (result.status === "SUCCESS") {
         toast({
@@ -210,7 +208,7 @@ const Page = () => {
                 Select Time
               </option>
               {SHIFT_OPTIONS.map((shift, idx) => (
-                <option key={idx+1} value={idx + 1}>
+                <option key={idx + 1} value={idx + 1}>
                   {shift}
                 </option>
               ))}
@@ -219,7 +217,10 @@ const Page = () => {
         </div>
       </div>
       <h1 className="text-center text-4xl font-bold">SYSCO</h1>
-      <form onSubmit={handleSubmit} className="w-full max-w-6xl px-6 mt-6">
+      <form
+        onSubmit={handleSubmit}
+        className="w-full max-w-6xl px-6 mt-6 overflow-y-scroll h-[65vh] "
+      >
         <div className="grid grid-cols-5 gap-4 text-center font-bold text-lg mb-4">
           <p className="text-left">Item Name</p>
           <p>Yesterday Order</p>
@@ -233,7 +234,7 @@ const Page = () => {
             className="grid grid-cols-5 gap-4 items-center mb-4"
           >
             <p className="text-left text-lg font-medium">{item.name}</p>
-            
+
             <input
               type="text"
               value={formData[item._id]?.yesterdayOrder || ""}
@@ -264,17 +265,17 @@ const Page = () => {
             />
           </div>
         ))}
-        <div className="flex justify-center mt-6">
-          <MainButton
-            type="submit"
-            text={isLoading ? "Submitting..." : "Submit"}
-            disabled={isLoading}
-            className={`bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition duration-300 ${
-              isLoading ? "opacity-50 cursor-not-allowed" : ""
-            }`}
-          />
-        </div>
       </form>
+      <div className="flex justify-center mt-6">
+        <MainButton
+          type="submit"
+          text={isLoading ? "Submitting..." : "Submit"}
+          disabled={isLoading}
+          className={`bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition duration-300 ${
+            isLoading ? "opacity-50 cursor-not-allowed" : ""
+          }`}
+        />
+      </div>
     </div>
   );
 };
