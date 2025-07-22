@@ -181,14 +181,14 @@ export default function Page() {
   };
 
   return (
-    <div className="flex flex-col justify-start items-center h-screen gap-4 m-4">
+    <div className="flex flex-col justify-start items-center h-screen gap-4 m-4 ">
       <h1 className="text-3xl font-semibold mb-4">
         {orderTypes[orderType]} Order Items
       </h1>
       <h1 className="text-2xl font-bold text-start self-start ml-4">
         Remove the Item you want to remove:
       </h1>
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-3 overflow-y-scroll h-[55vh] w-full">
         {orderItems.map((item, index) => (
           <div
             key={item._id}
@@ -243,7 +243,7 @@ export default function Page() {
       </div>
 
       {showAddItemBar && (
-        <div className="flex flex-col gap-4 mt-4">
+        <div className="flex flex-col gap-4 mt-1">
           <h1 className="text-lg font-bold text-start self-start ml-4">
             Enter the name of the item you want to add:
           </h1>
