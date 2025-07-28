@@ -2,6 +2,7 @@ import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import connectDB from "./lib/mongodb";
 import User from "./models/User";
+const { getUSEasternTime } = require("./lib/utils");
 
 const handler = NextAuth({
   providers: [
@@ -27,8 +28,8 @@ const handler = NextAuth({
             return null;
           }
 
-          // Update last login
-          await User.findByIdAndUpdate(user._id, { lastLogin: new Date() });
+          // Update last login with US Eastern Time
+          await User.findByIdAndUpdate(user._id, { lastLogin: getUSEasternTime() });
 
           return {
             id: user._id.toString(),
