@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { getOrderItems } from "@/lib/actions/orderItems";
 import { createUSChefOrder } from "@/lib/actions/usChefOrder";
 import { timeOptions as SHIFT_OPTIONS } from "@/lib/constants";
+import { getUSEasternTime } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 
 const Page = () => {
@@ -15,7 +16,7 @@ const Page = () => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [selectedDate, setSelectedDate] = useState(
-    new Date().toISOString().split("T")[0]
+    getUSEasternTime().toISOString().split("T")[0]
   );
   const [shiftNumber, setShiftNumber] = useState("");
   const [orderItems, setOrderItems] = useState([]);

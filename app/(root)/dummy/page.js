@@ -2,6 +2,7 @@
 
 import { createCashSummary, deleteAllCashSummaries } from "@/lib/actions/cashSummary";
 import React, { useState } from "react";
+import { getUSEasternTime } from "@/lib/utils";
 
 const InsertCashSummary = () => {
   const [loading, setLoading] = useState(false);
@@ -10,7 +11,7 @@ const InsertCashSummary = () => {
   const generateDummyData = () => {
     const dummyData = [];
     const shifts = [1, 2, 3, 4]; // Shift numbers
-    const baseDate = new Date(); // Current date
+    const baseDate = getUSEasternTime(); // Current date in US Eastern Time
 
     // Generate data for 5 consecutive days from 5 days ago to today
     for (let i = -5; i <= 0; i++) {

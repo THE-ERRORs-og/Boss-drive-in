@@ -7,7 +7,7 @@ import { createOrderSummary } from "@/lib/actions/orderSummary";
 import { getOrderItems } from "@/lib/actions/orderItems";
 import { orderSummarySchema } from "@/lib/validation";
 import { z } from "zod";
-import { downloadOrderHistorySummary } from "@/lib/utils";
+import { downloadOrderHistorySummary, getUSEasternTime } from "@/lib/utils";
 
 export default function OrderForm({ orderData: initialOrderData }) {
   const { toast } = useToast();
@@ -113,7 +113,7 @@ export default function OrderForm({ orderData: initialOrderData }) {
         cashOrder: parseFloat(values.cashOrder) || 0,
         inventory: parseFloat(values.inventory) || 0,
       })),
-      submissionDate: new Date().toISOString(),
+      submissionDate: getUSEasternTime().toISOString(),
     };
 
     const isOrderDataValid = validateOrderData();
@@ -193,7 +193,7 @@ export default function OrderForm({ orderData: initialOrderData }) {
         cashOrder: parseFloat(values.cashOrder) || 0,
         inventory: parseFloat(values.inventory) || 0,
       })),
-      submissionDate: new Date().toISOString(),
+      submissionDate: getUSEasternTime().toISOString(),
     };
 
     const isOrderDataValid = validateOrderData();
