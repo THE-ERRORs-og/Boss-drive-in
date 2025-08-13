@@ -197,17 +197,19 @@ const Page = () => {
         onSubmit={handleSubmit}
         className="w-full max-w-6xl px-6 mt-6 overflow-y-scroll h-[65vh]"
       >
-        <div className="grid grid-cols-3 gap-4 text-center font-bold text-lg mb-4">
+        <div className="grid grid-cols-4 gap-4 text-center font-bold text-lg mb-4">
           <p className="text-left">Item Name</p>
+          <p>Stock No.</p>
           <p>BOH</p>
           <p>Order</p>
         </div>
         {orderItems.map((item) => (
           <div
             key={item._id}
-            className="grid grid-cols-3 gap-4 items-center mb-4"
+            className="grid grid-cols-4 gap-4 items-center mb-4"
           >
             <p className="text-left text-lg font-medium">{item.name}</p>
+            <p className="text-center text-lg font-medium">{item.stockNo || "N/A"}</p>
             <input
               type="text"
               value={formData[item._id]?.boh || ""}
