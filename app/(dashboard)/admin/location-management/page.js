@@ -1,5 +1,5 @@
 import SquareButton from "@/components/Button/SquareButton";
-import { add_location, edit_location } from "@/public/images";
+import { add_location, edit_location, staff_management } from "@/public/images";
 
 export default function Page() {
   return (
@@ -18,6 +18,13 @@ export default function Page() {
           text="Manage Locations"
           imageUrl={edit_location}
           redirectUrl="/admin/location-management/manage-locations"
+        />
+        
+        {/* Manage User Location Access */}
+        <SquareButton
+          text="Manage User Location Access"
+          imageUrl={staff_management}
+          redirectUrl="/admin/user-location-access/manage"
         />
       </div>
     </div>

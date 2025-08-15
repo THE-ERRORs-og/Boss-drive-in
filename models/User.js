@@ -31,6 +31,10 @@ const userSchema = new mongoose.Schema(
     lastLogin: {
       type: Date,
     },
+    locationAccess: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Location",
+    }],
   },
   {
     timestamps: true,
