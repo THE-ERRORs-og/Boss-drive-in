@@ -8,5 +8,22 @@ import edit_staff from './edit_staff.svg';
 import daily_cash_flow from './daily_cash_flow.svg';
 import view_order_history from './view_order_history.svg';
 import edit_order_list from './edit_order_list.svg';
+import location_management from './location_management.svg';
+import add_location from './add_staff_member.svg'; // Reusing the add_staff_member icon for now
+import edit_location from './edit_staff.svg'; // Reusing the edit_staff icon for now
 
-export {logo, daily_cash_summary, daily_safe_balance, employee_order_process , staff_management , add_staff_member , edit_staff, daily_cash_flow , view_order_history , edit_order_list};
+export {
+  logo, 
+  daily_cash_summary, 
+  daily_safe_balance, 
+  employee_order_process, 
+  staff_management, 
+  add_staff_member, 
+  edit_staff, 
+  daily_cash_flow, 
+  view_order_history, 
+  edit_order_list,
+  location_management,
+  add_location,
+  edit_location
+};

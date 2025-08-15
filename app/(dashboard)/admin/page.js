@@ -2,6 +2,7 @@ import SquareButton from "@/components/Button/SquareButton";
 import staff_management from "@/public/staff_management.svg";
 import daily_safe_balance_history from "@/public/daily_safe_balance_history.svg";
 import employee_order_history from "@/public/employee_order_history.svg";
+import { location_management } from "@/public/images";
 
 export default function Page() {
   return (
@@ -13,16 +14,22 @@ export default function Page() {
           redirectUrl="/admin/staff-management"
         />
 
-        {/* Staff Login */}
         <SquareButton
           text="Daily Safe Balance History"
           imageUrl={daily_safe_balance_history}
           redirectUrl="/admin/daily-safe-balance"
         />
+
         <SquareButton
           text="Employee Order History"
           imageUrl={employee_order_history}
           redirectUrl="/admin/employee-order-history"
+        />
+
+        <SquareButton
+          text="Location Management"
+          imageUrl={location_management}
+          redirectUrl="/admin/location-management"
         />
       </div>
     </div>
