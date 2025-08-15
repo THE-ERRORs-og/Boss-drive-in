@@ -137,11 +137,17 @@ export default function UserLocationManager({ user }) {
   };
 
   const toggleAssignSelection = (locationId) => {
-    setSelectedToAssign(prev => 
-      prev.includes(locationId) 
-        ? prev.filter(id => id !== locationId)
-        : [...prev, locationId]
-    );
+    // For regular employees, only allow one location selection at a time
+    if (user.role === "employee") {
+      setSelectedToAssign([locationId]);
+    } else {
+      // For admins, allow multiple selections
+      setSelectedToAssign(prev => 
+        prev.includes(locationId) 
+          ? prev.filter(id => id !== locationId)
+          : [...prev, locationId]
+      );
+    }
   };
 
   const toggleRemoveSelection = (locationId) => {
@@ -167,6 +173,14 @@ export default function UserLocationManager({ user }) {
       {/* Current Access Section */}
       <div className="bg-white p-6 rounded-lg shadow-md">
         <h2 className="text-xl font-bold mb-4 text-center">Current Access</h2>
+        
+        {user.role === "employee" && (
+          <div className="bg-yellow-50 p-3 rounded-md mb-4">
+            <p className="text-sm text-yellow-800">
+              <span className="font-bold">Note:</span> Regular users can only have access to one location at a time.
+            </p>
+          </div>
+        )}
         
         {assignedLocations.length === 0 ? (
           <div className="bg-gray-50 p-4 rounded text-center">
@@ -222,6 +236,15 @@ export default function UserLocationManager({ user }) {
       <div className="bg-white p-6 rounded-lg shadow-md">
         <h2 className="text-xl font-bold mb-4 text-center">Available Locations</h2>
         
+        {user.role === "employee" && (
+          <div className="bg-blue-50 p-3 rounded-md mb-4">
+            <p className="text-sm text-blue-800">
+              <span className="font-bold">Note:</span> Regular users can only have access to one location at a time. 
+              Selecting a new location will replace their current access.
+            </p>
+          </div>
+        )}
+        
         {availableLocations.length === 0 ? (
           <div className="bg-gray-50 p-4 rounded text-center">
             <p className="text-gray-500">No available locations to assign</p>
@@ -238,11 +261,12 @@ export default function UserLocationManager({ user }) {
                     }`}
                   >
                     <input
-                      type="checkbox"
+                      type={user.role === "employee" ? "radio" : "checkbox"}
                       id={`assign-${location._id}`}
                       checked={selectedToAssign.includes(location._id)}
                       onChange={() => toggleAssignSelection(location._id)}
                       className="h-5 w-5 text-green-600 rounded"
+                      name={user.role === "employee" ? "employeeLocation" : undefined}
                     />
                     <label htmlFor={`assign-${location._id}`} className="flex-1 cursor-pointer">
                       <div className="font-medium">{location.name}</div>
