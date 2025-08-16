@@ -6,6 +6,7 @@ import {
   deleteItem,
   toggleItemStatus,
   updateOrder,
+  updateOrderItem,
 } from "@/lib/actions/orderItems";
 import { useToast } from "@/hooks/use-toast";
 import { useParams } from "next/navigation";
@@ -17,10 +18,13 @@ export default function Page() {
   const [orderItems, setOrderItems] = useState([]);
   const [showAddItemBar, setShowAddItemBar] = useState(false);
   const [newItem, setNewItem] = useState("");
+  const [newStockNo, setNewStockNo] = useState("");
   const [isPopupVisible, setIsPopupVisible] = useState(false);
   const [popupAction, setPopupAction] = useState(null);
   const [selectedItemId, setSelectedItemId] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const [itemToEdit, setItemToEdit] = useState({ id: "", name: "", stockNo: "" });
 
   // Fetch order items
   async function fetchOrderItems() {
@@ -70,6 +74,8 @@ export default function Page() {
         await handleDisableItem(selectedItemId);
       } else if (popupAction === "delete") {
         await handleDeleteItem(selectedItemId);
+      } else if (popupAction === "edit") {
+        await handleEditItem();
       }
       await fetchOrderItems();
     } catch (error) {
@@ -111,9 +117,9 @@ export default function Page() {
   };
 
   const handleSaveNewItem = async () => {
-    if (newItem.trim()) {
+    if (newItem.trim() && newStockNo.trim()) {
       try {
-        const result = await createOrderItem(newItem.trim(), orderType);
+        const result = await createOrderItem(newItem.trim(), orderType, newStockNo.trim());
         if (result.status === "SUCCESS") {
           toast({
             variant: "success",
@@ -121,6 +127,7 @@ export default function Page() {
             description: "Item added successfully",
           });
           setNewItem("");
+          setNewStockNo("");
           setShowAddItemBar(false);
         } else {
           throw new Error(result.error);
@@ -133,6 +140,12 @@ export default function Page() {
           description: error.message || "Failed to add item",
         });
       }
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Name and Stock Number are required",
+      });
     }
   };
 
@@ -180,6 +193,54 @@ export default function Page() {
     }
   };
 
+  const handleEditButtonClick = (item) => {
+    setItemToEdit({
+      id: item._id,
+      name: item.name,
+      stockNo: item.stockNo || ""
+    });
+    setEditMode(true);
+    setShowAddItemBar(true);
+  };
+
+  const handleEditItem = async () => {
+    if (itemToEdit.name.trim() && itemToEdit.stockNo.trim()) {
+      try {
+        const result = await updateOrderItem(
+          itemToEdit.id, 
+          itemToEdit.name.trim(), 
+          itemToEdit.stockNo.trim()
+        );
+        
+        if (result.status === "SUCCESS") {
+          toast({
+            variant: "success",
+            title: "Success",
+            description: "Item updated successfully",
+          });
+          setItemToEdit({ id: "", name: "", stockNo: "" });
+          setEditMode(false);
+          setShowAddItemBar(false);
+        } else {
+          throw new Error(result.error);
+        }
+      } catch (error) {
+        console.error("Error updating item:", error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: error.message || "Failed to update item",
+        });
+      }
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Name and Stock Number are required",
+      });
+    }
+  };
+
   return (
     <div className="flex flex-col justify-start items-center h-screen gap-4 m-4 ">
       <h1 className="text-3xl font-semibold mb-4">
@@ -206,12 +267,29 @@ export default function Page() {
             </div>
 
             <div
-              className={`border-2 border-gray-300 p-2 rounded-md w-[60vw] h-[40] font-semibold text-2xl justify-center items-center flex ${
+              className={`border-2 border-gray-300 p-2 rounded-md w-[30vw] h-[40] font-semibold text-2xl justify-center items-center flex ${
                 !item.isEnabled ? "bg-gray-300" : ""
               }`}
             >
               {item.name}
             </div>
+
+            <div
+              className={`border-2 border-gray-300 p-2 rounded-md w-[20vw] h-[40] font-semibold text-2xl justify-center items-center flex ${
+                !item.isEnabled ? "bg-gray-300" : ""
+              }`}
+            >
+              {item.stockNo || "N/A"}
+            </div>
+
+            <button
+              onClick={() => handleEditButtonClick(item)}
+              className="px-4 py-3 sm:px-6 sm:py-3 md:px-8 md:py-3 lg:px-10 lg:py-3 
+      bg-blue-500 text-white text-sm sm:text-base md:text-md lg:text-lg 
+      font-semibold border rounded-lg hover:bg-blue-600 transition duration-300"
+            >
+              Edit
+            </button>
 
             <button
               onClick={() => {
@@ -245,23 +323,42 @@ export default function Page() {
       {showAddItemBar && (
         <div className="flex flex-col gap-4 mt-1">
           <h1 className="text-lg font-bold text-start self-start ml-4">
-            Enter the name of the item you want to add:
+            {editMode ? "Edit item:" : "Enter the details of the item you want to add:"}
           </h1>
-          <div className="flex gap-3">
-            <input
-              type="text"
-              className="border-2 border-gray-300 p-2 rounded-md w-[60vw] h-[40] font-medium text-xl"
-              value={newItem}
-              onChange={(e) => setNewItem(e.target.value)}
-              placeholder="Enter item name"
-            />
+          <div className="flex flex-row gap-6 items-center">
+            <div className="flex gap-2">
+              <label className="min-w-[100px] font-medium text-lg flex items-center">Item Name:</label>
+              <input
+                type="text"
+                className="border-2 border-gray-300 p-2 rounded-md w-[30vw] h-[40] font-medium text-xl"
+                value={editMode ? itemToEdit.name : newItem}
+                onChange={(e) => editMode ? setItemToEdit({...itemToEdit, name: e.target.value}) : setNewItem(e.target.value)}
+                placeholder="Enter item name"
+              />
+            </div>
+            <div className="flex gap-2">
+              <label className="min-w-[120px] font-medium text-lg flex items-center">Stock Number:</label>
+              <input
+                type="text"
+                className="border-2 border-gray-300 p-2 rounded-md w-[25vw] h-[40] font-medium text-xl"
+                value={editMode ? itemToEdit.stockNo : newStockNo}
+                onChange={(e) => editMode ? setItemToEdit({...itemToEdit, stockNo: e.target.value}) : setNewStockNo(e.target.value)}
+                placeholder="Enter stock number"
+              />
+            </div>
           </div>
         </div>
       )}
 
       <div className="gap-20 flex">
         <button
-          onClick={handleAddItemClick}
+          onClick={() => {
+            setShowAddItemBar(!showAddItemBar);
+            if (editMode) {
+              setEditMode(false);
+              setItemToEdit({ id: "", name: "", stockNo: "" });
+            }
+          }}
           className="px-4 py-3 sm:px-6 sm:py-3 md:px-8 md:py-3 lg:px-10 lg:py-3 
       bg-[#ED1C24] text-white text-sm sm:text-base md:text-md lg:text-lg 
       font-semibold border rounded-lg hover:bg-red-600 transition duration-300"
@@ -271,14 +368,18 @@ export default function Page() {
         {showAddItemBar && (
           <button
             onClick={() => {
-              setPopupAction("save");
+              if (editMode) {
+                setPopupAction("edit");
+              } else {
+                setPopupAction("save");
+              }
               handlePopUp();
             }}
             className="px-4 py-3 sm:px-6 sm:py-3 md:px-8 md:py-3 lg:px-10 lg:py-3 
       bg-[#ED1C24] text-white text-sm sm:text-base md:text-md lg:text-lg 
       font-semibold border rounded-lg hover:bg-red-600 transition duration-300"
           >
-            Save Changes
+            {editMode ? "Update Item" : "Save Changes"}
           </button>
         )}
       </div>
@@ -287,7 +388,10 @@ export default function Page() {
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-lg shadow-lg text-center">
             <p className="text-lg font-medium">
-              Are You Sure to {popupAction} Item?
+              {popupAction === "save" && "Are You Sure to Save This Item?"}
+              {popupAction === "edit" && "Are You Sure to Update This Item?"}
+              {popupAction === "disable" && "Are You Sure to Change Item Status?"}
+              {popupAction === "delete" && "Are You Sure to Delete This Item?"}
             </p>
             <div className="flex gap-20">
               <button

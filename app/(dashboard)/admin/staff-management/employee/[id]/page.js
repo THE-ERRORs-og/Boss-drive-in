@@ -17,6 +17,7 @@ export default async function Page({ params }) {
   }
 
   const employee = result.data;
+  const isSuperadmin = employee.role === "superadmin";
 
   return (
     <div className="flex flex-col items-center justify-center h-screen w-screen text-xl gap-2">
@@ -48,13 +49,52 @@ export default async function Page({ params }) {
           {employee.password}
         </div>
       </div>
+      <div className="flex justify-between items-center gap-10 w-[50vw]">
+        <h1 className="font-semibold">Role :</h1>
+        <div
+          type="text"
+          className="border-2 border-gray-300 p-2 rounded-md w-[30vw] h-[60] font-semibold text-2xl justify-center items-center flex capitalize"
+        >
+          {employee.role}
+        </div>
+      </div>
 
-      <Link
-        href={`/admin/staff-management/employee/${employee.userid}/edit`}
-        className="text-blue-boss font-bold text-lg"
-      >
-        Forgot Password ?
-      </Link>
+      <div className="flex justify-between items-center gap-10 w-[50vw]">
+        <h1 className="font-semibold">Location Access :</h1>
+        <div
+          type="text"
+          className="border-2 border-gray-300 p-2 rounded-md w-[30vw] font-semibold text-xl justify-center items-center flex"
+        >
+          {isSuperadmin ? (
+            <span>All Locations (Superadmin)</span>
+          ) : employee.locationAccess && employee.locationAccess.length > 0 ? (
+            <ul className="list-disc list-inside text-left">
+              {employee.locationAccess.map(location => (
+                <li key={location._id}>{location.name}</li>
+              ))}
+            </ul>
+          ) : (
+            <span>No locations assigned</span>
+          )}
+        </div>
+      </div>
+
+      <div className="flex flex-col sm:flex-row gap-4 mt-4">
+        <Link
+          href={`/admin/staff-management/employee/${employee.userid}/edit`}
+          className="text-blue-boss font-bold text-lg"
+        >
+          Forgot Password ?
+        </Link>
+        
+        <Link
+          href={`/admin/user-location-access/${employee.userid}`}
+          className="text-blue-boss font-bold text-lg"
+        >
+          Manage Location Access
+        </Link>
+      </div>
+      
       <p>Last Login</p>
 
       <div className="flex gap-4">

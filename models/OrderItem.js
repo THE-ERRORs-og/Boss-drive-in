@@ -12,6 +12,11 @@ const orderItemSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    stockNo: {
+      type: String,
+      required: true,
+      unique: true,
+    },
     type: {
       type: String,
       // enum: Object.keys(orderTypes),
