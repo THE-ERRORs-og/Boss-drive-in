@@ -11,6 +11,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useParams } from "next/navigation";
 import { orderTypes } from "@/lib/constants";
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 
 export default function Page() {
   const { orderType } = useParams();
@@ -31,7 +32,10 @@ export default function Page() {
     try {
       const result = await getAllOrderItems(orderType);
       if (result.status === "SUCCESS") {
-        setOrderItems(result.data);
+        // Sort items by order property to ensure correct display
+        const sortedItems = result.data.sort((a, b) => a.order - b.order);
+        console.log('Fetched items:', sortedItems.map(item => ({ name: item.name, order: item.order })));
+        setOrderItems(sortedItems);
       } else {
         toast({
           variant: "destructive",
@@ -107,12 +111,89 @@ export default function Page() {
     updateMongoDBOrder(newItems);
   };
 
+  // Track the dragging state
+  const [isDragging, setIsDragging] = useState(false);
+  const [draggedItemId, setDraggedItemId] = useState(null);
+
+  // Handle the start of dragging
+  const handleDragStart = (start) => {
+    setIsDragging(true);
+    setDraggedItemId(start.draggableId);
+    console.log('Started dragging:', start.draggableId, 'from index:', start.source.index);
+  };
+
+  // Handle the end of a drag operation
+  const handleDragEnd = (result) => {
+    setIsDragging(false);
+    setDraggedItemId(null);
+    
+    const { destination, source, draggableId } = result;
+    
+    // Drop outside the list or no destination
+    if (!destination) {
+      return;
+    }
+
+    // If dropped in the same position
+    if (destination.index === source.index) {
+      return;
+    }
+
+    // Create a new ordered array
+    const newOrderedItems = Array.from(orderItems);
+    
+    // Find the item being dragged
+    const draggedItem = newOrderedItems.find(item => item._id === draggableId);
+    
+    if (!draggedItem) {
+      console.error('Could not find dragged item with ID:', draggableId);
+      return;
+    }
+    
+    // Remove the item from its original position
+    newOrderedItems.splice(source.index, 1);
+    
+    // Insert the item at its new position
+    newOrderedItems.splice(destination.index, 0, draggedItem);
+    
+    // Log the reordering for debugging
+    console.log(`Moving item "${draggedItem.name}" from position ${source.index} to ${destination.index}`);
+    console.log('New order:', newOrderedItems.map((item, i) => `${i}: ${item.name}`));
+    
+    // Update the order property for each item
+    const updatedItems = newOrderedItems.map((item, index) => ({
+      ...item,
+      order: index + 1
+    }));
+    
+    // Update state and save to DB
+    setOrderItems(updatedItems);
+    updateMongoDBOrder(updatedItems);
+  };
+
   let debounceTimer;
 
   const updateMongoDBOrder = (newItems) => {
     clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(() => {
-      updateOrder(newItems);
+    debounceTimer = setTimeout(async () => {
+      try {
+        console.log('Saving new order to database:', newItems.map(item => item.name));
+        const result = await updateOrder(newItems);
+        if (result.status !== "SUCCESS") {
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: result.error || "Failed to update order",
+          });
+        }
+      } catch (error) {
+        console.error("Error updating order:", error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to save the new order",
+        });
+      }
     }, 500);
   };
 
@@ -247,102 +328,190 @@ export default function Page() {
         {orderTypes[orderType]} Order Items
       </h1>
       <h1 className="text-2xl font-bold text-start self-start ml-4">
-        Remove the Item you want to remove:
+        Drag and drop to reorder, or remove items as needed:
       </h1>
-      <div className="flex flex-col gap-3 overflow-y-scroll h-[55vh] w-full">
-        {orderItems.map((item, index) => (
-          <div
-            key={item._id}
-            className="flex justify-center items-center gap-3"
-          >
-            <div className="border-2 border-gray-300 flex flex-col p-2 rounded-md">
-              <div
-                className="w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-b-[15px] border-b-black"
-                onClick={() => moveItem(index, -1)}
-              ></div>
-              <div
-                className="w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-t-[15px] border-t-black mt-1"
-                onClick={() => moveItem(index, 1)}
-              ></div>
-            </div>
-
+      <DragDropContext onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
+        
+        <Droppable droppableId="droppable">
+          {(provided, snapshot) => (
             <div
-              className={`border-2 border-gray-300 p-2 rounded-md w-[30vw] h-[40] font-semibold text-2xl justify-center items-center flex ${
-                !item.isEnabled ? "bg-gray-300" : ""
+              {...provided.droppableProps}
+              ref={provided.innerRef}
+              className={`flex flex-col gap-3 overflow-y-scroll h-[55vh] w-full p-2 transition-colors duration-200 ${
+                snapshot && snapshot.isDraggingOver
+                  ? "bg-blue-50 rounded-lg border border-blue-200"
+                  : ""
               }`}
+              // style={{
+              //   // Add space to ensure placeholder is visible
+              //   minHeight: '100px',
+              //   // padding: snapshot && snapshot.isDraggingOver ? '16px' : '8px',
+              // }}
             >
-              {item.name}
+              {orderItems.map((item, index) => (
+                <Draggable
+                  key={item._id}
+                  draggableId={item._id}
+                  index={index}
+                  // disableInteractiveElementBlocking={true}
+                >
+                  {(provided, snapshot) => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.draggableProps}
+                      {...provided.dragHandleProps}
+                      className={`flex justify-center items-center gap-3 mb-4 p-2 transition-all duration-200 ${
+                        snapshot && snapshot.isDragging
+                          ? "opacity-90 bg-green-200 shadow-lg rounded-lg border-2 border-blue-300 z-50"
+                          : "bg-white"
+                      }`}
+                      style={{
+                        // Important: Maintain the height and position during dragging
+                        minHeight: "70px",
+                        boxShadow:
+                          snapshot && snapshot.isDragging
+                            ? "0 5px 15px rgba(0, 0, 0, 0.1)"
+                            : "none",
+                        ...provided.draggableProps.style,
+                      }}
+                    >
+                      <div
+                        {...provided.dragHandleProps}
+                        className={`border-2 border-gray-300 flex flex-col p-2 rounded-md cursor-grab ${
+                          snapshot && snapshot.isDragging
+                            ? "bg-blue-200"
+                            : "bg-gray-100"
+                        }`}
+                      >
+                        <div className="w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-b-[15px] border-b-black"></div>
+                        <div className="w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-t-[15px] border-t-black mt-1"></div>
+                      </div>
+
+                      <div
+                        className={`border-2 border-gray-300 p-2 rounded-md w-[30vw] h-[40] font-semibold text-2xl justify-center items-center flex ${
+                          !item.isEnabled ? "bg-gray-300" : ""
+                        }`}
+                      >
+                        {item.name}
+                      </div>
+
+                      <div
+                        className={`border-2 border-gray-300 p-2 rounded-md w-[20vw] h-[40] font-semibold text-2xl justify-center items-center flex ${
+                          !item.isEnabled ? "bg-gray-300" : ""
+                        }`}
+                      >
+                        {item.stockNo || "N/A"}
+                      </div>
+
+                      <button
+                        onClick={() => handleEditButtonClick(item)}
+                        className={`px-4 py-3 sm:px-6 sm:py-3 md:px-8 md:py-3 lg:px-10 lg:py-3 
+                bg-blue-500 text-white text-sm sm:text-base md:text-md lg:text-lg 
+                font-semibold border rounded-lg hover:bg-blue-600 transition duration-300`}
+                      >
+                        Edit
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          setPopupAction("disable");
+                          setSelectedItemId(item._id);
+                          handlePopUp();
+                        }}
+                        className={`px-4 py-3 sm:px-6 sm:py-3 md:px-8 md:py-3 lg:px-10 lg:py-3 
+                text-white text-sm sm:text-base md:text-md lg:text-lg 
+                font-semibold border rounded-lg transition duration-300
+                ${
+                  item.isEnabled
+                    ? "bg-green-500 hover:bg-green-600"
+                    : "bg-red-500 hover:bg-red-600"
+                }`}
+                      >
+                        {item.isEnabled ? "Enabled" : "Disabled"}
+                      </button>
+                      <button
+                        onClick={() => {
+                          setPopupAction("delete");
+                          setSelectedItemId(item._id);
+                          handlePopUp();
+                        }}
+                        className={`px-4 py-3 sm:px-6 sm:py-3 md:px-8 md:py-3 lg:px-10 lg:py-3 
+                bg-[#ED1C24] text-white text-sm sm:text-base md:text-md lg:text-lg 
+                font-semibold border rounded-lg hover:bg-red-600 transition duration-300`}
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  )}
+                </Draggable>
+              ))}
+              <style jsx global>{`
+                .react-beautiful-dnd-placeholder {
+                  background-color: rgba(144, 202, 249, 0.3);
+                  border: 2px dashed #2196f3;
+                  border-radius: 8px;
+                  margin-bottom: 16px;
+                  min-height: 70px;
+                  max-width: 100%;
+                  transition: background-color 0.2s ease;
+                  animation: pulse 1.5s infinite ease-in-out;
+                }
+
+                @keyframes pulse {
+                  0% {
+                    background-color: rgba(144, 202, 249, 0.2);
+                  }
+                  50% {
+                    background-color: rgba(144, 202, 249, 0.5);
+                  }
+                  100% {
+                    background-color: rgba(144, 202, 249, 0.2);
+                  }
+                }
+              `}</style>
+              {provided.placeholder}
             </div>
-
-            <div
-              className={`border-2 border-gray-300 p-2 rounded-md w-[20vw] h-[40] font-semibold text-2xl justify-center items-center flex ${
-                !item.isEnabled ? "bg-gray-300" : ""
-              }`}
-            >
-              {item.stockNo || "N/A"}
-            </div>
-
-            <button
-              onClick={() => handleEditButtonClick(item)}
-              className="px-4 py-3 sm:px-6 sm:py-3 md:px-8 md:py-3 lg:px-10 lg:py-3 
-      bg-blue-500 text-white text-sm sm:text-base md:text-md lg:text-lg 
-      font-semibold border rounded-lg hover:bg-blue-600 transition duration-300"
-            >
-              Edit
-            </button>
-
-            <button
-              onClick={() => {
-                setPopupAction("disable");
-                setSelectedItemId(item._id);
-                handlePopUp();
-              }}
-              className={`px-4 py-3 sm:px-6 sm:py-3 md:px-8 md:py-3 lg:px-10 lg:py-3 
-      bg-[#ED1C24] text-white text-sm sm:text-base md:text-md lg:text-lg 
-      font-semibold border rounded-lg hover:bg-red-600 transition duration-300
-      ${item.isEnabled ? "bg-green-500" : "bg-red-500"}`}
-            >
-              {item.isEnabled ? "Enabled" : "Disabled"}
-            </button>
-            <button
-              onClick={() => {
-                setPopupAction("delete");
-                setSelectedItemId(item._id);
-                handlePopUp();
-              }}
-              className="px-4 py-3 sm:px-6 sm:py-3 md:px-8 md:py-3 lg:px-10 lg:py-3 
-      bg-[#ED1C24] text-white text-sm sm:text-base md:text-md lg:text-lg 
-      font-semibold border rounded-lg hover:bg-red-600 transition duration-300"
-            >
-              Remove
-            </button>
-          </div>
-        ))}
-      </div>
+          )}
+        </Droppable>
+      </DragDropContext>
 
       {showAddItemBar && (
         <div className="flex flex-col gap-4 mt-1">
           <h1 className="text-lg font-bold text-start self-start ml-4">
-            {editMode ? "Edit item:" : "Enter the details of the item you want to add:"}
+            {editMode
+              ? "Edit item:"
+              : "Enter the details of the item you want to add:"}
           </h1>
           <div className="flex flex-row gap-6 items-center">
             <div className="flex gap-2">
-              <label className="min-w-[100px] font-medium text-lg flex items-center">Item Name:</label>
+              <label className="min-w-[100px] font-medium text-lg flex items-center">
+                Item Name:
+              </label>
               <input
                 type="text"
                 className="border-2 border-gray-300 p-2 rounded-md w-[30vw] h-[40] font-medium text-xl"
                 value={editMode ? itemToEdit.name : newItem}
-                onChange={(e) => editMode ? setItemToEdit({...itemToEdit, name: e.target.value}) : setNewItem(e.target.value)}
+                onChange={(e) =>
+                  editMode
+                    ? setItemToEdit({ ...itemToEdit, name: e.target.value })
+                    : setNewItem(e.target.value)
+                }
                 placeholder="Enter item name"
               />
             </div>
             <div className="flex gap-2">
-              <label className="min-w-[120px] font-medium text-lg flex items-center">Stock Number:</label>
+              <label className="min-w-[120px] font-medium text-lg flex items-center">
+                Stock Number:
+              </label>
               <input
                 type="text"
                 className="border-2 border-gray-300 p-2 rounded-md w-[25vw] h-[40] font-medium text-xl"
                 value={editMode ? itemToEdit.stockNo : newStockNo}
-                onChange={(e) => editMode ? setItemToEdit({...itemToEdit, stockNo: e.target.value}) : setNewStockNo(e.target.value)}
+                onChange={(e) =>
+                  editMode
+                    ? setItemToEdit({ ...itemToEdit, stockNo: e.target.value })
+                    : setNewStockNo(e.target.value)
+                }
                 placeholder="Enter stock number"
               />
             </div>
@@ -359,9 +528,9 @@ export default function Page() {
               setItemToEdit({ id: "", name: "", stockNo: "" });
             }
           }}
-          className="px-4 py-3 sm:px-6 sm:py-3 md:px-8 md:py-3 lg:px-10 lg:py-3 
+          className={`px-4 py-3 sm:px-6 sm:py-3 md:px-8 md:py-3 lg:px-10 lg:py-3 
       bg-[#ED1C24] text-white text-sm sm:text-base md:text-md lg:text-lg 
-      font-semibold border rounded-lg hover:bg-red-600 transition duration-300"
+      font-semibold border rounded-lg hover:bg-red-600 transition duration-300`}
         >
           {showAddItemBar ? "Cancel" : "Add Item"}
         </button>
@@ -375,9 +544,9 @@ export default function Page() {
               }
               handlePopUp();
             }}
-            className="px-4 py-3 sm:px-6 sm:py-3 md:px-8 md:py-3 lg:px-10 lg:py-3 
+            className={`px-4 py-3 sm:px-6 sm:py-3 md:px-8 md:py-3 lg:px-10 lg:py-3 
       bg-[#ED1C24] text-white text-sm sm:text-base md:text-md lg:text-lg 
-      font-semibold border rounded-lg hover:bg-red-600 transition duration-300"
+      font-semibold border rounded-lg hover:bg-red-600 transition duration-300`}
           >
             {editMode ? "Update Item" : "Save Changes"}
           </button>
@@ -390,7 +559,8 @@ export default function Page() {
             <p className="text-lg font-medium">
               {popupAction === "save" && "Are You Sure to Save This Item?"}
               {popupAction === "edit" && "Are You Sure to Update This Item?"}
-              {popupAction === "disable" && "Are You Sure to Change Item Status?"}
+              {popupAction === "disable" &&
+                "Are You Sure to Change Item Status?"}
               {popupAction === "delete" && "Are You Sure to Delete This Item?"}
             </p>
             <div className="flex gap-20">
