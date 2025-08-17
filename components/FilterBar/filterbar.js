@@ -14,6 +14,7 @@ import {
   Search,
   ArrowDownWideNarrow,
   ArrowUpWideNarrow,
+  MapPin,
 } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { useRouter } from "next/navigation";
@@ -22,12 +23,17 @@ export default function FilterComponent({
   query: defaultQuery = "",
   sortOrder: defaultSortOrder = "desc",
   dateRange: defaultDateRange = { start: null, end: null },
+  locations = [],
+  initialLocation = "",
+  showLocationSelector = true,
+  isLoadingLocations = false,
   onFilterChange,
 }) {
   const router = useRouter();
   const [query, setQuery] = useState(defaultQuery);
   const [sortOrder, setSortOrder] = useState(defaultSortOrder);
   const [dateRange, setDateRange] = useState(defaultDateRange);
+  const [location, setLocation] = useState(initialLocation);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   useEffect(() => {
@@ -40,9 +46,10 @@ export default function FilterComponent({
       params.set("startDate", dateRange.start.toISOString());
       params.set("endDate", dateRange.end.toISOString());
     }
+    params.set("location", location);
     router.push(`?${params.toString()}`);
-    onFilterChange?.({ query, sortOrder, startDate, endDate });
-  }, [query, sortOrder, dateRange]);
+    onFilterChange?.({ query, sortOrder, location, startDate, endDate });
+  }, [query, sortOrder, location, dateRange]);
 
   return (
     <div className="flex flex-col w-full items-center p-6">
@@ -68,6 +75,28 @@ export default function FilterComponent({
             <Search />
           </div>
         </div>
+
+        {/* Location Selector */}
+        {showLocationSelector && locations.length > 0 && (
+          <div className="relative min-w-[200px]">
+            <select
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              disabled={isLoadingLocations}
+              className="w-full bg-white text-black border border-gray-300 rounded-md py-2 px-3 appearance-none focus:outline-none focus:ring-2 focus:ring-red-500"
+            >
+              <option value="">All Locations</option>
+              {locations.map(loc => (
+                <option key={loc._id} value={loc._id}>
+                  {loc.name}
+                </option>
+              ))}
+            </select>
+            <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+              <MapPin className="h-5 w-5 text-gray-400" />
+            </div>
+          </div>
+        )}
 
         {/* Sort Button */}
         <Button
