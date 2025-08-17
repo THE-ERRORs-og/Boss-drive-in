@@ -65,12 +65,17 @@ const cashSummarySchema = new mongoose.Schema({
     required: true,
     enum: [1, 2, 3, 4],
   },
+  location: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Location',
+    required: true,
+  },
 }, {
   timestamps: true,
 });
 
-// Create compound index for datetime and shiftNumber to ensure uniqueness
-cashSummarySchema.index({ datetime: 1, shiftNumber: 1 }, { unique: true });
+// Create compound index for datetime (descending), shiftNumber, and location to ensure uniqueness
+cashSummarySchema.index({ datetime: -1, shiftNumber: 1, location: 1 }, { unique: true });
 
 const CashSummary = mongoose.models.CashSummary || mongoose.model('CashSummary', cashSummarySchema);
 

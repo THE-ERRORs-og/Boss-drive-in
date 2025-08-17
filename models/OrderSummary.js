@@ -42,13 +42,18 @@ const orderSummarySchema = new mongoose.Schema({
     required: true,
     default: Date.now,
   },
+  location: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Location',
+    required: true,
+  },
   items: [orderItemSchema],
 }, {
   timestamps: true,
 });
 
-// Create compound index for date and shiftNumber to ensure uniqueness
-orderSummarySchema.index({ date: 1, shiftNumber: 1 }, { unique: true });
+// Create compound index for date (descending), shiftNumber, and location to ensure uniqueness
+orderSummarySchema.index({ date: -1, shiftNumber: 1, location: 1 }, { unique: true });
 
 const OrderSummary = mongoose.models.OrderSummary || mongoose.model('OrderSummary', orderSummarySchema);
 

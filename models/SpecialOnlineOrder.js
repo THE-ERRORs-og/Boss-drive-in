@@ -42,11 +42,19 @@ const specialOnlineOrderSchema = new mongoose.Schema(
       type: Date,
       default: Date.now,
     },
+    location: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Location",
+      required: true,
+    },
   },
   {
     timestamps: true,
   }
 );
+
+// Create compound index for date (descending), shiftNumber, and location to ensure uniqueness
+specialOnlineOrderSchema.index({ date: -1, shiftNumber: 1, location: 1 }, { unique: true });
 
 const SpecialOnlineOrder = mongoose.models.SpecialOnlineOrder || mongoose.model("SpecialOnlineOrder", specialOnlineOrderSchema);
 
