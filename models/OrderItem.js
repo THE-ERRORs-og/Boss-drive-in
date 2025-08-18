@@ -44,10 +44,7 @@ const orderItemSchema = new mongoose.Schema(
 );
 
 // Create compound index for type, order, and location to ensure uniqueness per location
-orderItemSchema.index(
-  { type: 1, order: 1, location: 1 },
-  { unique: true }
-);
+orderItemSchema.index({ type: 1, location: 1, stockNo: 1 }, { unique: true });
 
 const OrderItem = mongoose.models.OrderItem || mongoose.model('OrderItem', orderItemSchema);
 

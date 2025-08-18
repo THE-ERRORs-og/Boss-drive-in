@@ -72,7 +72,8 @@ const Page = () => {
       
       try {
         // Fetch order items
-        const itemsResult = await getOrderItems("sysco");
+        if (!selectedLocation) return;
+        const itemsResult = await getOrderItems("sysco", selectedLocation);
         if (itemsResult.status === "SUCCESS") {
           setOrderItems(itemsResult.data);
 

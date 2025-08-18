@@ -69,7 +69,8 @@ const Page = () => {
     const fetchData = async () => {
       try {
         // Fetch order items
-        const itemsResult = await getOrderItems("restaurant-depot");
+        if (!selectedLocation) return;
+        const itemsResult = await getOrderItems("restaurant-depot", selectedLocation);
         if (itemsResult.status === "SUCCESS") {
           setOrderItems(itemsResult.data);
 
@@ -102,7 +103,7 @@ const Page = () => {
     };
 
     fetchData();
-  }, [toast]);
+  }, [toast, selectedLocation]);
 
   // Handle BOH input change
   const handleBOHChange = (itemId, value) => {
