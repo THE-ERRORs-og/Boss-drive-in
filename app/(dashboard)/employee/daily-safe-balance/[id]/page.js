@@ -28,8 +28,17 @@ export default async function Page({ params }) {
             </p>
             <div className="flex space-x-4 items-center">
               <div className="flex items-center">
+                <p className="text-base font-semibold mr-2">Location:</p>
+                <p className="text-base text-black">
+                  {cashSummary?.location?.name || "No location assigned"}
+                </p>
+              </div>
+              <div className="flex items-center">
                 <p className="text-base font-semibold mr-2">Date:</p>
-                <p className="text-sm">{new Date(cashSummary?.datetime).toLocaleDateString() || "N/A"}</p>
+                <p className="text-sm">
+                  {new Date(cashSummary?.datetime).toLocaleDateString() ||
+                    "N/A"}
+                </p>
               </div>
               <div className="flex items-center">
                 <p className="text-base font-semibold mr-2">Shift Time:</p>
