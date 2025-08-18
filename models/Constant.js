@@ -13,11 +13,18 @@ const constantSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
-    unique: true,
+  },
+  location: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Location',
+    required: true,
   },
 }, {
   timestamps: true,
 });
+
+// Create compound index for name and location to ensure uniqueness per location
+constantSchema.index({ name: 1, location: 1 }, { unique: true });
 
 const Constant = mongoose.models.Constant || mongoose.model('Constant', constantSchema);
 

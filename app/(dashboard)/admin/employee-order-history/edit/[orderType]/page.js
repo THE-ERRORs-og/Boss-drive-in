@@ -8,14 +8,17 @@ import {
   updateOrder,
   updateOrderItem,
 } from "@/lib/actions/orderItems";
+import { getAllLocations, getLocationById } from "@/lib/actions/location";
 import { useToast } from "@/hooks/use-toast";
 import { useParams } from "next/navigation";
 import { orderTypes } from "@/lib/constants";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+import { useSession } from "@/context/SessionContext";
 
 export default function Page() {
   const { orderType } = useParams();
   const { toast } = useToast();
+  const { user } = useSession();
   const [orderItems, setOrderItems] = useState([]);
   const [showAddItemBar, setShowAddItemBar] = useState(false);
   const [newItem, setNewItem] = useState("");
@@ -26,11 +29,65 @@ export default function Page() {
   const [loading, setLoading] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [itemToEdit, setItemToEdit] = useState({ id: "", name: "", stockNo: "" });
+  const [selectedLocation, setSelectedLocation] = useState("");
+  const [locations, setLocations] = useState([]);
+  const [isLoadingLocations, setIsLoadingLocations] = useState(true);
+
+  // Fetch locations
+  useEffect(() => {
+    // Fetch available locations for user
+    const fetchLocations = async () => {
+      try {
+        setIsLoadingLocations(true);
+        let result;
+        if (
+          user &&
+          !user.hasAllLocationsAccess &&
+          user.locationIds &&
+          user.locationIds.length === 1
+        ) {
+          result = await getLocationById(user.locationIds[0]);
+          if (result.status === "SUCCESS") {
+            setLocations([result.data]);
+            setSelectedLocation(result.data._id);
+          }
+        } else {
+          result = await getAllLocations();
+
+          if (result.status === "SUCCESS" && result.data) {
+            setLocations(result.data);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching locations:", error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to load locations",
+        });
+      } finally {
+        setIsLoadingLocations(false);
+      }
+    };
+
+    if (user) {
+      fetchLocations();
+    }
+  }, [user, toast]);
 
   // Fetch order items
   async function fetchOrderItems() {
+    if (!selectedLocation) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Please select a location first",
+      });
+      return;
+    }
+
     try {
-      const result = await getAllOrderItems(orderType);
+      const result = await getAllOrderItems(orderType, selectedLocation);
       if (result.status === "SUCCESS") {
         // Sort items by order property to ensure correct display
         const sortedItems = result.data.sort((a, b) => a.order - b.order);
@@ -54,8 +111,10 @@ export default function Page() {
   }
 
   useEffect(() => {
-    fetchOrderItems();
-  }, []);
+    if (selectedLocation) {
+      fetchOrderItems();
+    }
+  }, [selectedLocation]);
 
   const closePopup = () => {
     setIsPopupVisible(false);
@@ -198,9 +257,18 @@ export default function Page() {
   };
 
   const handleSaveNewItem = async () => {
+    if (!selectedLocation) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Please select a location first",
+      });
+      return;
+    }
+
     if (newItem.trim() && newStockNo.trim()) {
       try {
-        const result = await createOrderItem(newItem.trim(), orderType, newStockNo.trim());
+        const result = await createOrderItem(newItem.trim(), orderType, newStockNo.trim(), selectedLocation);
         if (result.status === "SUCCESS") {
           toast({
             variant: "success",
@@ -327,9 +395,51 @@ export default function Page() {
       <h1 className="text-3xl font-semibold mb-4">
         {orderTypes[orderType]} Order Items
       </h1>
-      <h1 className="text-2xl font-bold text-start self-start ml-4">
-        Drag and drop to reorder, or remove items as needed:
-      </h1>
+      <div className="flex justify-between items-center w-full px-4">
+        <h1 className="text-2xl font-bold">
+          Drag and drop to reorder, or remove items as needed:
+        </h1>
+        
+        {/* Location Selector */}
+        {user?.hasAllLocationsAccess || user?.locationIds?.length > 1 ? (
+          <div className="flex items-center">
+            <p className="text-base font-semibold mr-2">Location:</p>
+            <select
+              value={selectedLocation}
+              onChange={(e) => setSelectedLocation(e.target.value)}
+              disabled={isLoadingLocations}
+              className={`px-2 py-1 text-sm border ${
+                !selectedLocation ? "border-red-600" : "border-gray-300"
+              } rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 min-w-[180px]`}
+            >
+              <option value="" disabled>
+                -- Select Location --
+              </option>
+              {locations
+                .filter(
+                  (location) =>
+                    user?.hasAllLocationsAccess ||
+                    user?.locationIds?.includes(location._id)
+                )
+                .map((location) => (
+                  <option key={location._id} value={location._id}>
+                    {location.name}
+                  </option>
+                ))}
+            </select>
+          </div>
+        ) : (
+          <div className="flex items-center">
+            <p className="text-base font-semibold mr-2">Location:</p>
+            <p className="text-base text-black">
+              {isLoadingLocations
+                ? "Loading..."
+                : locations.find((loc) => loc._id === selectedLocation)
+                    ?.name || "No location assigned"}
+            </p>
+          </div>
+        )}
+      </div>
       <DragDropContext onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
         
         <Droppable droppableId="droppable">

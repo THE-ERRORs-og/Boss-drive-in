@@ -10,11 +10,11 @@ const OrderDetailView = ({ orderDetails }) => {
   // Get all unique fields from items, excluding _id
   const getUniqueFields = () => {
     if (!orderDetails.items || orderDetails.items.length === 0) return [];
-    
+
     const fields = new Set();
-    orderDetails.items.forEach(item => {
-      Object.keys(item).forEach(key => {
-        if (key !== '_id' && key !== 'itemId' && key !== 'itemName') {
+    orderDetails.items.forEach((item) => {
+      Object.keys(item).forEach((key) => {
+        if (key !== "_id" && key !== "itemId" && key !== "itemName") {
           fields.add(key);
         }
       });
@@ -24,7 +24,7 @@ const OrderDetailView = ({ orderDetails }) => {
 
   const uniqueFields = getUniqueFields();
   const gridCols = `grid-cols-${uniqueFields.length + 1}`; // +1 for itemName
-  console.log(gridCols);
+
   return (
     <div className="flex flex-col items-center w-screen p-6">
       <div className="text-center mb-6 flex flex-col items-center w-full">
@@ -36,6 +36,12 @@ const OrderDetailView = ({ orderDetails }) => {
             <span className="font-bold">Ordered by :</span>{" "}
             {orderDetails.createdBy.name}
           </p>
+          {orderDetails.location && (
+            <p>
+              <span className="font-bold">Location:</span>{" "}
+              {orderDetails.location.name}
+            </p>
+          )}
           <p>
             <span className="font-bold">Shift :</span>{" "}
             {timeOptions[orderDetails.shiftNumber - 1]}
@@ -45,7 +51,9 @@ const OrderDetailView = ({ orderDetails }) => {
 
       <div className="w-full border rounded-lg shadow-md p-6">
         <h2 className="text-2xl font-bold text-center mb-4">Order List</h2>
-        <div className={`grid ${gridCols} gap-4 text-center font-semibold mb-4`}>
+        <div
+          className={`grid ${gridCols} gap-4 text-center font-semibold mb-4`}
+        >
           <p className="font-bold">Item Name</p>
           {uniqueFields.map((field, index) => (
             <p key={index} className="font-bold">
@@ -77,4 +85,4 @@ const OrderDetailView = ({ orderDetails }) => {
   );
 };
 
-export default OrderDetailView; 
+export default OrderDetailView;

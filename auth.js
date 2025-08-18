@@ -16,7 +16,10 @@ const handler = NextAuth({
         try {
           await connectDB();
 
-          const user = await User.findOne({ userid: credentials.userid });
+          // Get user with locationAccess in a single query
+          const user = await User.findOne({ userid: credentials.userid })
+            .select('_id name userid password role locationAccess')
+            .lean();
 
           if (!user) {
             return null;
@@ -30,12 +33,14 @@ const handler = NextAuth({
 
           // Update last login with US Eastern Time
           await User.findByIdAndUpdate(user._id, { lastLogin: getUSEasternTime() });
-
+          
           return {
             id: user._id.toString(),
             name: user.name,
             userid: user.userid,
             role: user.role,
+            // Include locationAccess directly from the first query
+            locationAccess: user.locationAccess || [],
           };
         } catch (error) {
           console.error("Auth error:", error);
@@ -56,20 +61,63 @@ const handler = NextAuth({
         token.userid = user.userid;
         token.name = user.name;
         token.role = user.role;
+        
+        // Set location IDs based on role and provided locationAccess
+        if (user.role === "superadmin") {
+          token.locationIds = ["__all__"];
+        } else {
+          // Use the locationAccess we already fetched during authorization
+          token.locationIds = user.locationAccess?.map(id => id.toString()) || [];
+        }
       }
       return token;
     },
     async session({ session, token }) {
-      await connectDB();
-      const dbUser = await User.findById(token.id);
-      if (dbUser) {
+      // We'll make just one database call to get fresh user data
+      try {
+        await connectDB();
+        // Get user with locationAccess in a single query
+        const dbUser = await User.findById(token.id)
+          .select('_id userid name role locationAccess')
+          .lean();
+        
+        if (dbUser) {
+          // Set basic user info
+          session.user = {
+            id: dbUser._id.toString(),
+            userid: dbUser.userid,
+            name: dbUser.name,
+            role: dbUser.role,
+          };
+          
+          // Add location access information
+          if (dbUser.role === "superadmin") {
+            // Superadmins have access to all locations
+            session.user.hasAllLocationsAccess = true;
+            session.user.locationIds = ["__all__"]; 
+          } else {
+            // For regular users and admins, include specific location IDs
+            session.user.hasAllLocationsAccess = false;
+            session.user.locationIds = dbUser.locationAccess?.map(id => id.toString()) || [];
+          }
+        } else {
+          // Fallback to token data if user not found
+          session.user = {
+            ...session.user,
+            locationIds: token.locationIds || [],
+            hasAllLocationsAccess: token.role === "superadmin"
+          };
+        }
+      } catch (error) {
+        console.error("Error in session callback:", error);
+        // Fallback to token data if there was an error
         session.user = {
-          id: dbUser._id.toString(),
-          userid: dbUser.userid,
-          name: dbUser.name,
-          role: dbUser.role, // latest role
+          ...session.user,
+          locationIds: token.locationIds || [],
+          hasAllLocationsAccess: token.role === "superadmin"
         };
       }
+      
       return session;
     },
   },

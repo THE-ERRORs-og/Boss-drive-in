@@ -5,6 +5,7 @@ import { useSession } from "@/context/SessionContext";
 import { useToast } from "@/hooks/use-toast";
 import { getOrderItems } from "@/lib/actions/orderItems";
 import { getLastSyscoOrder, createSyscoOrder } from "@/lib/actions/syscoOrder";
+import { getAllLocations, getLocationById } from "@/lib/actions/location";
 import { getUSEasternTime } from "@/lib/utils";
 import { timeOptions as SHIFT_OPTIONS } from "@/lib/constants";
 import { useRouter } from "next/navigation";
@@ -20,13 +21,59 @@ const Page = () => {
   const [shiftNumber, setShiftNumber] = useState("");
   const [orderItems, setOrderItems] = useState([]);
   const [formData, setFormData] = useState({});
+  const [selectedLocation, setSelectedLocation] = useState("");
+  const [locations, setLocations] = useState([]);
+  const [isLoadingLocations, setIsLoadingLocations] = useState(true);
+
+  // Fetch locations
+  useEffect(() => {
+    const fetchLocations = async () => {
+      try {
+        setIsLoadingLocations(true);
+        let result;
+        
+        if (user && !user.hasAllLocationsAccess && user.locationIds && user.locationIds.length === 1) {
+          // User has only one location
+          result = await getLocationById(user.locationIds[0]);
+          if (result.status === "SUCCESS") {
+            setLocations([result.data]);
+            setSelectedLocation(result.data._id);
+          }
+        } else {
+          // User has multiple locations or all access
+          result = await getAllLocations();
+          if (result.status === "SUCCESS" && result.data) {
+            setLocations(result.data);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching locations:", error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to load locations",
+        });
+      } finally {
+        setIsLoadingLocations(false);
+      }
+    };
+
+    if (user) {
+      fetchLocations();
+    }
+  }, [user, toast]);
 
   // Fetch order items and last order
   useEffect(() => {
     const fetchData = async () => {
+      if (!selectedLocation) {
+        return; // Don't fetch data if no location is selected
+      }
+      
       try {
         // Fetch order items
-        const itemsResult = await getOrderItems("sysco");
+        if (!selectedLocation) return;
+        const itemsResult = await getOrderItems("sysco", selectedLocation);
         if (itemsResult.status === "SUCCESS") {
           setOrderItems(itemsResult.data);
 
@@ -44,8 +91,8 @@ const Page = () => {
           }, {});
           setFormData(initialFormData);
 
-          // Fetch last order
-          const lastOrderResult = await getLastSyscoOrder();
+          // Fetch last order with the selected location
+          const lastOrderResult = await getLastSyscoOrder(selectedLocation);
           console.log("lastOrderResult", lastOrderResult);
           if (lastOrderResult.status === "SUCCESS" && lastOrderResult.data) {
             // Update form data with last order values
@@ -76,7 +123,7 @@ const Page = () => {
     };
 
     fetchData();
-  }, [toast]);
+  }, [toast, selectedLocation]);
 
   // Handle BOH input change
   const handleBOHChange = (itemId, value) => {
@@ -140,9 +187,20 @@ const Page = () => {
         return;
       }
 
+      if (!selectedLocation) {
+        toast({
+          variant: "destructive",
+          title: "Validation Error",
+          description: "Please select a location",
+        });
+        setIsLoading(false);
+        return;
+      }
+
       const orderData = {
         date: new Date(selectedDate),
         shiftNumber: parseInt(shiftNumber),
+        location: selectedLocation,
         items: items.map((item) => ({
           itemId: item.itemId,
           itemName: item.itemName,
@@ -188,6 +246,46 @@ const Page = () => {
           Staff Name: <span className="text-black">{user?.name}</span>
         </p>
         <div className="flex space-x-4 items-center">
+          {/* Location Selector */}
+          {user?.hasAllLocationsAccess || (user?.locationIds && user?.locationIds.length > 1) ? (
+            <div className="flex items-center">
+              <p className="text-base font-semibold mr-2">Location:</p>
+              <select
+                value={selectedLocation}
+                onChange={(e) => setSelectedLocation(e.target.value)}
+                disabled={isLoadingLocations}
+                className={`px-2 py-1 text-sm border ${
+                  !selectedLocation ? "border-red-600" : "border-gray-300"
+                } rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 min-w-[180px]`}
+              >
+                <option value="" disabled>
+                  -- Select Location --
+                </option>
+                {locations
+                  .filter(
+                    (location) =>
+                      user?.hasAllLocationsAccess ||
+                      user?.locationIds?.includes(location._id)
+                  )
+                  .map((location) => (
+                    <option key={location._id} value={location._id}>
+                      {location.name}
+                    </option>
+                  ))}
+              </select>
+            </div>
+          ) : (
+            <div className="flex items-center">
+              <p className="text-base font-semibold mr-2">Location:</p>
+              <p className="text-base text-black">
+                {isLoadingLocations
+                  ? "Loading..."
+                  : locations.find((loc) => loc._id === selectedLocation)
+                      ?.name || "No location assigned"}
+              </p>
+            </div>
+          )}
+          
           <div className="flex items-center">
             <p className="text-base font-semibold mr-2">Date:</p>
             <input

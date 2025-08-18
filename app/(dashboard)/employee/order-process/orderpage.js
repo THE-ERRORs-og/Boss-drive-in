@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useSession } from "@/context/SessionContext";
 import { useToast } from "@/hooks/use-toast";
+import { getAllLocations, getLocationById } from "@/lib/actions/location";
 import { createOrderSummary } from "@/lib/actions/orderSummary";
 import { getOrderItems } from "@/lib/actions/orderItems";
 import { orderSummarySchema } from "@/lib/validation";
@@ -19,6 +20,47 @@ export default function OrderForm({ orderData: initialOrderData }) {
   const [errors, setErrors] = useState({});
   const [isPopupVisible, setIsPopupVisible] = useState(false);
   const [isPopupVisible2, setIsPopupVisible2] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState("");
+  const [locations, setLocations] = useState([]);
+  const [isLoadingLocations, setIsLoadingLocations] = useState(true);
+
+  // Fetch locations
+  useEffect(() => {
+    const fetchLocations = async () => {
+      try {
+        setIsLoadingLocations(true);
+        let result;
+        
+        if (user && !user.hasAllLocationsAccess && user.locationIds && user.locationIds.length === 1) {
+          // User has only one location
+          result = await getLocationById(user.locationIds[0]);
+          if (result.status === "SUCCESS") {
+            setLocations([result.data]);
+            setSelectedLocation(result.data._id);
+          }
+        } else {
+          // User has multiple locations or all access
+          result = await getAllLocations();
+          if (result.status === "SUCCESS" && result.data) {
+            setLocations(result.data);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching locations:", error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to load locations",
+        });
+      } finally {
+        setIsLoadingLocations(false);
+      }
+    };
+
+    if (user) {
+      fetchLocations();
+    }
+  }, [user, toast]);
 
   useEffect(() => {
     const fetchOrderItems = async () => {
@@ -104,9 +146,20 @@ export default function OrderForm({ orderData: initialOrderData }) {
     e.preventDefault();
     setIsLoading(true);
 
+    if (!selectedLocation) {
+      toast({
+        variant: "destructive",
+        title: "Validation Error",
+        description: "Please select a location.",
+      });
+      setIsLoading(false);
+      return;
+    }
+
     const data = {
       createdBy: user?.id || "",
       date: selectedDate,
+      location: selectedLocation,
       items: Object.entries(orderData).map(([itemName, values]) => ({
         itemName,
         boh: parseFloat(values.boh) || 0,
@@ -142,6 +195,10 @@ export default function OrderForm({ orderData: initialOrderData }) {
         // Reset form
         setSelectedDate("");
         setOrderData(initialOrderData);
+        // Reset location only if user has multiple locations
+        if (user?.hasAllLocationsAccess || (user?.locationIds && user?.locationIds.length > 1)) {
+          setSelectedLocation("");
+        }
       } else {
         toast({
           variant: "destructive",
@@ -184,9 +241,20 @@ export default function OrderForm({ orderData: initialOrderData }) {
     e.preventDefault();
     setIsLoading(true);
 
+    if (!selectedLocation) {
+      toast({
+        variant: "destructive",
+        title: "Validation Error",
+        description: "Please select a location.",
+      });
+      setIsLoading(false);
+      return;
+    }
+
     const data = {
       createdBy: user?.id || "",
       date: selectedDate,
+      location: selectedLocation,
       items: Object.entries(orderData).map(([itemName, values]) => ({
         itemName,
         boh: parseFloat(values.boh) || 0,
@@ -222,6 +290,10 @@ export default function OrderForm({ orderData: initialOrderData }) {
         // Reset form
         setSelectedDate("");
         setOrderData(initialOrderData);
+        // Reset location only if user has multiple locations
+        if (user?.hasAllLocationsAccess || (user?.locationIds && user?.locationIds.length > 1)) {
+          setSelectedLocation("");
+        }
       } else {
         toast({
           variant: "destructive",
@@ -249,6 +321,46 @@ export default function OrderForm({ orderData: initialOrderData }) {
           Staff Name: <span className="text-black">{user?.name}</span>
         </p>
         <div className="flex space-x-4 items-center">
+          {/* Location Selector */}
+          {user?.hasAllLocationsAccess || (user?.locationIds && user?.locationIds.length > 1) ? (
+            <div className="flex items-center">
+              <p className="text-base font-semibold mr-2">Location:</p>
+              <select
+                value={selectedLocation}
+                onChange={(e) => setSelectedLocation(e.target.value)}
+                disabled={isLoadingLocations}
+                className={`px-2 py-1 text-sm border ${
+                  !selectedLocation ? "border-red-600" : "border-gray-300"
+                } rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 min-w-[180px]`}
+              >
+                <option value="" disabled>
+                  -- Select Location --
+                </option>
+                {locations
+                  .filter(
+                    (location) =>
+                      user?.hasAllLocationsAccess ||
+                      user?.locationIds?.includes(location._id)
+                  )
+                  .map((location) => (
+                    <option key={location._id} value={location._id}>
+                      {location.name}
+                    </option>
+                  ))}
+              </select>
+            </div>
+          ) : (
+            <div className="flex items-center">
+              <p className="text-base font-semibold mr-2">Location:</p>
+              <p className="text-base text-black">
+                {isLoadingLocations
+                  ? "Loading..."
+                  : locations.find((loc) => loc._id === selectedLocation)
+                      ?.name || "No location assigned"}
+              </p>
+            </div>
+          )}
+          
           <div className="flex items-center">
             <p className="text-base font-semibold mr-2">Date:</p>
             <input

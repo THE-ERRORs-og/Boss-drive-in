@@ -15,7 +15,6 @@ const orderItemSchema = new mongoose.Schema(
     stockNo: {
       type: String,
       required: true,
-      unique: true,
     },
     type: {
       type: String,
@@ -33,11 +32,19 @@ const orderItemSchema = new mongoose.Schema(
       required: true,
       default: true,
     },
+    location: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Location",
+      required: true,
+    },
   },
   {
     timestamps: true,
   }
 );
+
+// Create compound index for type, order, and location to ensure uniqueness per location
+orderItemSchema.index({ type: 1, location: 1, stockNo: 1 }, { unique: true });
 
 const OrderItem = mongoose.models.OrderItem || mongoose.model('OrderItem', orderItemSchema);
 

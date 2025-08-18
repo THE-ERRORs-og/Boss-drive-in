@@ -1,7 +1,11 @@
 "use client";
 import { useSession } from "@/context/SessionContext";
 import { useToast } from "@/hooks/use-toast";
-import { createCashSummary, getCashSummaryByDate } from "@/lib/actions/cashSummary";
+import {
+  createCashSummary,
+  getCashSummaryByDate,
+} from "@/lib/actions/cashSummary";
+import { getAllLocations, getLocationById } from "@/lib/actions/location";
 import { downloadCashSummary } from "@/lib/utils";
 import { cashSummarySchema } from "@/lib/validation";
 import { startingRegisterCash, timeOptions } from "@/lib/constants";
@@ -13,8 +17,11 @@ export default function Page() {
   const { user } = useSession();
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
+  const [selectedLocation, setSelectedLocation] = useState("");
+  const [locations, setLocations] = useState([]);
   const [isPopupVisible, setIsPopupVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingLocations, setIsLoadingLocations] = useState(true);
   const [formData, setFormData] = useState({
     expectedCloseoutCash: "",
     startingRegisterCash: startingRegisterCash,
@@ -30,17 +37,61 @@ export default function Page() {
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
+    // Fetch available locations for user
+    const fetchLocations = async () => {
+      try {
+        setIsLoadingLocations(true);
+        let result;
+        if (
+          user &&
+          !user.hasAllLocationsAccess &&
+          user.locationIds &&
+          user.locationIds.length === 1
+        ) {
+          result = await getLocationById(user.locationIds[0]);
+          if (result.status === "SUCCESS") {
+            setLocations([result.data]);
+            setSelectedLocation(result.data._id);
+          }
+        } else {
+          result = await getAllLocations();
+
+          if (result.status === "SUCCESS" && result.data) {
+            setLocations(result.data);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching locations:", error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to load locations",
+        });
+      } finally {
+        setIsLoadingLocations(false);
+      }
+    };
+
+    if (user) {
+      fetchLocations();
+    }
+  }, [user, toast]);
+
+  useEffect(() => {
     const checkExistingSummary = async () => {
-      if (selectedDate && selectedTime) {
+      if (selectedDate && selectedTime && selectedLocation) {
         try {
-          const result = await getCashSummaryByDate(selectedDate);
-          console.log('result', result);
+          const result = await getCashSummaryByDate(
+            selectedDate,
+            selectedLocation
+          );
+          console.log("result", result);
           if (result.status === "SUCCESS" && result.data) {
             // Check if there's a summary for the selected shift time
             const existingSummary = result.data.find(
-              summary => summary.shiftNumber === parseInt(selectedTime)
+              (summary) => summary.shiftNumber === parseInt(selectedTime)
             );
-            
+
             if (existingSummary) {
               toast({
                 title: "Warning",
@@ -55,11 +106,11 @@ export default function Page() {
     };
 
     checkExistingSummary();
-  }, [selectedDate, selectedTime, toast]);
+  }, [selectedDate, selectedTime, selectedLocation, toast]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    
+
     // Only allow numbers and decimal point
     if (value && !/^\d*\.?\d*$/.test(value)) {
       return;
@@ -69,7 +120,7 @@ export default function Page() {
     var totalTipDeduction =
       parseFloat(fvlues.onlineTipsToast || 0) +
       parseFloat(fvlues.onlineTipsKiosk || 0);
-    
+
     // Calculate OWED amount (can be negative)
     var ownedToRestaurantSafe =
       parseFloat(fvlues.expectedCloseoutCash || 0) -
@@ -120,6 +171,16 @@ export default function Page() {
       return;
     }
 
+    if (!selectedLocation) {
+      toast({
+        variant: "destructive",
+        title: "1",
+        description: "Please select a location.",
+      });
+      setIsLoading(false);
+      return;
+    }
+
     const data = {
       expectedCloseoutCash: parseFloat(formData.expectedCloseoutCash || 0),
       startingRegisterCash: parseFloat(formData.startingRegisterCash || 0),
@@ -133,7 +194,8 @@ export default function Page() {
       discounts: parseFloat(formData.otherClosingDiscounts || 0),
       datetime: selectedDate,
       shiftNumber: parseInt(selectedTime),
-      createdBy: user.id
+      createdBy: user.id,
+      location: selectedLocation,
     };
 
     if (!validateForm(data)) {
@@ -144,7 +206,16 @@ export default function Page() {
     try {
       const result = await createCashSummary(data);
       if (result.status === "SUCCESS") {
-        await downloadCashSummary({ ...data, username: user?.name });
+        // Get location name for the PDF
+        const locationName =
+          locations.find((loc) => loc._id === selectedLocation)?.name || "";
+
+        await downloadCashSummary({
+          ...data,
+          username: user?.name,
+          locationName: locationName,
+        });
+
         toast({
           title: "Success",
           description: "Cash summary created successfully",
@@ -153,6 +224,10 @@ export default function Page() {
         // Reset form
         setSelectedDate("");
         setSelectedTime("");
+        // Only reset location if user has multiple locations
+        if (user?.hasAllLocationsAccess || user?.locationIds?.length > 1) {
+          setSelectedLocation("");
+        }
         setFormData({
           expectedCloseoutCash: "",
           startingRegisterCash: startingRegisterCash,
@@ -166,7 +241,7 @@ export default function Page() {
           ownedToRestaurantSafe: -1 * startingRegisterCash,
         });
       } else {
-        console.log('result', result);
+        console.log("result", result);
         toast({
           variant: "destructive",
           title: "Error",
@@ -198,13 +273,55 @@ export default function Page() {
               Staff Name: <span className="text-black">{user?.name}</span>
             </p>
             <div className="flex space-x-4 items-center">
+              {/* Location Selector */}
+              {user?.hasAllLocationsAccess || user?.locationIds?.length > 1 ? (
+                <div className="flex items-center">
+                  <p className="text-base font-semibold mr-2">Location:</p>
+                  <select
+                    value={selectedLocation}
+                    onChange={(e) => setSelectedLocation(e.target.value)}
+                    disabled={isLoadingLocations}
+                    className={`px-2 py-1 text-sm border ${
+                      !selectedLocation ? "border-red-600" : "border-gray-300"
+                    } rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 min-w-[180px]`}
+                  >
+                    <option value="" disabled>
+                      -- Select Location --
+                    </option>
+                    {locations
+                      .filter(
+                        (location) =>
+                          user?.hasAllLocationsAccess ||
+                          user?.locationIds?.includes(location._id)
+                      )
+                      .map((location) => (
+                        <option key={location._id} value={location._id}>
+                          {location.name}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+              ) : (
+                <div className="flex items-center">
+                  <p className="text-base font-semibold mr-2">Location:</p>
+                  <p className="text-base text-black">
+                    {isLoadingLocations
+                      ? "Loading..."
+                      : locations.find((loc) => loc._id === selectedLocation)
+                          ?.name || "No location assigned"}
+                  </p>
+                </div>
+              )}
+
               <div className="flex items-center">
                 <p className="text-base font-semibold mr-2">Date:</p>
                 <input
                   type="date"
                   value={selectedDate}
                   onChange={(e) => setSelectedDate(e.target.value)}
-                  className={`px-2 py-1 text-sm border ${errors.datetime ? "border-red-600" : "border-gray-300"}  rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500`}
+                  className={`px-2 py-1 text-sm border ${
+                    errors.datetime ? "border-red-600" : "border-gray-300"
+                  }  rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500`}
                 />
               </div>
               <div className="flex items-center">
@@ -212,7 +329,9 @@ export default function Page() {
                 <select
                   value={selectedTime}
                   onChange={(e) => setSelectedTime(e.target.value)}
-                  className={`px-2 py-1 text-sm border ${errors.shiftNumber ? "border-red-600" : "border-gray-300"} border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500`}
+                  className={`px-2 py-1 text-sm border ${
+                    errors.shiftNumber ? "border-red-600" : "border-gray-300"
+                  } border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500`}
                 >
                   <option value="" disabled>
                     Select Time
@@ -245,7 +364,11 @@ export default function Page() {
                   onChange={handleInputChange}
                   placeholder="$---"
                   inputMode="decimal"
-                  className={`mt-1 w-full px-4 py-1 border ${errors.expectedCloseoutCash ? "border-red-600" : "border-gray-300"} rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500`}
+                  className={`mt-1 w-full px-4 py-1 border ${
+                    errors.expectedCloseoutCash
+                      ? "border-red-600"
+                      : "border-gray-300"
+                  } rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500`}
                 />
                 <input
                   type="text"
@@ -254,7 +377,9 @@ export default function Page() {
                   onChange={handleInputChange}
                   disabled={true}
                   placeholder="$---"
-                  className={`mt-1 w-full px-4 py-1 border ${errors.shiftNumber ? "border-red-600" : "border-gray-300"} rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500`}
+                  className={`mt-1 w-full px-4 py-1 border ${
+                    errors.shiftNumber ? "border-red-600" : "border-gray-300"
+                  } rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500`}
                 />
               </div>
             </div>
@@ -285,7 +410,11 @@ export default function Page() {
                   onChange={handleInputChange}
                   placeholder="$---"
                   inputMode="decimal"
-                  className={`mt-1 w-full px-4 py-2 border ${errors.onlineTipsToast ? "border-red-600" : "border-gray-300"} rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500`}
+                  className={`mt-1 w-full px-4 py-2 border ${
+                    errors.onlineTipsToast
+                      ? "border-red-600"
+                      : "border-gray-300"
+                  } rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500`}
                 />
                 <input
                   type="text"
@@ -294,7 +423,11 @@ export default function Page() {
                   onChange={handleInputChange}
                   placeholder="$---"
                   inputMode="decimal"
-                  className={`mt-1 w-full px-4 py-2 border ${errors.onlineTipsKiosk ? "border-red-600" : "border-gray-300"} rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500`}
+                  className={`mt-1 w-full px-4 py-2 border ${
+                    errors.onlineTipsKiosk
+                      ? "border-red-600"
+                      : "border-gray-300"
+                  } rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500`}
                 />
               </div>
             </div>
@@ -324,7 +457,11 @@ export default function Page() {
                   onChange={handleInputChange}
                   disabled={true}
                   placeholder="$XX"
-                  className={`mt-1 w-full px-4 py-2 border ${errors.totalTipDeduction ? "border-red-600" : "border-gray-300"} rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500`}
+                  className={`mt-1 w-full px-4 py-2 border ${
+                    errors.totalTipDeduction
+                      ? "border-red-600"
+                      : "border-gray-300"
+                  } rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500`}
                 />
                 <input
                   type="text"
@@ -334,11 +471,11 @@ export default function Page() {
                   disabled={true}
                   placeholder="$XX"
                   className={`mt-1 w-full px-4 py-2 border ${
-                    errors.ownedToRestaurantSafe 
-                      ? "border-red-600" 
-                      : parseFloat(formData.ownedToRestaurantSafe) < 0 
-                        ? "border-yellow-400 bg-yellow-50" 
-                        : "border-gray-300"
+                    errors.ownedToRestaurantSafe
+                      ? "border-red-600"
+                      : parseFloat(formData.ownedToRestaurantSafe) < 0
+                      ? "border-yellow-400 bg-yellow-50"
+                      : "border-gray-300"
                   } rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500`}
                 />
               </div>
@@ -377,7 +514,9 @@ export default function Page() {
                   onChange={handleInputChange}
                   placeholder="$---"
                   inputMode="decimal"
-                  className={` w-full px-4 py-2 border ${errors.onlineTipCash ? "border-red-600" : "border-gray-300"} rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500`}
+                  className={` w-full px-4 py-2 border ${
+                    errors.onlineTipCash ? "border-red-600" : "border-gray-300"
+                  } rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500`}
                 />
 
                 <input
@@ -387,7 +526,11 @@ export default function Page() {
                   onChange={handleInputChange}
                   placeholder="$---"
                   inputMode="decimal"
-                  className={` w-full px-4 py-2 border ${errors.onlineTipsToast ? "border-red-600" : "border-gray-300"} rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500`}
+                  className={` w-full px-4 py-2 border ${
+                    errors.onlineTipsToast
+                      ? "border-red-600"
+                      : "border-gray-300"
+                  } rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500`}
                 />
 
                 <input
@@ -398,7 +541,11 @@ export default function Page() {
                   placeholder="0"
                   inputMode="numeric"
                   pattern="\d*"
-                  className={` w-full px-4 py-2 border ${errors.onlineTipsToast ? "border-red-600" : "border-gray-300"} rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500`}
+                  className={` w-full px-4 py-2 border ${
+                    errors.onlineTipsToast
+                      ? "border-red-600"
+                      : "border-gray-300"
+                  } rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500`}
                 />
                 <input
                   type="text"
@@ -407,7 +554,11 @@ export default function Page() {
                   onChange={handleInputChange}
                   placeholder="$---"
                   inputMode="decimal"
-                  className={`mb-2 w-full px-4 py-2 border ${errors.onlineTipsKiosk ? "border-red-600" : "border-gray-300"} rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500`}
+                  className={`mb-2 w-full px-4 py-2 border ${
+                    errors.onlineTipsKiosk
+                      ? "border-red-600"
+                      : "border-gray-300"
+                  } rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500`}
                 />
               </div>
             </div>

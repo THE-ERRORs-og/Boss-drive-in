@@ -5,7 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { depositSafeBalance } from "@/lib/actions/safeBalance";
 import React, { useState } from "react";
 
-const BottomContainer = ({ currentSafeBalance }) => {
+const BottomContainer = ({ currentSafeBalance, locationId, locationName }) => {
   const [isPopupVisible, setIsPopupVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -23,12 +23,12 @@ const BottomContainer = ({ currentSafeBalance }) => {
 
     setIsLoading(true);
     try {
-      const result = await depositSafeBalance();
+      const result = await depositSafeBalance(locationId);
       if (result.status === "SUCCESS") {
         toast({
           variant: "success",
           title: "Success",
-          description: `Successfully deposited $${currentSafeBalance.toFixed(2)} to bank`,
+          description: `Successfully deposited $${currentSafeBalance.toFixed(2)} to bank from ${result.data.locationName || locationName || "selected location"}`,
         });
         setIsPopupVisible(false);
         window.location.reload(); // Refresh the page to show updated balance
@@ -53,6 +53,16 @@ const BottomContainer = ({ currentSafeBalance }) => {
 
   const showPopup = (e) => {
     e.preventDefault();
+    
+    if (!locationId) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Please select a location first",
+      });
+      return;
+    }
+    
     if (!currentSafeBalance || currentSafeBalance <= 0) {
       toast({
         variant: "destructive",
@@ -76,11 +86,12 @@ const BottomContainer = ({ currentSafeBalance }) => {
       <MainButton
         className=""
         text="Deposit to bank & Download PDF"
-        disabled={!currentSafeBalance || currentSafeBalance <= 0}
+        disabled={!locationId || !currentSafeBalance || currentSafeBalance <= 0}
       />
       <div className="flex w-2/3 justify-end space-x-6 items-center">
         <p className="text-md md:text-2xl font-semibold">
           Available Safe Balance
+          {locationName && <span className="text-sm ml-2">({locationName})</span>}
         </p>
         <StaticDataBox
           text={`$ ${currentSafeBalance?.toFixed(2) || "0.00"}`}
@@ -97,6 +108,11 @@ const BottomContainer = ({ currentSafeBalance }) => {
             <p className="mt-2 text-gray-600">
               Amount to deposit: ${currentSafeBalance?.toFixed(2) || "0.00"}
             </p>
+            {locationName && (
+              <p className="mt-1 text-gray-600">
+                Location: {locationName}
+              </p>
+            )}
 
             <div className="flex justify-center mt-6 gap-2">
               <button
