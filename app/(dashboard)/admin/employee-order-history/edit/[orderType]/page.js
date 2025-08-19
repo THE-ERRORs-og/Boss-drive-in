@@ -28,8 +28,14 @@ export default function Page() {
   const [selectedItemId, setSelectedItemId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [editMode, setEditMode] = useState(false);
-  const [itemToEdit, setItemToEdit] = useState({ id: "", name: "", stockNo: "" });
+  const [itemToEdit, setItemToEdit] = useState({
+    id: "",
+    name: "",
+    stockNo: "",
+  });
+
   const [selectedLocation, setSelectedLocation] = useState("");
+
   const [locations, setLocations] = useState([]);
   const [isLoadingLocations, setIsLoadingLocations] = useState(true);
 
@@ -91,7 +97,10 @@ export default function Page() {
       if (result.status === "SUCCESS") {
         // Sort items by order property to ensure correct display
         const sortedItems = result.data.sort((a, b) => a.order - b.order);
-        console.log('Fetched items:', sortedItems.map(item => ({ name: item.name, order: item.order })));
+        console.log(
+          "Fetched items:",
+          sortedItems.map((item) => ({ name: item.name, order: item.order }))
+        );
         setOrderItems(sortedItems);
       } else {
         toast({
@@ -178,16 +187,21 @@ export default function Page() {
   const handleDragStart = (start) => {
     setIsDragging(true);
     setDraggedItemId(start.draggableId);
-    console.log('Started dragging:', start.draggableId, 'from index:', start.source.index);
+    console.log(
+      "Started dragging:",
+      start.draggableId,
+      "from index:",
+      start.source.index
+    );
   };
 
   // Handle the end of a drag operation
   const handleDragEnd = (result) => {
     setIsDragging(false);
     setDraggedItemId(null);
-    
+
     const { destination, source, draggableId } = result;
-    
+
     // Drop outside the list or no destination
     if (!destination) {
       return;
@@ -200,31 +214,38 @@ export default function Page() {
 
     // Create a new ordered array
     const newOrderedItems = Array.from(orderItems);
-    
+
     // Find the item being dragged
-    const draggedItem = newOrderedItems.find(item => item._id === draggableId);
-    
+    const draggedItem = newOrderedItems.find(
+      (item) => item._id === draggableId
+    );
+
     if (!draggedItem) {
-      console.error('Could not find dragged item with ID:', draggableId);
+      console.error("Could not find dragged item with ID:", draggableId);
       return;
     }
-    
+
     // Remove the item from its original position
     newOrderedItems.splice(source.index, 1);
-    
+
     // Insert the item at its new position
     newOrderedItems.splice(destination.index, 0, draggedItem);
-    
+
     // Log the reordering for debugging
-    console.log(`Moving item "${draggedItem.name}" from position ${source.index} to ${destination.index}`);
-    console.log('New order:', newOrderedItems.map((item, i) => `${i}: ${item.name}`));
-    
+    console.log(
+      `Moving item "${draggedItem.name}" from position ${source.index} to ${destination.index}`
+    );
+    console.log(
+      "New order:",
+      newOrderedItems.map((item, i) => `${i}: ${item.name}`)
+    );
+
     // Update the order property for each item
     const updatedItems = newOrderedItems.map((item, index) => ({
       ...item,
-      order: index + 1
+      order: index + 1,
     }));
-    
+
     // Update state and save to DB
     setOrderItems(updatedItems);
     updateMongoDBOrder(updatedItems);
@@ -236,7 +257,10 @@ export default function Page() {
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(async () => {
       try {
-        console.log('Saving new order to database:', newItems.map(item => item.name));
+        console.log(
+          "Saving new order to database:",
+          newItems.map((item) => item.name)
+        );
         const result = await updateOrder(newItems);
         if (result.status !== "SUCCESS") {
           toast({
@@ -268,7 +292,12 @@ export default function Page() {
 
     if (newItem.trim() && newStockNo.trim()) {
       try {
-        const result = await createOrderItem(newItem.trim(), orderType, newStockNo.trim(), selectedLocation);
+        const result = await createOrderItem(
+          newItem.trim(),
+          orderType,
+          newStockNo.trim(),
+          selectedLocation
+        );
         if (result.status === "SUCCESS") {
           toast({
             variant: "success",
@@ -346,7 +375,7 @@ export default function Page() {
     setItemToEdit({
       id: item._id,
       name: item.name,
-      stockNo: item.stockNo || ""
+      stockNo: item.stockNo || "",
     });
     setEditMode(true);
     setShowAddItemBar(true);
@@ -356,11 +385,11 @@ export default function Page() {
     if (itemToEdit.name.trim() && itemToEdit.stockNo.trim()) {
       try {
         const result = await updateOrderItem(
-          itemToEdit.id, 
-          itemToEdit.name.trim(), 
+          itemToEdit.id,
+          itemToEdit.name.trim(),
           itemToEdit.stockNo.trim()
         );
-        
+
         if (result.status === "SUCCESS") {
           toast({
             variant: "success",
@@ -390,23 +419,52 @@ export default function Page() {
     }
   };
 
+  // Add this useEffect to handle localStorage
+  useEffect(() => {
+    // Get saved location from localStorage on component mount
+    const savedLocation = localStorage.getItem("selectedLocation");
+    if (savedLocation) {
+      setSelectedLocation(savedLocation);
+    } else if (
+      user &&
+      !user.hasAllLocationsAccess &&
+      user.locationIds?.length === 1
+    ) {
+      // Set default location for users with single location access
+      setSelectedLocation(user.locationIds[0]);
+    }
+  }, [user]);
+
+  // Add this effect to save location changes to localStorage
+  useEffect(() => {
+    if (selectedLocation) {
+      localStorage.setItem("selectedLocation", selectedLocation);
+    }
+  }, [selectedLocation]);
+
+  // Modify the location selection handler
+  const handleLocationChange = (e) => {
+    const newLocation = e.target.value;
+    setSelectedLocation(newLocation);
+  };
+
   return (
-    <div className="flex flex-col justify-start items-center h-screen gap-4 m-4 ">
-      <h1 className="text-3xl font-semibold mb-4">
+    <div className="flex flex-col justify-start items-center h-screen gap-4 m-4  ">
+      <h1 className="text-3xl font-semibold mb-4 ">
         {orderTypes[orderType]} Order Items
       </h1>
-      <div className="flex justify-between items-center w-full px-4">
-        <h1 className="text-2xl font-bold">
+      <div className="flex justify-between items-center w-full px-4 ">
+        {/* <h1 className="text-2xl font-bold">
           Drag and drop to reorder, or remove items as needed:
-        </h1>
-        
+        </h1> */}
+
         {/* Location Selector */}
         {user?.hasAllLocationsAccess || user?.locationIds?.length > 1 ? (
           <div className="flex items-center">
             <p className="text-base font-semibold mr-2">Location:</p>
             <select
               value={selectedLocation}
-              onChange={(e) => setSelectedLocation(e.target.value)}
+              onChange={handleLocationChange}
               disabled={isLoadingLocations}
               className={`px-2 py-1 text-sm border ${
                 !selectedLocation ? "border-red-600" : "border-gray-300"
@@ -434,101 +492,109 @@ export default function Page() {
             <p className="text-base text-black">
               {isLoadingLocations
                 ? "Loading..."
-                : locations.find((loc) => loc._id === selectedLocation)
-                    ?.name || "No location assigned"}
+                : locations.find((loc) => loc._id === selectedLocation)?.name ||
+                  "No location assigned"}
             </p>
           </div>
         )}
       </div>
-      <DragDropContext onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
-        
-        <Droppable droppableId="droppable">
-          {(provided, snapshot) => (
-            <div
-              {...provided.droppableProps}
-              ref={provided.innerRef}
-              className={`flex flex-col gap-3 overflow-y-scroll h-[55vh] w-full p-2 transition-colors duration-200 ${
-                snapshot && snapshot.isDraggingOver
-                  ? "bg-blue-50 rounded-lg border border-blue-200"
-                  : ""
-              }`}
-              // style={{
-              //   // Add space to ensure placeholder is visible
-              //   minHeight: '100px',
-              //   // padding: snapshot && snapshot.isDraggingOver ? '16px' : '8px',
-              // }}
-            >
-              {orderItems.map((item, index) => (
-                <Draggable
-                  key={item._id}
-                  draggableId={item._id}
-                  index={index}
-                  // disableInteractiveElementBlocking={true}
-                >
-                  {(provided, snapshot) => (
-                    <div
-                      ref={provided.innerRef}
-                      {...provided.draggableProps}
-                      {...provided.dragHandleProps}
-                      className={`flex justify-center items-center gap-3 mb-4 p-2 transition-all duration-200 ${
-                        snapshot && snapshot.isDragging
-                          ? "opacity-90 bg-green-200 shadow-lg rounded-lg border-2 border-blue-300 z-50"
-                          : "bg-white"
-                      }`}
-                      style={{
-                        // Important: Maintain the height and position during dragging
-                        minHeight: "70px",
-                        boxShadow:
-                          snapshot && snapshot.isDragging
-                            ? "0 5px 15px rgba(0, 0, 0, 0.1)"
-                            : "none",
-                        ...provided.draggableProps.style,
-                      }}
+
+      {selectedLocation ? (
+        <DragDropContext
+          onDragEnd={handleDragEnd}
+          onDragStart={handleDragStart}
+        >
+          <Droppable droppableId="droppable">
+            {(provided, snapshot) => (
+              <div
+                {...provided.droppableProps}
+                ref={provided.innerRef}
+                className={`flex flex-col gap-3 overflow-y-scroll h-[55vh] w-full p-2  transition-colors duration-200 ${
+                  snapshot && snapshot.isDraggingOver
+                    ? "bg-blue-50 rounded-lg border border-blue-200"
+                    : ""
+                }`}
+                // style={{
+                //   // Add space to ensure placeholder is visible
+                //   minHeight: '100px',
+                //   // padding: snapshot && snapshot.isDraggingOver ? '16px' : '8px',
+                // }}
+              >
+                {orderItems.length > 0 ? (
+                  orderItems.map((item, index) => (
+                    <Draggable
+                      key={item._id}
+                      draggableId={item._id}
+                      index={index}
+                      // disableInteractiveElementBlocking={true}
                     >
-                      <div
-                        {...provided.dragHandleProps}
-                        className={`border-2 border-gray-300 flex flex-col p-2 rounded-md cursor-grab ${
-                          snapshot && snapshot.isDragging
-                            ? "bg-blue-200"
-                            : "bg-gray-100"
-                        }`}
-                      >
-                        <div className="w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-b-[15px] border-b-black"></div>
-                        <div className="w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-t-[15px] border-t-black mt-1"></div>
-                      </div>
+                      {(provided, snapshot) => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}
+                          className={`flex  items-center justify-between gap-3 mb-1 p-2 bg-green-200 transition-all duration-200 ${
+                            snapshot && snapshot.isDragging
+                              ? "opacity-90 bg-green-200 shadow-lg rounded-lg border-2 border-blue-300 z-50"
+                              : "bg-white"
+                          }`}
+                          style={{
+                            // Important: Maintain the height and position during dragging
+                            minHeight: "70px",
+                            boxShadow:
+                              snapshot && snapshot.isDragging
+                                ? "0 5px 15px rgba(0, 0, 0, 0.1)"
+                                : "none",
+                            ...provided.draggableProps.style,
+                          }}
+                        >
+                          {/* <div
+                          {...provided.dragHandleProps}
+                          className={`border-2 border-gray-300 flex flex-col p-2 rounded-md cursor-grab ${
+                            snapshot && snapshot.isDragging
+                              ? "bg-blue-200"
+                              : "bg-gray-100"
+                          }`}
+                        >
+                          <div className="w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-b-[15px] border-b-black"></div>
+                          <div className="w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-t-[15px] border-t-black mt-1"></div>
+                        </div> */}
 
-                      <div
-                        className={`border-2 border-gray-300 p-2 rounded-md w-[30vw] h-[40] font-semibold text-2xl justify-center items-center flex ${
-                          !item.isEnabled ? "bg-gray-300" : ""
-                        }`}
-                      >
-                        {item.name}
-                      </div>
+                          <div className="flex flex-col  sm:flex-row items-center content-center gap-2 ">
+                            <div
+                              className={`border-2 border-gray-300 bg-blue-200 p-2 rounded-md w-[20vw]  h-[40] font-semibold text-2xl justify-center items-center flex ${
+                                !item.isEnabled ? "bg-gray-300" : ""
+                              }`}
+                            >
+                              {item.name}
+                            </div>
 
-                      <div
-                        className={`border-2 border-gray-300 p-2 rounded-md w-[20vw] h-[40] font-semibold text-2xl justify-center items-center flex ${
-                          !item.isEnabled ? "bg-gray-300" : ""
-                        }`}
-                      >
-                        {item.stockNo || "N/A"}
-                      </div>
+                            <div
+                              className={`border-2 border-gray-300 p-2 rounded-md w-[20vw]  h-[40] font-semibold text-2xl justify-center items-center flex ${
+                                !item.isEnabled ? "bg-gray-300" : ""
+                              }`}
+                            >
+                              {item.stockNo || "N/A"}
+                            </div>
+                          </div>
 
-                      <button
-                        onClick={() => handleEditButtonClick(item)}
-                        className={`px-4 py-3 sm:px-6 sm:py-3 md:px-8 md:py-3 lg:px-10 lg:py-3 
+                          <div className="flex flex-col sm:flex-row items-center gap-2">
+                            <button
+                              onClick={() => handleEditButtonClick(item)}
+                              className={`px-4 py-3 sm:px-6 sm:py-3 md:px-8 md:py-3 lg:px-10 lg:py-3 
                 bg-blue-500 text-white text-sm sm:text-base md:text-md lg:text-lg 
                 font-semibold border rounded-lg hover:bg-blue-600 transition duration-300`}
-                      >
-                        Edit
-                      </button>
+                            >
+                              Edit
+                            </button>
 
-                      <button
-                        onClick={() => {
-                          setPopupAction("disable");
-                          setSelectedItemId(item._id);
-                          handlePopUp();
-                        }}
-                        className={`px-4 py-3 sm:px-6 sm:py-3 md:px-8 md:py-3 lg:px-10 lg:py-3 
+                            <button
+                              onClick={() => {
+                                setPopupAction("disable");
+                                setSelectedItemId(item._id);
+                                handlePopUp();
+                              }}
+                              className={`px-4 py-3 sm:px-6 sm:py-3 md:px-8 md:py-3 lg:px-10 lg:py-3 
                 text-white text-sm sm:text-base md:text-md lg:text-lg 
                 font-semibold border rounded-lg transition duration-300
                 ${
@@ -536,63 +602,81 @@ export default function Page() {
                     ? "bg-green-500 hover:bg-green-600"
                     : "bg-red-500 hover:bg-red-600"
                 }`}
-                      >
-                        {item.isEnabled ? "Enabled" : "Disabled"}
-                      </button>
-                      <button
-                        onClick={() => {
-                          setPopupAction("delete");
-                          setSelectedItemId(item._id);
-                          handlePopUp();
-                        }}
-                        className={`px-4 py-3 sm:px-6 sm:py-3 md:px-8 md:py-3 lg:px-10 lg:py-3 
+                            >
+                              {item.isEnabled ? "Enabled" : "Disabled"}
+                            </button>
+                            <button
+                              onClick={() => {
+                                setPopupAction("delete");
+                                setSelectedItemId(item._id);
+                                handlePopUp();
+                              }}
+                              className={`px-4 py-3 sm:px-6 sm:py-3 md:px-8 md:py-3 lg:px-10 lg:py-3 
                 bg-[#ED1C24] text-white text-sm sm:text-base md:text-md lg:text-lg 
                 font-semibold border rounded-lg hover:bg-red-600 transition duration-300`}
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  )}
-                </Draggable>
-              ))}
-              <style jsx global>{`
-                .react-beautiful-dnd-placeholder {
-                  background-color: rgba(144, 202, 249, 0.3);
-                  border: 2px dashed #2196f3;
-                  border-radius: 8px;
-                  margin-bottom: 16px;
-                  min-height: 70px;
-                  max-width: 100%;
-                  transition: background-color 0.2s ease;
-                  animation: pulse 1.5s infinite ease-in-out;
-                }
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </Draggable>
+                  ))
+                ) : (
+                  <div className="p-10 h-[55vh] w-full items-center flex justify-center">
+                    {" "}
+                    <p className="text-gray-500 font-bold">
+                      No items found for this location.
+                    </p>
+                  </div>
+                )}
 
-                @keyframes pulse {
-                  0% {
-                    background-color: rgba(144, 202, 249, 0.2);
+                <style jsx global>{`
+                  .react-beautiful-dnd-placeholder {
+                    background-color: rgba(144, 202, 249, 0.3);
+                    border: 2px dashed #2196f3;
+                    border-radius: 8px;
+                    margin-bottom: 16px;
+                    min-height: 70px;
+                    max-width: 100%;
+                    transition: background-color 0.2s ease;
+                    animation: pulse 1.5s infinite ease-in-out;
                   }
-                  50% {
-                    background-color: rgba(144, 202, 249, 0.5);
+
+                  @keyframes pulse {
+                    0% {
+                      background-color: rgba(144, 202, 249, 0.2);
+                    }
+                    50% {
+                      background-color: rgba(144, 202, 249, 0.5);
+                    }
+                    100% {
+                      background-color: rgba(144, 202, 249, 0.2);
+                    }
                   }
-                  100% {
-                    background-color: rgba(144, 202, 249, 0.2);
-                  }
-                }
-              `}</style>
-              {provided.placeholder}
-            </div>
-          )}
-        </Droppable>
-      </DragDropContext>
+                `}</style>
+                {provided.placeholder}
+              </div>
+            )}
+          </Droppable>
+        </DragDropContext>
+      ) : (
+        <div className="p-10 h-[55vh] w-full items-center flex justify-center">
+          {" "}
+          <p className="text-gray-500 font-bold">
+            Please select a location to view order items
+          </p>
+        </div>
+      )}
 
       {showAddItemBar && (
-        <div className="flex flex-col gap-4 mt-1">
-          <h1 className="text-lg font-bold text-start self-start ml-4">
+        <div className="flex flex-col gap-2">
+          <h1 className="text-lg font-bold text-start w-full self-start ">
             {editMode
               ? "Edit item:"
               : "Enter the details of the item you want to add:"}
           </h1>
-          <div className="flex flex-row gap-6 items-center">
+          <div className="flex flex-row gap-6  items-center">
             <div className="flex gap-2">
               <label className="min-w-[100px] font-medium text-lg flex items-center">
                 Item Name:

@@ -15,7 +15,7 @@ export default function UserLocationsLink({ user, idx }) {
   };
 
   return (
-    <div className="flex flex-col sm:flex-row w-full items-center content-center p-1 gap-2">
+    <div className="flex flex-col sm:flex-row w-full items-center justify-between content-center p-1 gap-2">
       <div className="rounded-lg border-2 w-full sm:w-[74%] p-2">
         <p className="text-lg font-medium truncate">
           {idx + 1}. {user.name} ({user.userid}) - <span className="capitalize">{user.role}</span>

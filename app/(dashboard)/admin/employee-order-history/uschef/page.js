@@ -41,7 +41,7 @@ export default function USChefOrderHistory() {
       try {
         setIsLoadingLocations(true);
         let result;
-        
+
         if (
           user &&
           !user.hasAllLocationsAccess &&
@@ -130,8 +130,8 @@ export default function USChefOrderHistory() {
     <div className="p-8 h-screen w-screen flex flex-col items-center">
       <h1 className="text-3xl font-semibold mb-4">USChef Order History</h1>
 
-      <FilterComponent 
-        onFilterChange={handleFilterChange} 
+      <FilterComponent
+        onFilterChange={handleFilterChange}
         initialLocation={filters.location}
         locations={locations}
         isLoadingLocations={isLoadingLocations}
@@ -141,7 +141,7 @@ export default function USChefOrderHistory() {
         }
       />
 
-      <div className="h-[54vh] rounded-md border shadow-inner-lg w-full m-4 overflow-y-scroll">
+      {/* <div className="h-[54vh] rounded-md border shadow-inner-lg w-full m-4 overflow-y-scroll">
         {isLoading
           ? [1, 2, 3, 4, 5].map((item, index) => (
               <SkeletonOrderSummaryCard key={index} />
@@ -149,7 +149,26 @@ export default function USChefOrderHistory() {
           : rawData.map((item, index) => (
               <OrderSummaryCard key={index} item={item} />
             ))}
+      </div> */}
+
+      <div className="h-[54vh] rounded-md border shadow-inner-lg w-full m-4 overflow-y-scroll">
+        {isLoading ? (
+          [1, 2, 3, 4, 5].map((item, index) => (
+            <SkeletonOrderSummaryCard key={index} />
+          ))
+        ) : rawData.length > 0 ? (
+          rawData.map((item, index) => (
+            <OrderSummaryCard key={index} item={item} />
+          ))
+        ) : (
+          <div className="flex justify-center items-center h-full">
+            <p className="text-gray-500 text-xl font-semibold">
+              No orders found for this location
+            </p>
+          </div>
+        )}
       </div>
+
       <div className="flex w-full justify-center">
         <Pagination
           nPages={nPages}
@@ -173,4 +192,4 @@ const SkeletonOrderSummaryCard = () => {
       <Skeleton className="h-10 w-32 rounded-lg" />
     </div>
   );
-}; 
+};

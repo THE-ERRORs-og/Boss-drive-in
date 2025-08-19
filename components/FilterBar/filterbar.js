@@ -78,15 +78,16 @@ export default function FilterComponent({
 
         {/* Location Selector */}
         {showLocationSelector && locations.length > 0 && (
-          <div className="relative min-w-[200px]">
+          <div className="relative min-w-[200px] max-w-[250px]">
             <select
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               disabled={isLoadingLocations}
-              className="w-full bg-white text-black border border-gray-300 rounded-md py-2 px-3 appearance-none focus:outline-none focus:ring-2 focus:ring-red-500"
+              className="w-full bg-white text-black border border-gray-300 rounded-md py-2 px-3 pr-10 
+                 appearance-none focus:outline-none focus:ring-2 focus:ring-red-500 truncate"
             >
               <option value="">All Locations</option>
-              {locations.map(loc => (
+              {locations.map((loc) => (
                 <option key={loc._id} value={loc._id}>
                   {loc.name}
                 </option>
