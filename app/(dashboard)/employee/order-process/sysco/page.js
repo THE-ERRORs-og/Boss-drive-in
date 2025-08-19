@@ -318,7 +318,7 @@ const Page = () => {
       <h1 className="text-center text-4xl font-bold">SYSCO</h1>
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-6xl px-6 mt-6 overflow-y-scroll h-[65vh] "
+        className="w-full  px-6 mt-6 overflow-y-scroll h-[65vh] "
       >
         <div className="grid grid-cols-6 gap-4 text-center font-bold text-lg mb-4">
           <p className="text-left">Item Name</p>

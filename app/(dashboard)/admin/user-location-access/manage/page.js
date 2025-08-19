@@ -10,7 +10,7 @@ export default async function UserLocationAccessPage() {
         <h1 className="font-semibold text-3xl p-1 mb-4 mt-4">
           Manage User Location Access
         </h1>
-        <div className="max-h-[75vh] mb-4 w-full rounded-md border shadow-inner-lg overflow-y-auto">
+        <div className="max-h-[75vh] mb-4 w-full rounded-md border shadow-inner-lg overflow-y-scroll h-[55vh]">
           {result.status === "SUCCESS" && result.data.length > 0 ? (
             <div>
               {result.data.map((user, idx) => (

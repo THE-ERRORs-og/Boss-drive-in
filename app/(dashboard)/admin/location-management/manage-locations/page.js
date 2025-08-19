@@ -95,7 +95,7 @@ export default function Page() {
           Add New Location
         </button>
       </div>
-      <div className="h-[80vh] mb-4 w-full rounded-md border shadow-inner-lg overflow-y-auto">
+      <div className=" mb-4 w-full rounded-md border shadow-inner-lg overflow-y-scroll h-[55vh] ">
         {/* Locations List */}
         <div>
           {locations.map((location, idx) => (
