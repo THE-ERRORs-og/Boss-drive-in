@@ -560,21 +560,23 @@ export default function Page() {
                           <div className="w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-t-[15px] border-t-black mt-1"></div>
                         </div> */}
 
-                          <div className="flex flex-col  sm:flex-row items-center content-center gap-2 ">
+                          <div className="flex flex-col sm:flex-row items-center content-center gap-2">
                             <div
-                              className={`border-2 border-gray-300 bg-blue-200 p-2 rounded-md w-[20vw]  h-[40] font-semibold text-2xl justify-center items-center flex ${
+                              className={`border-2 border-gray-300 bg-blue-200 p-2 rounded-md w-[20vw] h-[40] font-semibold text-2xl justify-center items-center flex truncate ${
                                 !item.isEnabled ? "bg-gray-300" : ""
                               }`}
+                              title={item.name} // shows full text on hover
                             >
                               {item.name}
                             </div>
 
                             <div
-                              className={`border-2 border-gray-300 p-2 rounded-md w-[20vw]  h-[40] font-semibold text-2xl justify-center items-center flex ${
+                              className={`border-2 border-gray-300 p-2 rounded-md w-[20vw] h-[40] font-semibold text-2xl justify-center items-center flex truncate ${
                                 !item.isEnabled ? "bg-gray-300" : ""
                               }`}
+                              title={item.stockNo || "N/A"} // shows full stock no on hover
                             >
-                              {item.stockNo || "N/A"}
+                              {item.stockNo ? `#${item.stockNo}` : "N/A"}
                             </div>
                           </div>
 
