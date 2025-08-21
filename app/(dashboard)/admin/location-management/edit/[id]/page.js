@@ -80,10 +80,10 @@ export default function EditLocation() {
     try {
       // We don't validate locationId because it can't be changed
       const { locationId, _id, ...validationData } = data;
-      
+
       // Create a modified schema without the locationId requirement
       const editSchema = locationSchema.omit({ locationId: true });
-      
+
       await editSchema.parseAsync(validationData);
       setErrors({});
       return true;
@@ -158,10 +158,9 @@ export default function EditLocation() {
 
   return (
     <div className="min-h-screen p-8">
-      
       <div className="mt-8 max-w-3xl mx-auto">
         <h1 className="text-3xl font-bold mb-6 text-center">Edit Location</h1>
-        
+
         <div className="bg-white p-6 rounded-lg shadow-md">
           <form onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -177,7 +176,9 @@ export default function EditLocation() {
                     disabled
                     className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 cursor-not-allowed"
                   />
-                  <p className="text-xs text-gray-500 mt-1">Location ID cannot be changed</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Location ID cannot be changed
+                  </p>
                 </div>
 
                 <div className="mb-4">
@@ -189,12 +190,16 @@ export default function EditLocation() {
                     name="name"
                     value={formData.name}
                     onChange={handleInputChange}
-                    placeholder="Downtown Coffee Shop"
-                    className={`w-full px-3 py-2 border ${errors.name ? "border-red-600" : "border-gray-300"} rounded-md focus:outline-none focus:ring-2 focus:ring-red-500`}
+                    placeholder="Downtown Boss"
+                    className={`w-full px-3 py-2 border ${
+                      errors.name ? "border-red-600" : "border-gray-300"
+                    } rounded-md focus:outline-none focus:ring-2 focus:ring-red-500`}
                   />
-                  {errors.name && <p className="text-red-600 text-xs mt-1">{errors.name}</p>}
+                  {errors.name && (
+                    <p className="text-red-600 text-xs mt-1">{errors.name}</p>
+                  )}
                 </div>
-                
+
                 <div className="mb-4">
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Address
@@ -205,12 +210,18 @@ export default function EditLocation() {
                     value={formData.address}
                     onChange={handleInputChange}
                     placeholder="123 Main Street"
-                    className={`w-full px-3 py-2 border ${errors.address ? "border-red-600" : "border-gray-300"} rounded-md focus:outline-none focus:ring-2 focus:ring-red-500`}
+                    className={`w-full px-3 py-2 border ${
+                      errors.address ? "border-red-600" : "border-gray-300"
+                    } rounded-md focus:outline-none focus:ring-2 focus:ring-red-500`}
                   />
-                  {errors.address && <p className="text-red-600 text-xs mt-1">{errors.address}</p>}
+                  {errors.address && (
+                    <p className="text-red-600 text-xs mt-1">
+                      {errors.address}
+                    </p>
+                  )}
                 </div>
               </div>
-              
+
               <div>
                 <div className="mb-4">
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -222,11 +233,15 @@ export default function EditLocation() {
                     value={formData.city}
                     onChange={handleInputChange}
                     placeholder="New York"
-                    className={`w-full px-3 py-2 border ${errors.city ? "border-red-600" : "border-gray-300"} rounded-md focus:outline-none focus:ring-2 focus:ring-red-500`}
+                    className={`w-full px-3 py-2 border ${
+                      errors.city ? "border-red-600" : "border-gray-300"
+                    } rounded-md focus:outline-none focus:ring-2 focus:ring-red-500`}
                   />
-                  {errors.city && <p className="text-red-600 text-xs mt-1">{errors.city}</p>}
+                  {errors.city && (
+                    <p className="text-red-600 text-xs mt-1">{errors.city}</p>
+                  )}
                 </div>
-                
+
                 <div className="mb-4">
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     State
@@ -237,11 +252,15 @@ export default function EditLocation() {
                     value={formData.state}
                     onChange={handleInputChange}
                     placeholder="NY"
-                    className={`w-full px-3 py-2 border ${errors.state ? "border-red-600" : "border-gray-300"} rounded-md focus:outline-none focus:ring-2 focus:ring-red-500`}
+                    className={`w-full px-3 py-2 border ${
+                      errors.state ? "border-red-600" : "border-gray-300"
+                    } rounded-md focus:outline-none focus:ring-2 focus:ring-red-500`}
                   />
-                  {errors.state && <p className="text-red-600 text-xs mt-1">{errors.state}</p>}
+                  {errors.state && (
+                    <p className="text-red-600 text-xs mt-1">{errors.state}</p>
+                  )}
                 </div>
-                
+
                 <div className="mb-4">
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Zip Code
@@ -252,11 +271,17 @@ export default function EditLocation() {
                     value={formData.zipCode}
                     onChange={handleInputChange}
                     placeholder="10001"
-                    className={`w-full px-3 py-2 border ${errors.zipCode ? "border-red-600" : "border-gray-300"} rounded-md focus:outline-none focus:ring-2 focus:ring-red-500`}
+                    className={`w-full px-3 py-2 border ${
+                      errors.zipCode ? "border-red-600" : "border-gray-300"
+                    } rounded-md focus:outline-none focus:ring-2 focus:ring-red-500`}
                   />
-                  {errors.zipCode && <p className="text-red-600 text-xs mt-1">{errors.zipCode}</p>}
+                  {errors.zipCode && (
+                    <p className="text-red-600 text-xs mt-1">
+                      {errors.zipCode}
+                    </p>
+                  )}
                 </div>
-                
+
                 <div className="mb-4">
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Phone Number (Optional)

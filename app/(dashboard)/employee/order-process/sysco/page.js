@@ -287,7 +287,7 @@ const Page = () => {
           )}
           
           <div className="flex items-center">
-            <p className="text-base font-semibold mr-2">Date:</p>
+            <p className="text-base font-semibold mr-2">Delivery Date:</p>
             <input
               type="date"
               value={selectedDate}
