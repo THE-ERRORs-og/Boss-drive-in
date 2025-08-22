@@ -22,9 +22,9 @@ export default function Page() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ 
-      ...formData, 
-      [name]: name === "locationId" ? value.toLowerCase() : value 
+    setFormData({
+      ...formData,
+      [name]: name === "locationId" ? value.toLowerCase() : value,
     });
   };
 
@@ -35,7 +35,7 @@ export default function Page() {
         ...data,
         locationId: data.locationId.toLowerCase(),
       };
-  
+
       await locationSchema.parseAsync(normalizedData);
       setErrors({});
       return true;
@@ -69,13 +69,13 @@ export default function Page() {
         ...formData,
         locationId: formData.locationId.toLowerCase(),
       };
-  
+
       const response = await createLocation(normalizedData);
       if (response.status === "SUCCESS") {
         toast({
           variant: "success",
           title: "Location added successfully",
-          description: "Coffee shop location has been added successfully",
+          description: "Boss location has been added successfully",
         });
         setFormData({
           locationId: "",
@@ -114,7 +114,7 @@ export default function Page() {
       <div className="bg-white p-6 w-full">
         {/* Form */}
         <h1 className="font-semibold text-3xl p-1 mb-4">
-          Enter the details of the coffee shop location:
+          Enter the details of the Boss location:
         </h1>
         <form onSubmit={handleFormSubmit}>
           <div className="grid grid-cols-2">
@@ -148,15 +148,19 @@ export default function Page() {
                 value={formData.locationId}
                 onChange={handleInputChange}
                 placeholder="downtown-shop"
-                className={`mt-1 w-full px-3 py-2 border ${errors.locationId ? "border-red-600" : "border-gray-300"} rounded-md focus:outline-none focus:ring-2 focus:ring-red-500`}
+                className={`mt-1 w-full px-3 py-2 border ${
+                  errors.locationId ? "border-red-600" : "border-gray-300"
+                } rounded-md focus:outline-none focus:ring-2 focus:ring-red-500`}
               />
               <input
                 type="text"
                 name="name"
                 value={formData.name}
                 onChange={handleInputChange}
-                placeholder="Downtown Coffee Shop"
-                className={`mt-1 w-full px-3 py-2 border ${errors.name ? "border-red-600" : "border-gray-300"} rounded-md focus:outline-none focus:ring-2 focus:ring-red-500`}
+                placeholder="Downtown Boss"
+                className={`mt-1 w-full px-3 py-2 border ${
+                  errors.name ? "border-red-600" : "border-gray-300"
+                } rounded-md focus:outline-none focus:ring-2 focus:ring-red-500`}
               />
               <input
                 type="text"
@@ -164,7 +168,9 @@ export default function Page() {
                 value={formData.address}
                 onChange={handleInputChange}
                 placeholder="123 Main Street"
-                className={`mt-1 w-full px-3 py-2 border ${errors.address ? "border-red-600" : "border-gray-300"} rounded-md focus:outline-none focus:ring-2 focus:ring-red-500`}
+                className={`mt-1 w-full px-3 py-2 border ${
+                  errors.address ? "border-red-600" : "border-gray-300"
+                } rounded-md focus:outline-none focus:ring-2 focus:ring-red-500`}
               />
               <input
                 type="text"
@@ -172,7 +178,9 @@ export default function Page() {
                 value={formData.city}
                 onChange={handleInputChange}
                 placeholder="New York"
-                className={`mt-1 w-full px-3 py-2 border ${errors.city ? "border-red-600" : "border-gray-300"} rounded-md focus:outline-none focus:ring-2 focus:ring-red-500`}
+                className={`mt-1 w-full px-3 py-2 border ${
+                  errors.city ? "border-red-600" : "border-gray-300"
+                } rounded-md focus:outline-none focus:ring-2 focus:ring-red-500`}
               />
               <input
                 type="text"
@@ -180,7 +188,9 @@ export default function Page() {
                 value={formData.state}
                 onChange={handleInputChange}
                 placeholder="NY"
-                className={`mt-1 w-full px-3 py-2 border ${errors.state ? "border-red-600" : "border-gray-300"} rounded-md focus:outline-none focus:ring-2 focus:ring-red-500`}
+                className={`mt-1 w-full px-3 py-2 border ${
+                  errors.state ? "border-red-600" : "border-gray-300"
+                } rounded-md focus:outline-none focus:ring-2 focus:ring-red-500`}
               />
               <input
                 type="text"
@@ -188,7 +198,9 @@ export default function Page() {
                 value={formData.zipCode}
                 onChange={handleInputChange}
                 placeholder="10001"
-                className={`mt-1 w-full px-3 py-2 border ${errors.zipCode ? "border-red-600" : "border-gray-300"} rounded-md focus:outline-none focus:ring-2 focus:ring-red-500`}
+                className={`mt-1 w-full px-3 py-2 border ${
+                  errors.zipCode ? "border-red-600" : "border-gray-300"
+                } rounded-md focus:outline-none focus:ring-2 focus:ring-red-500`}
               />
               <input
                 type="text"
@@ -196,7 +208,9 @@ export default function Page() {
                 value={formData.phoneNumber}
                 onChange={handleInputChange}
                 placeholder="(555) 123-4567"
-                className={`mt-1 w-full px-3 py-2 border ${errors.phoneNumber ? "border-red-600" : "border-gray-300"} rounded-md focus:outline-none focus:ring-2 focus:ring-red-500`}
+                className={`mt-1 w-full px-3 py-2 border ${
+                  errors.phoneNumber ? "border-red-600" : "border-gray-300"
+                } rounded-md focus:outline-none focus:ring-2 focus:ring-red-500`}
               />
             </div>
           </div>

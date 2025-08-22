@@ -8,7 +8,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from "@/components/ui/custom-dialog";
 import {
   ListFilter,
   Search,
@@ -47,7 +47,7 @@ export default function FilterComponent({
       params.set("endDate", dateRange.end.toISOString());
     }
     params.set("location", location);
-    router.push(`?${params.toString()}`);
+    router.replace(`?${params.toString()}`); // replace instead of push
     onFilterChange?.({ query, sortOrder, location, startDate, endDate });
   }, [query, sortOrder, location, dateRange]);
 

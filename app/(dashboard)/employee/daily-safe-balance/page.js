@@ -141,7 +141,10 @@ export default function DailySafeBalance() {
           // Handle error
           setGroupedData([]);
           setTotalRecords(0);
-          console.error("Error fetching cash summaries:", cashSummariesResponse.error);
+          console.error(
+            "Error fetching cash summaries:",
+            cashSummariesResponse.error
+          );
         }
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -158,7 +161,7 @@ export default function DailySafeBalance() {
 
   const handleFilterChange = (newFilters) => {
     setFilters({ ...newFilters, sort: newFilters.sortOrder });
-    
+
     setLocationName(
       locations.find((loc) => loc._id === newFilters.location)?.name || ""
     );
@@ -168,7 +171,7 @@ export default function DailySafeBalance() {
     setCurrentPage(page);
     const params = new URLSearchParams(searchParams);
     params.set("page", page.toString());
-    router.push(`?${params.toString()}`);
+    router.replace(`?${params.toString()}`);
   };
 
   const nPages = Math.ceil(totalRecords / recordsPerPage);
@@ -213,10 +216,10 @@ export default function DailySafeBalance() {
       )}
 
       <div className="flex w-full justify-center">
-        <Pagination 
-          nPages={nPages} 
-          currentPage={currentPage} 
-          setPage={handlePageChange} 
+        <Pagination
+          nPages={nPages}
+          currentPage={currentPage}
+          setPage={handlePageChange}
         />
       </div>
 

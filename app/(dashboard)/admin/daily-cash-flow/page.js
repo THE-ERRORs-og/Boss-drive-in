@@ -50,7 +50,9 @@ export default function EmployeeOrderHistory() {
           setLocations(result.data);
           if (searchParams.get("location")) {
             setLocationName(
-              result.data.find((loc) => loc._id === searchParams.get("location"))?.name || ""
+              result.data.find(
+                (loc) => loc._id === searchParams.get("location")
+              )?.name || ""
             );
           }
         }
@@ -134,7 +136,7 @@ export default function EmployeeOrderHistory() {
     setCurrentPage(page);
     const params = new URLSearchParams(searchParams);
     params.set("page", page.toString());
-    router.push(`?${params.toString()}`);
+    router.replace(`?${params.toString()}`);
   };
 
   const nPages = Math.ceil(totalRecords / recordsPerPage);
