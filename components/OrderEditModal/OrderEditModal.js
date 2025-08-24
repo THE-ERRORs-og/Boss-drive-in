@@ -490,8 +490,8 @@ export default function OrderEditModal({ orderType, isOpen, onClose }) {
                 <p className="text-base text-black">
                   {isLoadingLocations
                     ? "Loading..."
-                    : locations.find((loc) => loc._id === selectedLocation)?.name ||
-                      "No location assigned"}
+                    : locations.find((loc) => loc._id === selectedLocation)
+                        ?.name || "No location assigned"}
                 </p>
               </div>
             )}
@@ -682,7 +682,10 @@ export default function OrderEditModal({ orderType, isOpen, onClose }) {
                     value={editMode ? itemToEdit.stockNo : newStockNo}
                     onChange={(e) =>
                       editMode
-                        ? setItemToEdit({ ...itemToEdit, stockNo: e.target.value })
+                        ? setItemToEdit({
+                            ...itemToEdit,
+                            stockNo: e.target.value,
+                          })
                         : setNewStockNo(e.target.value)
                     }
                     placeholder="Enter stock number"
@@ -731,10 +734,12 @@ export default function OrderEditModal({ orderType, isOpen, onClose }) {
               <div className="bg-white p-6 rounded-lg shadow-lg text-center">
                 <p className="text-lg font-medium">
                   {popupAction === "save" && "Are You Sure to Save This Item?"}
-                  {popupAction === "edit" && "Are You Sure to Update This Item?"}
+                  {popupAction === "edit" &&
+                    "Are You Sure to Update This Item?"}
                   {popupAction === "disable" &&
                     "Are You Sure to Change Item Status?"}
-                  {popupAction === "delete" && "Are You Sure to Delete This Item?"}
+                  {popupAction === "delete" &&
+                    "Are You Sure to Delete This Item?"}
                 </p>
                 <div className="flex gap-20">
                   <button
