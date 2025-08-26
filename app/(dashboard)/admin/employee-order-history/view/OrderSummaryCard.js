@@ -2,6 +2,7 @@ import React from "react";
 import { format } from "date-fns";
 import MainButton from "@/components/Button/MainButton";
 import { useRouter } from "next/navigation";
+import { getDateString } from "@/lib/utils";
 
 const OrderSummaryCard = ({ item }) => {
   const router = useRouter();
@@ -21,7 +22,7 @@ const OrderSummaryCard = ({ item }) => {
           {item.createdBy?.name || "Unknown User"}
         </p>
         <p className="text-lg font-semibold">
-          {format(new Date(item.date), "MMM dd, yyyy")}
+          {getDateString(new Date(item.date))}
         </p>
         <p className="text-lg font-semibold">
           {item.type} Order

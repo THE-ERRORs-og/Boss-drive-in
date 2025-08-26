@@ -1,16 +1,12 @@
 import MainButton from '@/components/Button/MainButton';
+import { getDateString } from '@/lib/utils';
 import React from 'react';
 
 const SafeBalanceCard = ({ item }) => {
   const date = new Date(item.createdAt);
 
-  // Format Date: "11/Feb/2025"
-  const dateStr =
-    date.getDate().toString().padStart(2, "0") +
-    "/" +
-    date.toLocaleString("en-US", { month: "short" }) +
-    "/" +
-    date.getFullYear();
+  // Format Date: "MM/DD/YYYY"
+  const dateStr = getDateString(date);
 
   // Format Time: "12:00 PM"
   const time = date
