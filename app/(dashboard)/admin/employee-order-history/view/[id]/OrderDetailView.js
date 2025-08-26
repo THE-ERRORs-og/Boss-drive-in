@@ -5,7 +5,7 @@ import { timeOptions } from "@/lib/constants";
 
 const OrderDetailView = ({ orderDetails }) => {
   const date = new Date(orderDetails.date);
-  const dateStr = format(date, "dd/MMM/yyyy");
+  const dateStr = format(date, "MM/dd/yyyy");
 
   // Get all unique fields from items, excluding _id
   const getUniqueFields = () => {

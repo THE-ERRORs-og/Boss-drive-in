@@ -1,3 +1,4 @@
+import { getDateString } from "@/lib/utils";
 import React from "react";
 
 const ScrollViewer = ({groupedData}) => {
@@ -25,7 +26,7 @@ const ScrollViewer = ({groupedData}) => {
             key={index}
             className="grid grid-cols-5 border-2 border-black rounded-xl m-1 text-center items-center hover:bg-gray-50 p-1"
           >
-            <div className="p-2">{row.date}</div>
+            <div className="p-2">{getDateString(new Date(row.date))}</div>
             <div className="p-2">{row.name}</div>
             <div className="p-2 col-span-2">
               <div className="flex gap-2 flex-wrap justify-center">

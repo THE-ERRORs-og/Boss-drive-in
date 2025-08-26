@@ -1,5 +1,6 @@
 import { timeOptions } from "@/lib/constants";
 import { getCashSummaryById } from "@/lib/actions/cashSummary";
+import { getDateString } from "@/lib/utils";
 
 export default async function Page({ params }) {
   const { id } = await params;
@@ -36,8 +37,7 @@ export default async function Page({ params }) {
               <div className="flex items-center">
                 <p className="text-base font-semibold mr-2">Date:</p>
                 <p className="text-sm">
-                  {new Date(cashSummary?.datetime).toLocaleDateString() ||
-                    "N/A"}
+                  {getDateString(new Date(cashSummary?.datetime)) || "N/A"}
                 </p>
               </div>
               <div className="flex items-center">

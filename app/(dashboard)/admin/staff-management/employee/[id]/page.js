@@ -1,4 +1,5 @@
 import { getUserById } from "@/lib/actions/user";
+import { getDateString } from "@/lib/utils";
 import Link from "next/link";
 
 export default async function Page({ params }) {
@@ -99,7 +100,7 @@ export default async function Page({ params }) {
 
       <div className="flex gap-4">
         <div className="text-center mt-4 w-[20vw] px-6 py-2 text-white rounded-lg font-medium bg-red-600 transition duration-300">
-          {employee.lastLogin ? new Date(employee.lastLogin).toLocaleString() : "Not Available"}
+          {employee.lastLogin ? getDateString(new Date(employee.lastLogin)) + ' ' + new Date(employee.lastLogin).toLocaleTimeString('en-US') : "Not Available"}
         </div>
       </div>
     </div>
