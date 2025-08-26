@@ -35,18 +35,31 @@ export default function FilterComponent({
   const [dateRange, setDateRange] = useState(defaultDateRange);
   const [location, setLocation] = useState(initialLocation);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-
+  const [isInitialRender, setIsInitialRender] = useState(true);
+  
   useEffect(() => {
+    if (isInitialRender) {
+      // Only call onFilterChange on initial render without updating URL
+      const startDate = dateRange.start ? dateRange.start.toISOString() : null;
+      const endDate = dateRange.end ? dateRange.end.toISOString() : null;
+      onFilterChange?.({ query, sortOrder, location, startDate, endDate });
+      setIsInitialRender(false);
+      return;
+    }
+    
+    // Only update URL after the initial render
     const params = new URLSearchParams();
     const startDate = dateRange.start ? dateRange.start.toISOString() : null;
     const endDate = dateRange.end ? dateRange.end.toISOString() : null;
+    
     if (query) params.set("query", query);
     if (sortOrder) params.set("sort", sortOrder);
     if (dateRange.start && dateRange.end) {
       params.set("startDate", dateRange.start.toISOString());
       params.set("endDate", dateRange.end.toISOString());
     }
-    params.set("location", location);
+    if (location) params.set("location", location);
+    
     router.replace(`?${params.toString()}`); // replace instead of push
     onFilterChange?.({ query, sortOrder, location, startDate, endDate });
   }, [query, sortOrder, location, dateRange]);

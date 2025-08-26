@@ -2,6 +2,7 @@ import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import connectDB from "./lib/mongodb";
 import User from "./models/User";
+import Location from "./models/Location";
 const { getUSEasternTime } = require("./lib/utils");
 
 const handler = NextAuth({
@@ -64,7 +65,10 @@ const handler = NextAuth({
         
         // Set location IDs based on role and provided locationAccess
         if (user.role === "superadmin") {
-          token.locationIds = ["__all__"];
+          const locations = await Location.find({ isActive: true })
+            .select("_id")
+            .lean();
+          token.locationIds = locations.map(loc => loc._id.toString());
         } else {
           // Use the locationAccess we already fetched during authorization
           token.locationIds = user.locationAccess?.map(id => id.toString()) || [];
@@ -93,8 +97,11 @@ const handler = NextAuth({
           // Add location access information
           if (dbUser.role === "superadmin") {
             // Superadmins have access to all locations
-            session.user.hasAllLocationsAccess = true;
-            session.user.locationIds = ["__all__"]; 
+            session.user.hasAllLocationsAccess = true; 
+            const locations = await Location.find({ isActive: true })
+              .select("_id")
+              .lean();
+            token.locationIds = locations.map((loc) => loc._id.toString());
           } else {
             // For regular users and admins, include specific location IDs
             session.user.hasAllLocationsAccess = false;
