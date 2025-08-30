@@ -5,6 +5,7 @@ export default async function RestaurantDepotOrderDetail({ params }) {
   const { id } = await params;
   const result = await getOrderById("restaurant-depot", id);
 
+  // console.log(result.data);
   if (result.status !== "SUCCESS") {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -14,4 +15,4 @@ export default async function RestaurantDepotOrderDetail({ params }) {
   }
 
   return <OrderDetailView orderDetails={result.data} />;
-} 
+}

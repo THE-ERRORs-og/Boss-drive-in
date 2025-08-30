@@ -323,7 +323,9 @@ const Page = () => {
             />
           </div>
         ))}
-        <div className="flex justify-center mt-6">
+       
+      </form>
+       <div className="flex justify-center mt-2">
           <MainButton
             type="submit"
             text={isLoading ? "Submitting..." : "Submit"}
@@ -333,7 +335,6 @@ const Page = () => {
             }`}
           />
         </div>
-      </form>
     </div>
   );
 };

@@ -32,8 +32,13 @@ const Page = () => {
       try {
         setIsLoadingLocations(true);
         let result;
-        
-        if (user && !user.hasAllLocationsAccess && user.locationIds && user.locationIds.length === 1) {
+
+        if (
+          user &&
+          !user.hasAllLocationsAccess &&
+          user.locationIds &&
+          user.locationIds.length === 1
+        ) {
           // User has only one location
           result = await getLocationById(user.locationIds[0]);
           if (result.status === "SUCCESS") {
@@ -69,7 +74,7 @@ const Page = () => {
     const fetchData = async () => {
       try {
         // Fetch order items
-        if(!selectedLocation) return;
+        if (!selectedLocation) return;
         const itemsResult = await getOrderItems("uschef", selectedLocation);
         if (itemsResult.status === "SUCCESS") {
           setOrderItems(itemsResult.data);
@@ -219,7 +224,8 @@ const Page = () => {
         </p>
         <div className="flex space-x-4 items-center">
           {/* Location Selector */}
-          {user?.hasAllLocationsAccess || (user?.locationIds && user?.locationIds.length > 1) ? (
+          {user?.hasAllLocationsAccess ||
+          (user?.locationIds && user?.locationIds.length > 1) ? (
             <div className="flex items-center">
               <p className="text-base font-semibold mr-2">Location:</p>
               <select
@@ -257,7 +263,7 @@ const Page = () => {
               </p>
             </div>
           )}
-          
+
           <div className="flex items-center">
             <p className="text-base font-semibold mr-2">Delivery Date:</p>
             <input
@@ -303,7 +309,9 @@ const Page = () => {
             className="grid grid-cols-4 gap-4 items-center mb-4"
           >
             <p className="text-left text-lg font-medium">{item.name}</p>
-            <p className="text-center text-lg font-medium">{item.stockNo || "N/A"}</p>
+            <p className="text-center text-lg font-medium">
+              {item.stockNo || "N/A"}
+            </p>
             <input
               type="text"
               value={formData[item._id]?.boh || ""}
@@ -322,17 +330,17 @@ const Page = () => {
             />
           </div>
         ))}
-        <div className="flex justify-center mt-6">
-          <MainButton
-            type="submit"
-            text={isLoading ? "Submitting..." : "Submit"}
-            disabled={isLoading}
-            className={`bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition duration-300 ${
-              isLoading ? "opacity-50 cursor-not-allowed" : ""
-            }`}
-          />
-        </div>
       </form>
+      <div className="flex justify-center mt-6">
+        <MainButton
+          type="submit"
+          text={isLoading ? "Submitting..." : "Submit"}
+          disabled={isLoading}
+          className={`bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition duration-300 ${
+            isLoading ? "opacity-50 cursor-not-allowed" : ""
+          }`}
+        />
+      </div>
     </div>
   );
 };

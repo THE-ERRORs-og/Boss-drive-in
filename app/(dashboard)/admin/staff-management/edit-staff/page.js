@@ -73,7 +73,7 @@ export default function UserList() {
       <h1 className="font-semibold text-3xl p-1">
         Remove the member you want to remove:
       </h1>
-      <div className="h-[80vh] mb-4 w-full rounded-md border shadow-inner-lg overflow-y-auto">
+      <div className="h-[80vh]  overflow-y-scroll mb-4 w-full rounded-md border shadow-inner-lg ">
         {/* Table Body */}
         <div>
           {users.map((user, idx) => (

@@ -509,7 +509,7 @@ export default function Page() {
               <div
                 {...provided.droppableProps}
                 ref={provided.innerRef}
-                className={`flex flex-col gap-3 overflow-y-scroll h-[55vh] w-full p-2  transition-colors duration-200 ${
+                className={`flex flex-col gap-3 overflow-y-scroll h-[53vh] w-full p-2  transition-colors duration-200 ${
                   snapshot && snapshot.isDraggingOver
                     ? "bg-blue-50 rounded-lg border border-blue-200"
                     : ""
@@ -533,9 +533,9 @@ export default function Page() {
                           ref={provided.innerRef}
                           {...provided.draggableProps}
                           {...provided.dragHandleProps}
-                          className={`flex  items-center justify-between gap-3 mb-1 p-2 bg-green-200 transition-all duration-200 ${
+                          className={`flex  items-center border rounded-xl justify-between gap-3 mb-1 p-2 bg-blue-200 transition-all duration-200 ${
                             snapshot && snapshot.isDragging
-                              ? "opacity-90 bg-green-200 shadow-lg rounded-lg border-2 border-blue-300 z-50"
+                              ? "opacity-90 bg-blue-200 shadow-lg rounded-lg border-2 border-blue-300 z-50"
                               : "bg-white"
                           }`}
                           style={{
