@@ -3,16 +3,14 @@ import { getDateString } from "@/lib/utils";
 import Link from "next/link";
 
 export default async function Page({ params }) {
-    const { id:userid} = await params;
+  const { id: userid } = await params;
 
   const result = await getUserById(userid);
-  
+
   if (result.status === "ERROR") {
     return (
       <div className="flex flex-col items-center justify-center h-screen w-screen text-xl gap-2">
-        <div className="text-red-600 font-semibold">
-          {result.error}
-        </div>
+        <div className="text-red-600 font-semibold">{result.error}</div>
       </div>
     );
   }
@@ -67,15 +65,20 @@ export default async function Page({ params }) {
           className="border-2 border-gray-300 p-2 rounded-md w-[30vw] font-semibold text-xl justify-center items-center flex"
         >
           {isSuperadmin ? (
-            <span>All Locations (Superadmin)</span>
+            <span className="px-2 py-1 rounded-full bg-red-600  text-white text-sm">All Locations (Superadmin)</span>
           ) : employee.locationAccess && employee.locationAccess.length > 0 ? (
-            <ul className="list-disc list-inside text-left">
-              {employee.locationAccess.map(location => (
-                <li key={location._id}>{location.name}</li>
+            <ul className="flex flex-wrap gap-1">
+              {employee.locationAccess.map((location) => (
+                <li
+                  key={location._id}
+                  className="px-2 py-1 rounded-full bg-red-600  text-white text-sm"
+                >
+                  {location.name}
+                </li>
               ))}
             </ul>
           ) : (
-            <span>No locations assigned</span>
+            <span className="px-2 py-1 rounded-full bg-red-600  text-white text-sm">No locations assigned</span>
           )}
         </div>
       </div>
@@ -87,7 +90,7 @@ export default async function Page({ params }) {
         >
           Forgot Password ?
         </Link>
-        
+
         <Link
           href={`/admin/user-location-access/${employee.userid}`}
           className="text-blue-boss font-bold text-lg"
@@ -95,12 +98,16 @@ export default async function Page({ params }) {
           Manage Location Access
         </Link>
       </div>
-      
+
       <p>Last Login</p>
 
       <div className="flex gap-4">
         <div className="text-center mt-4 w-[20vw] px-6 py-2 text-white rounded-lg font-medium bg-red-600 transition duration-300">
-          {employee.lastLogin ? getDateString(new Date(employee.lastLogin)) + ' ' + new Date(employee.lastLogin).toLocaleTimeString('en-US') : "Not Available"}
+          {employee.lastLogin
+            ? getDateString(new Date(employee.lastLogin)) +
+              " " +
+              new Date(employee.lastLogin).toLocaleTimeString("en-US")
+            : "Not Available"}
         </div>
       </div>
     </div>

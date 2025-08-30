@@ -4,7 +4,7 @@ import OrderDetailView from "../../view/[id]/OrderDetailView";
 export default async function SyscoOrderDetail({ params }) {
   const { id } = await params;
   const result = await getOrderById("sysco", id);
-  console.log(result);
+  // console.log(result);
 
   if (result.status !== "SUCCESS") {
     return (

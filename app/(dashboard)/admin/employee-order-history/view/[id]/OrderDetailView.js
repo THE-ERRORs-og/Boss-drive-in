@@ -7,34 +7,45 @@ const OrderDetailView = ({ orderDetails }) => {
   const date = new Date(orderDetails.date);
   const dateStr = format(date, "MM/dd/yyyy");
 
-  // Get all unique fields from items, excluding _id
-  const getUniqueFields = () => {
-    if (!orderDetails.items || orderDetails.items.length === 0) return [];
-
-    const fields = new Set();
+  // Step 1: Collect all unique fields across all items
+  const allFields = new Set();
+  if (orderDetails.items && orderDetails.items.length > 0) {
     orderDetails.items.forEach((item) => {
       Object.keys(item).forEach((key) => {
         if (key !== "_id" && key !== "itemId" && key !== "itemName") {
-          fields.add(key);
+          allFields.add(key);
         }
       });
     });
-    return Array.from(fields);
-  };
+  }
+  const uniqueFields = Array.from(allFields);
 
-  const uniqueFields = getUniqueFields();
-  const gridCols = `grid-cols-${uniqueFields.length + 1}`; // +1 for itemName
+  // Step 2: Normalize items so each one has all fields
+  const normalizedItems = orderDetails.items
+    ? orderDetails.items.map((item) => {
+        const normalized = { itemName: item.itemName };
+        uniqueFields.forEach((field) => {
+          normalized[field] = item[field] ?? 0;
+        });
+        return normalized;
+      })
+    : [];
+
+  // Step 3: Generate grid template dynamically
+  const colCount = uniqueFields.length + 1;
+  const gridTemplate = `repeat(${colCount}, minmax(0, 1fr))`;
 
   return (
     <div className="flex flex-col items-center w-screen p-6">
+      {/* Header Section */}
       <div className="text-center mb-6 flex flex-col items-center w-full">
-        <div className="flex justify-between w-full text-xl font-semibold border-b pb-2">
+        <div className="flex flex-wrap justify-between w-full text-xl font-semibold border-b pb-2">
           <p>
             <span className="font-bold">Date :</span> {dateStr}
           </p>
           <p>
             <span className="font-bold">Ordered by :</span>{" "}
-            {orderDetails.createdBy.name}
+            {orderDetails.createdBy?.name || "-"}
           </p>
           {orderDetails.location && (
             <p>
@@ -49,10 +60,14 @@ const OrderDetailView = ({ orderDetails }) => {
         </div>
       </div>
 
-      <div className="w-full border rounded-lg shadow-md p-6">
+      {/* Order Table */}
+      <div className="w-full border h-[65vh] overflow-y-scroll rounded-lg shadow-md p-6">
         <h2 className="text-2xl font-bold text-center mb-4">Order List</h2>
+
+        {/* Header Row */}
         <div
-          className={`grid ${gridCols} gap-4 text-center font-semibold mb-4`}
+          className="grid gap-4 text-center font-semibold mb-4"
+          style={{ gridTemplateColumns: gridTemplate }}
         >
           <p className="font-bold">Item Name</p>
           {uniqueFields.map((field, index) => (
@@ -62,10 +77,13 @@ const OrderDetailView = ({ orderDetails }) => {
             </p>
           ))}
         </div>
-        {orderDetails.items.map((item, index) => (
+
+        {/* Data Rows */}
+        {normalizedItems.map((item, index) => (
           <div
             key={index}
-            className={`grid ${gridCols} gap-4 text-center items-center py-2 border-b`}
+            className="grid gap-4 text-center items-center py-2 border-b"
+            style={{ gridTemplateColumns: gridTemplate }}
           >
             <p className="font-semibold">{item.itemName}</p>
             {uniqueFields.map((field, fieldIndex) => (
@@ -80,6 +98,7 @@ const OrderDetailView = ({ orderDetails }) => {
         ))}
       </div>
 
+      {/* Download Button */}
       <DownloadButton orderDetails={orderDetails} />
     </div>
   );

@@ -81,7 +81,7 @@ const BottomContainer = ({ currentSafeBalance, locationId, locationName }) => {
   return (
     <form
       onSubmit={showPopup}
-      className="flex w-full mt-1 justify-between pl-8 pr-8 space-x-3 items-center"
+      className="flex w-full justify-between pl-8 pr-8 space-x-3 items-center"
     >
       <MainButton
         className=""
