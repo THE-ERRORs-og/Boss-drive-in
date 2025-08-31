@@ -7,6 +7,7 @@ import {
   toggleItemStatus,
   updateOrder,
   updateOrderItem,
+  copyOrderItemsFromLocation,
 } from "@/lib/actions/orderItems";
 import { getAllLocations, getLocationById } from "@/lib/actions/location";
 import { useToast } from "@/hooks/use-toast";
@@ -35,6 +36,9 @@ export default function Page() {
   });
 
   const [selectedLocation, setSelectedLocation] = useState("");
+  const [showCopyModal, setShowCopyModal] = useState(false);
+  const [copyFromLocation, setCopyFromLocation] = useState("");
+  const [isCopyLoading, setIsCopyLoading] = useState(false);
 
   const [locations, setLocations] = useState([]);
   const [isLoadingLocations, setIsLoadingLocations] = useState(true);
@@ -419,6 +423,66 @@ export default function Page() {
     }
   };
 
+  // Handle copying order items from another location
+  const handleCopyFromLocation = async () => {
+    if (!copyFromLocation) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Please select a location to copy from",
+      });
+      return;
+    }
+
+    if (copyFromLocation === selectedLocation) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Cannot copy from the same location",
+      });
+      return;
+    }
+
+    setIsCopyLoading(true);
+    try {
+      const result = await copyOrderItemsFromLocation(
+        orderType,
+        copyFromLocation,
+        selectedLocation
+      );
+
+      if (result.status === "SUCCESS") {
+        toast({
+          variant: "success",
+          title: "Success",
+          description: result.message || "Order items copied successfully",
+        });
+
+        // Refresh the order items list
+        await fetchOrderItems();
+
+        // Close the modal and reset state
+        setShowCopyModal(false);
+        setCopyFromLocation("");
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: result.error || "Failed to copy order items",
+        });
+      }
+    } catch (error) {
+      console.error("Error copying order items:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to copy order items",
+      });
+    } finally {
+      setIsCopyLoading(false);
+    }
+  };
+
   // Add this useEffect to handle localStorage
   useEffect(() => {
     // Get saved location from localStorage on component mount
@@ -454,10 +518,6 @@ export default function Page() {
         {orderTypes[orderType]} Order Items
       </h1>
       <div className="flex justify-between items-center w-full px-4 ">
-        {/* <h1 className="text-2xl font-bold">
-          Drag and drop to reorder, or remove items as needed:
-        </h1> */}
-
         {/* Location Selector */}
         {user?.hasAllLocationsAccess || user?.locationIds?.length > 1 ? (
           <div className="flex items-center">
@@ -497,6 +557,27 @@ export default function Page() {
             </p>
           </div>
         )}
+
+        {/* Copy from Location Button */}
+        {selectedLocation &&
+          (user?.hasAllLocationsAccess || user?.locationIds?.length > 1) && (
+            <button
+              onClick={() => setShowCopyModal(true)}
+              disabled={orderItems.length > 0}
+              className={`px-4 py-2 text-sm font-semibold border rounded-lg transition duration-300 ${
+                orderItems.length > 0
+                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  : "bg-blue-500 text-white hover:bg-blue-600"
+              }`}
+              title={
+                orderItems.length > 0
+                  ? "Location already has items. Please clear them first to copy from another location."
+                  : "Copy order list from another location"
+              }
+            >
+              Copy from Location
+            </button>
+          )}
       </div>
 
       {selectedLocation ? (
@@ -772,6 +853,72 @@ export default function Page() {
                 className="mt-4 px-6 py-2 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 transition duration-300"
               >
                 Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Copy from Location Modal */}
+      {showCopyModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+            <h2 className="text-xl font-semibold mb-4 text-center">
+              Copy Order Items from Another Location
+            </h2>
+
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Select Source Location:
+              </label>
+              <select
+                value={copyFromLocation}
+                onChange={(e) => setCopyFromLocation(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                disabled={isCopyLoading}
+              >
+                <option value="">-- Select Location to Copy From --</option>
+                {locations
+                  .filter((location) => location._id !== selectedLocation)
+                  .filter(
+                    (location) =>
+                      user?.hasAllLocationsAccess ||
+                      user?.locationIds?.includes(location._id)
+                  )
+                  .map((location) => (
+                    <option key={location._id} value={location._id}>
+                      {location.name}
+                    </option>
+                  ))}
+              </select>
+            </div>
+
+            <div className="mb-6 p-3 bg-blue-50 rounded-lg">
+              <p className="text-sm text-blue-800">
+                <strong>Note:</strong> This will copy all active order items
+                from the selected location to the current location (
+                {locations.find((loc) => loc._id === selectedLocation)?.name}).
+                Make sure the current location is empty before copying.
+              </p>
+            </div>
+
+            <div className="flex gap-4 justify-end">
+              <button
+                onClick={() => {
+                  setShowCopyModal(false);
+                  setCopyFromLocation("");
+                }}
+                disabled={isCopyLoading}
+                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition duration-300 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleCopyFromLocation}
+                disabled={isCopyLoading || !copyFromLocation}
+                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isCopyLoading ? "Copying..." : "Copy Items"}
               </button>
             </div>
           </div>
