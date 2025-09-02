@@ -323,7 +323,6 @@ const Page = () => {
           </div>
         ))}
         
-      </form>
       <div className="flex justify-center mt-6">
           <MainButton
             type="submit"
@@ -331,9 +330,10 @@ const Page = () => {
             disabled={isLoading}
             className={`bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition duration-300 ${
               isLoading ? "opacity-50 cursor-not-allowed" : ""
-            }`}
-          />
+              }`}
+              />
         </div>
+              </form>
     </div>
   );
 };
