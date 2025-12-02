@@ -2,10 +2,13 @@ import React from "react";
 import { format } from "date-fns";
 import DownloadButton from "./DownloadButton";
 import { timeOptions } from "@/lib/constants";
+import { getDateString } from "@/lib/utils";
 
 const OrderDetailView = ({ orderDetails }) => {
   const date = new Date(orderDetails.date);
-  const dateStr = format(date, "MM/dd/yyyy");
+  // const dateStr = format(date, "MM/dd/yyyy");
+  const dateStr = getDateString(date);
+
 
   // Step 1: Collect all unique fields across all items
   const allFields = new Set();
