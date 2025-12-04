@@ -177,7 +177,7 @@ const Page = () => {
       }
 
       const orderData = {
-        date: new Date(selectedDate),
+        date: selectedDate, // Send as string "YYYY-MM-DD"
         shiftNumber: parseInt(shiftNumber),
         location: selectedLocation,
         items: items.map((item) => ({
@@ -330,17 +330,17 @@ const Page = () => {
             />
           </div>
         ))}
-      <div className="flex justify-center mt-6">
-        <MainButton
-          type="submit"
-          text={isLoading ? "Submitting..." : "Submit"}
-          disabled={isLoading}
-          className={`bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition duration-300 ${
-            isLoading ? "opacity-50 cursor-not-allowed" : ""
+        <div className="flex justify-center mt-6">
+          <MainButton
+            type="submit"
+            text={isLoading ? "Submitting..." : "Submit"}
+            disabled={isLoading}
+            className={`bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition duration-300 ${
+              isLoading ? "opacity-50 cursor-not-allowed" : ""
             }`}
-            />
-      </div>
-            </form>
+          />
+        </div>
+      </form>
     </div>
   );
 };
